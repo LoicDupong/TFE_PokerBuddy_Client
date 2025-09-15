@@ -1,0 +1,38 @@
+.nav {
+    &--mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+        background-color: var(--secondary-color-trans);
+        backdrop-filter: blur(15px);
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        padding-left: 3rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        font-size: 26px;
+        overflow: hidden;
+        transition: transform 0.4s ease-in-out;
+        transform: translateX(100%);
+        z-index: 99;
+    }
+    .open {
+        transform: translateX(0);
+    }
+
+    &__close {
+        position: absolute;
+        right: 10%;
+        top: 5%;
+        background-color: var(--primary-text);
+        color: var(--primary-color);
+        border-radius: 25%;
+        padding: .5rem;
+        font-size: 25px;
+        cursor: pointer;
+    }
+}

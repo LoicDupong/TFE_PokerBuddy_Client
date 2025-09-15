@@ -1,0 +1,64 @@
+//* Colors variables
+:root {
+  --primary-text: #fff3f3;
+  --secondary-text: #9ca3af;
+  --primary-color: #1a1b26;
+  --secondary-color: #d70022;
+  --secondary-color-trans: rgba(215, 0, 34, 0.5);
+}
+
+
+// Reset anoying stuff
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+  /* Remove default margin */
+* {
+    margin: 0;
+  }
+
+  /* Prevent font size inflation */
+html {
+    -moz-text-size-adjust: none;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+body{
+    background-color: var(--primary-color);
+    color: var(--primary-text);
+    margin: 0;
+}
+
+img{
+    display: block;
+    max-width: 100%;
+}
+
+/* Inherit fonts for inputs and buttons */
+input, button,
+textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+    text-decoration-skip-ink: auto;
+    color: currentColor;
+  }
+
+  ul, li{
+    list-style: none;
+  }
+  
+  a {
+    color: inherit; /* blue colors for links too */
+    text-decoration: inherit; /* no underline */
+  }
+

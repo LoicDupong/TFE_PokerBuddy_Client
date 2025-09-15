@@ -1,0 +1,41 @@
+
+// .hero{
+//     &__container{
+
+//     }
+// }
+
+.leaderboard{
+    &__table{
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 1rem 0;
+        // width: 100%;
+    }
+}
+
+table {
+      border-collapse: collapse;
+      min-width: 600px; // ✅ force le scroll si l’écran est trop petit
+      width: 100%;
+
+      th,
+      td {
+        padding: 0.75rem 1rem; // ✅ aération
+        text-align: left;
+        white-space: nowrap; // ✅ évite les retours à la ligne moches
+      }
+
+      thead {
+        background: var(--secondary-color); // ou ta couleur thème
+        color: var(--primary-text);
+        font-weight: bold;
+        position: sticky; // ✅ header fixe au scroll horizontal
+        top: 0;
+        z-index: 1;
+      }
+
+      tbody tr:nth-child(even) {
+        background: rgba(247, 248, 255, 0.05); // ✅ zebra striping
+      }
+    }
