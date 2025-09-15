@@ -7,6 +7,7 @@
 
 h1{
   font-size: 38px;
+  letter-spacing: 1px;
 }
 
 h2{
@@ -18,8 +19,18 @@ h3{
   text-transform: uppercase;
 }
 
+p{
+  line-height: 27px;
+}
+
 .title{
   margin-bottom: 0.3rem;
+  
+  &--winner{
+    color: var(--secondary-color);
+    letter-spacing: 1px;
+    text-decoration: underline;
+  }
 }
 
 .subtitle{

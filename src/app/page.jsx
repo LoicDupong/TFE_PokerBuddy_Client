@@ -1,16 +1,16 @@
 import styles from "./page.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign, faHourglassStart, faLocationDot,faClock } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faHourglassStart, faLocationDot,faClock, faTrophy, faPeopleGroup, faUserGroup, faSackDollar, faPlus, faCircleInfo, faChartBar, faBook } from '@fortawesome/free-solid-svg-icons';
 
 export default function HomePage() {
   return (
-      <main>
+      <>
         <div className="hero__container">
             <div className="hero__header">
                 <h1 className="title title--hero">Welcome, <br /> Loïc Dupong!</h1>
                 <h2 className="subtitle subtitle--hero">Ready for your next poker session?</h2>
                 <p className="text--hero"></p>
-                <div className="btn btn--create">Create New Game</div>
+                <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
             </div>
             <div className="hero__carrousel">
                 <img src="#" alt=""></img>
@@ -33,11 +33,11 @@ export default function HomePage() {
                         <p><FontAwesomeIcon icon={faClock} className="fa-icon"/> <span className="gray">Meet up:</span> 19:00</p>
                         <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> 20:00</p>
                         <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon"/> <span className="gray">Entry price:</span> 30€</p>
-                        <div className="btn btn--card">More infos</div>
+                        <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
                     </div>
                 </div>
                 <div className="card card--plus">
-                    <p>+2 more...</p>
+                    <p><FontAwesomeIcon icon={faPlus} /> 2 more...</p>
                 </div>
             </div>
             <div className="divider"></div>
@@ -49,11 +49,11 @@ export default function HomePage() {
                         <h4 className="subtitle subtitle--card">@myFriendPlace</h4>
                     </div>
                     <div className="card__body">
-                        <h4>Winner</h4>
-                        <p>Player numbers : 7</p>
-                        <p>Entry price : 30€</p>
-                        <p>Total Cash Prize : 240€</p>
-                        <a href="">More stats</a>
+                        <p><FontAwesomeIcon icon={faTrophy} className="fa-icon"/> <span className="gray">Winner:</span> <span className="title--winner">Player X</span></p>
+                        <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon"/> <span className="gray">Player numbers:</span> 7</p>
+                        <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon"/> <span className="gray">Entry price:</span> 30€</p>
+                        <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon"/> <span className="gray">Total Cash Prize:</span> 240€</p>
+                        <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
                     </div>
                 </div>
                 <div className="card card--plus">
@@ -112,10 +112,12 @@ export default function HomePage() {
         <div className="learning__container">
             <div className="learning-new">
                 <h2 className="title title--section">New to poker ?</h2>
-                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vero, sed possimus. Error, qui! Praesentium ratione ab repellendus!</p>
-                <div className="btn">Learn Poker</div>
+                <p>Looking for a quick rundown on everything you need to know to get started playing poker?</p>
+                <p>Check out our guide to poker rules to get familiar with the basics of poker, as it’s crucial to know which hands beat which other hands, for example, or what blinds are, and how betting rounds work.</p>
+                <div className="btn"><FontAwesomeIcon icon={faBook} /> How to play</div>
             </div>
         </div>
-    </main>
+    </>
+
   );
 }

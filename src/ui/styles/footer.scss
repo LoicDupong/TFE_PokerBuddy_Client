@@ -1,0 +1,16 @@
+footer{
+    border-top: 1px solid var(--secondary-text);
+    width: 75vw;
+    margin-inline: auto;
+    margin-top: 2.5rem;
+    padding: 2rem 0;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    line-height: 26px;
+}
+
+.social{
+    letter-spacing: 2px;
+    color: var(--primary-text);
+}
