@@ -1,10 +1,12 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDollarSign, faHourglassStart, faLocationDot,faClock, faPlus, faCircleInfo} from '@fortawesome/free-solid-svg-icons';
 
 export default function UpcomingGamesDisplay() {
 
     return(
         <div className="cards cards--planned">
 
-            // TODO : faire un map de toutes les games à venir ici dans Cards
+            {/* // TODO : faire un map de toutes les games à venir ici dans Cards */}
 
           <div className="card card--planned">
             <div className="card__header">
@@ -20,8 +22,8 @@ export default function UpcomingGamesDisplay() {
             </div>
           </div>
 
-          // TODO : Gérer le onClick du Card--plus pour afficer le reste des games à venir si plusieurs 
-          
+          {/* // TODO : Gérer le onClick du Card--plus pour afficer le reste des games à venir si plusieurs  */}
+
           <div className="card card--plus">
             <p><FontAwesomeIcon icon={faPlus} /> 2 more...</p>
           </div>

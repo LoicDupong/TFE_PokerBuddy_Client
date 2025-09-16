@@ -1,12 +1,14 @@
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDollarSign, faTrophy,faUserGroup, faSackDollar,faChartBar } from '@fortawesome/free-solid-svg-icons';
 
 export default function PreviousGamesDisplay() {
 
     return (
         <div className="cards cards--previous">
 
-            // TODO : faire un map de tout l'historique ici dans Cards
-            
+
+            {/* //TODO: faire un map de tout l'historique ici dans Cards */}
+
             <div className="card card--previous">
                 <div className="card__header">
                     <h3 className="title title--card">Game Name - 30/08/25</h3>
@@ -21,7 +23,8 @@ export default function PreviousGamesDisplay() {
                 </div>
             </div>
 
-            // TODO : Gérer en fonction de la page if '/games' alors afficher ça, sinon afficher tout l'historique 
+            {/* //TODO: Gérer en fonction de la page if '/games' alors afficher ça, sinon afficher tout l'historique  */}
+            
             <div className="card card--plus">
                 <p>View Game History</p>
             </div>
