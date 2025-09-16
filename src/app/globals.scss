@@ -1,10 +1,15 @@
 //* Colors variables
 :root {
   --primary-text: #fff3f3;
+  --primary-text-trans: rgba(247, 248, 255, 0.05);
   --secondary-text: #9ca3af;
+
   --primary-color: #1a1b26;
+  --primary-color-light: #9fa5df;
+  
   --secondary-color: #d70022;
   --secondary-color-trans: rgba(215, 0, 34, 0.5);
+
 }
 
 
@@ -47,6 +52,23 @@ textarea, select {
   font-size: inherit;
 }
 
+button {
+  all: unset;         /* supprime tous les styles hérités du navigateur */
+  display: inline-block;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;      /* hérite de la police du parent */
+  color: inherit;     /* hérite de la couleur du parent */
+  text-align: inherit;
+  line-height: normal;
+  appearance: none;   /* supprime les styles par défaut (safari, ios etc) */
+  -webkit-appearance: none;
+}
+
+
 /* A elements that don't have a class get default styles */
 a:not([class]) {
     text-decoration-skip-ink: auto;
@@ -61,4 +83,5 @@ a:not([class]) {
     color: inherit; /* blue colors for links too */
     text-decoration: inherit; /* no underline */
   }
+
 

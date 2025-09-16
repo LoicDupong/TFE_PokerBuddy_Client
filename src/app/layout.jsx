@@ -3,12 +3,15 @@ import "./globals.scss";
 import "./styles/base/base.scss";
 import "./styles/base/typography.scss";
 import "./styles/pages/home.scss";
+import "./styles/pages/profile.scss";
 
 import Header from "@/ui/header/header.jsx";
 import "../ui/styles/header.scss";
 import "../ui/styles/navbar.scss";
 import Footer from "@/ui/footer/footer.jsx";
 import "../ui/styles/footer.scss";
+import "../ui/styles/form.scss";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

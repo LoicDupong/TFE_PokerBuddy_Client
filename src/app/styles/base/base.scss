@@ -1,5 +1,4 @@
-
-main{
+main {
     width: 75vw;
     margin-inline: auto;
     padding: 2rem 0;
@@ -8,12 +7,12 @@ main{
     gap: 2rem;
 }
 
-.divider{
+.divider {
     border-bottom: 1px solid #9ca3af8a;
     margin: 1rem 0;
 }
 
-.btn{
+.btn {
     margin-top: 1.5rem;
     border-radius: 8px;
     background-color: var(--secondary-color);
@@ -21,26 +20,44 @@ main{
     width: fit-content;
     letter-spacing: 1px;
 
-    &--card{
+    &--card {
         margin-top: 1.5rem;
         padding: .3rem .8rem;
     }
+
+    &--full {
+        width: auto;
+        text-align: center;
+    }
 }
 
-.cards{
-    padding: 1rem 0  2rem;
+.cards {
+    padding: 1rem 0 2rem;
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     gap: 1.5rem;
+
+    &--stat {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    &--friends {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))
+    }
 }
 
-.card{
+.card {
     padding: 1.5rem;
     border-radius: 10px;
     border: 1px solid var(--secondary-text);
-    background-color: rgba(247, 248, 255, 0.05);
+    background-color: var(--primary-text-trans);
+    width: auto;
 
-    &--plus{
+    &__body {
+        line-height: 1.8rem;
+    }
+
+    &--plus {
         width: fit-content;
         padding: 1rem;
         border-radius: 25px;
@@ -48,19 +65,27 @@ main{
         background-color: var(--secondary-color-trans);
     }
 
-    &__body{
-        line-height: 1.8rem;
+    &--stat {
+        border-radius: 25px;
+        width: auto;
+
+        p {
+            margin-top: 0.75rem;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color-light);
+        }
     }
 
 
 }
 
-.fa-icon{
+.fa-icon {
     width: 14px;
-    color: var(--secondary-color);
+    color: var(--primary-color-light);
     margin-right: 0.5rem;
 }
 
-.active{
+.active {
     color: var(--primary-color);
 }

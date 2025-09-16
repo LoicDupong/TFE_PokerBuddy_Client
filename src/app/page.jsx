@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faHourglassStart, faLocationDot,faClock, faTrophy, faPeopleGroup, faUserGroup, faSackDollar, faPlus, faCircleInfo, faChartBar, faBook } from '@fortawesome/free-solid-svg-icons';
+import Link from "next/link.js";
 
 export default function HomePage() {
   return (
@@ -10,12 +11,9 @@ export default function HomePage() {
                 <h1 className="title title--hero">Welcome, <br /> Loïc Dupong!</h1>
                 <h2 className="subtitle subtitle--hero">Ready for your next poker session?</h2>
                 <p className="text--hero"></p>
-                <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
-            </div>
-            <div className="hero__carrousel">
-                <img src="#" alt=""></img>
-                <img src="#" alt=""></img>
-                <img src="#" alt=""></img>
+                <Link href={'/games/create'}>
+                    <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
+                </Link>
             </div>
         </div>
         <div className="games__container">

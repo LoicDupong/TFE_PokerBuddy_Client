@@ -3,6 +3,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link.js";
+import Image from "next/image";
 import { usePathname } from "next/navigation.js";
 import { useEffect, useState } from "react";
 
@@ -52,10 +53,17 @@ export default function Navbar() {
     return (
         <nav className="nav">
             <div className="nav__toggle" onClick={() => setIsOpen(true)}>
-                <FontAwesomeIcon icon={faBars} className="nav__toggle"  size="lg"/>
+                <FontAwesomeIcon icon={faBars} className="nav__toggle"  size="xl"/>
             </div>
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
-            <div className="logo">PokerBuddy</div>
+            <Link href={'/'} onClick={() => setIsOpen(false)}>
+                <Image src="/pokerbuddy_logo_temp.png"
+                    className="logo logo--header"
+                    alt="PokerBuddy logo"
+                    width={80}
+                    height={80}
+                    priority />
+            </Link>
                 <div className={isOpen ? "nav__close" : "nav__toggle"} onClick={() => setIsOpen(false)}>
                     <FontAwesomeIcon icon={faXmark}/>
                 </div>
