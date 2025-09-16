@@ -6,10 +6,10 @@ import "./styles/pages/home.scss";
 import "./styles/pages/profile.scss";
 
 import Header from "@/ui/header/header.jsx";
-import "../ui/styles/header.scss";
-import "../ui/styles/navbar.scss";
+import "../ui/header/header.scss";
+import "../ui/navbar/navbar.scss";
 import Footer from "@/ui/footer/footer.jsx";
-import "../ui/styles/footer.scss";
+import "../ui/footer/footer.scss";
 import "../ui/styles/form.scss";
 
 

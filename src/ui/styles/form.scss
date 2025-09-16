@@ -71,14 +71,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 
-
-
-
-
 .form {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    margin-bottom: 2rem;
 
     &__row {
         display: flex;
@@ -131,5 +128,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         color: #ff4444;
         font-size: 0.85rem;
         margin-top: 0.25rem;
+    }
+
+    &--auth{
+        gap: 1rem;
     }
 }

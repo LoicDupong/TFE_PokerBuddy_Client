@@ -14,7 +14,7 @@ const links = [
     { href: '/profile', name: 'Profile' },
     { href: '/leaderboard', name: 'Leaderboard' },
     { href: '/learn', name: 'Learn' },
-    { href: '/login', name: 'Login' },
+    { href: '/auth/login', name: 'Login' },
     { href: '/games/create', name: 'Create Game' },
 ];
 

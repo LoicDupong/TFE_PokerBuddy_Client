@@ -40,6 +40,10 @@ p{
   &--friend{
     font-size: 18px;
   }
+
+  &--login{
+    margin-bottom: 2rem;
+  }
 }
 
 .subtitle{
@@ -47,6 +51,11 @@ p{
   font-weight: 200;
   color: var(--secondary-text);
   margin-bottom: 1rem;
+}
+
+.link{
+  text-decoration: underline;
+  color: var(--primary-color-light);
 }
 
 .gray{
