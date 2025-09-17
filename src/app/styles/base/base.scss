@@ -30,7 +30,7 @@ main {
         text-align: center;
     }
 
-    &--auth{
+    &--auth {
         margin-top: 1rem;
     }
 }
@@ -57,6 +57,10 @@ main {
     background-color: var(--primary-text-trans);
     width: auto;
 
+    li {
+        padding-left: 1em;
+    }
+
     &__body {
         line-height: 1.8rem;
     }
@@ -79,6 +83,15 @@ main {
             font-weight: bold;
             color: var(--primary-color-light);
         }
+    }
+
+
+    &__note {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 10px;
+        background-color: var(--primary-text-trans);
+        border: 1px solid var(--primary-text-trans);
     }
 
 

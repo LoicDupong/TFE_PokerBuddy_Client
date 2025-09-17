@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faChevronDown, faChevronUp, faXmark } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link.js";
 import Image from "next/image";
 import { usePathname } from "next/navigation.js";
@@ -13,9 +13,15 @@ const links = [
     { href: '/games', name: 'Games' },
     { href: '/profile', name: 'Profile' },
     { href: '/leaderboard', name: 'Leaderboard' },
-    { href: '/learn', name: 'Learn' },
     { href: '/auth/login', name: 'Login' },
     { href: '/games/create', name: 'Create Game' },
+];
+
+const learnLinks = [
+    { href: '/learn/rules', name: 'Poker Rules' },
+    { href: '/learn/hands', name: 'Poker Hands' },
+    { href: '/learn/strategy', name: 'Poker Strategy' },
+    { href: '/learn/terms', name: 'Poker Terms' },
 ];
 
 
@@ -25,6 +31,7 @@ export default function Navbar() {
 
     const [isMobile, setIsMobile] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
+    const [learnOpen, setLearnOpen] = useState(false);
 
     useEffect(() => {
         // fonction de resize
@@ -55,6 +62,20 @@ export default function Navbar() {
                         {name}
                     </Link>
                 ))}
+
+                {/* Learn dropdown desktop */}
+                <div className="nav__dropdown">
+                    <span className="nav__item nav__item--dropdown">
+                        Learn <FontAwesomeIcon icon={faChevronDown} className="nav__icon" />
+                    </span>
+                    <div className="nav__submenu">
+                        {learnLinks.map(({ href, name }) => (
+                            <Link key={href} href={href} className="nav__subitem">
+                                {name}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             </nav>
         );
     }
@@ -88,6 +109,23 @@ export default function Navbar() {
                         {name}
                     </Link>
                 ))}
+                {/* Learn dropdown mobile */}
+                <div className="nav__item nav__item--dropdown" onClick={() => setLearnOpen(!learnOpen)}>
+                    Learn{" "}
+                    <FontAwesomeIcon icon={learnOpen ? faChevronUp : faChevronDown} className="nav__icon" />
+                </div>
+                <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
+                    {learnLinks.map(({ href, name }) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={pathname === href ? "active nav__subitem" : "nav__subitem"}
+                            onClick={() => setIsOpen(false)}
+                        >
+                            {name}
+                        </Link>
+                    ))}
+                </div>
             </div>
         </nav>
     );

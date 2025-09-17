@@ -1,67 +1,74 @@
 //*  Typography
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
-*{
-  font-family: "Roboto", sans-serif; 
+* {
+  font-family: "Roboto", sans-serif;
 }
 
-h1{
+h1 {
   font-size: 38px;
   letter-spacing: 1px;
 }
 
-h2{
+h2 {
   font-size: 30px;
 }
 
-h3{
+h3 {
   font-size: 22px;
   text-transform: uppercase;
 }
 
-p{
+p {
   line-height: 27px;
 }
 
-.title{
+.title {
   margin-bottom: 0.3rem;
-  
-  &--winner{
+
+  &--winner {
     color: var(--secondary-color);
     letter-spacing: 1px;
     text-decoration: underline;
   }
 
-  &--stat{
+  &--stat {
     margin: 0;
     color: var(--primary-color-light);
   }
 
-  &--friend{
+  &--friend {
     font-size: 18px;
   }
 
-  &--auth{
+  &--auth {
     margin-bottom: 2rem;
   }
 }
 
-.subtitle{
+.subtitle {
   font-size: 14px;
   font-weight: 200;
   color: var(--secondary-text);
   margin-bottom: 1rem;
 }
 
-.link{
+.link {
   text-decoration: underline;
   color: var(--primary-color-light);
 }
 
-.gray{
+.gray {
   color: var(--secondary-text);
 }
 
-.red{
+.red {
   color: var(--secondary-color)
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin-bottom: 2rem;
 }
