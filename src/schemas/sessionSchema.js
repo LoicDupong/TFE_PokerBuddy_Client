@@ -1,6 +1,6 @@
 import { z } from "zod";
 
- const sessionSchema = z.object({
+const sessionSchema = z.object({
   title: z.string().min(1, "Title is required"),
   dateTime: z.string().min(1, "Date & Time is required"),
   location: z.string().min(1, "Location is required"),
@@ -35,12 +35,26 @@ import { z } from "zod";
   sendInvitesNow: z.boolean().default(false),
   notes: z.string().max(500, "Notes too long").optional(),
 })
-.superRefine((data, ctx) => {
-  if (data.bigBlind <= data.smallBlind) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["bigBlind"], // erreur attachée au champ bigBlind
-      message: "Big blind must be greater than small blind",
-    });
+  .superRefine((data, ctx) => {
+    if (data.bigBlind <= data.smallBlind) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["bigBlind"], // erreur attachée au champ bigBlind
+        message: "Big blind must be greater than small blind",
+      });
+    }
+  });
+
+
+// Validation Session Form
+export function validateSession(data) {
+  const result = sessionSchema.safeParse(data);
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      field: issue.path[0],
+      message: issue.message,
+    }));
+    return { ok: false, errors };
   }
-});
+  return { ok: true, data: result.data };
+}

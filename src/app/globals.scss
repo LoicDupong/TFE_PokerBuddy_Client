@@ -6,7 +6,7 @@
 
   --primary-color: #1a1b26;
   --primary-color-light: #9fa5df;
-  
+
   --secondary-color: #d70022;
   --secondary-color-trans: rgba(215, 0, 34, 0.5);
 
@@ -22,66 +22,111 @@
   box-sizing: border-box;
 }
 
-  /* Remove default margin */
+/* Remove default margin */
 * {
-    margin: 0;
-  }
-
-  /* Prevent font size inflation */
-html {
-    -moz-text-size-adjust: none;
-    -webkit-text-size-adjust: none;
-    text-size-adjust: none;
-  }
-
-body{
-    background-color: var(--primary-color);
-    color: var(--primary-text);
-    margin: 0;
+  margin: 0;
 }
 
-img{
-    display: block;
-    max-width: 100%;
+/* Prevent font size inflation */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+body {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
 }
 
 /* Inherit fonts for inputs and buttons */
-input, button,
-textarea, select {
+input,
+button,
+textarea,
+select {
   font-family: inherit;
   font-size: inherit;
 }
 
 button {
-  all: unset;         /* supprime tous les styles hérités du navigateur */
+  all: unset;
+  /* supprime tous les styles hérités du navigateur */
   display: inline-block;
   cursor: pointer;
   background: none;
   border: none;
   padding: 0;
   margin: 0;
-  font: inherit;      /* hérite de la police du parent */
-  color: inherit;     /* hérite de la couleur du parent */
+  font: inherit;
+  /* hérite de la police du parent */
+  color: inherit;
+  /* hérite de la couleur du parent */
   text-align: inherit;
   line-height: normal;
-  appearance: none;   /* supprime les styles par défaut (safari, ios etc) */
+  appearance: none;
+  /* supprime les styles par défaut (safari, ios etc) */
   -webkit-appearance: none;
 }
 
 
 /* A elements that don't have a class get default styles */
 a:not([class]) {
-    text-decoration-skip-ink: auto;
-    color: currentColor;
-  }
+  text-decoration-skip-ink: auto;
+  color: currentColor;
+}
 
-  ul, li{
-    list-style: none;
-  }
-  
-  a {
-    color: inherit; /* blue colors for links too */
-    text-decoration: inherit; /* no underline */
-  }
+ul,
+li {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  /* blue colors for links too */
+  text-decoration: inherit;
+  /* no underline */
+}
 
 
+// Loader
+.loader-overlay {
+  position: fixed;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6); // fond semi-transparent
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; // au-dessus de tout
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.2); // cercle pâle
+  border-top-color: var(--secondary-color); // la partie colorée
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: auto; // centré
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading{
+  position: absolute;
+  transform: translate(10%, 200%);
+  letter-spacing: 2px;
+}

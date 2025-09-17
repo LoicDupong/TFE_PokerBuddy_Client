@@ -6,74 +6,53 @@ import { useActionState, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendar, faCoins, faDiamond, faDollarSign, faEnvelope, faGear, faLocationDot, faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { getFieldError } from "@/utils/getFieldError.utils.js";
 
 export default function GameAddForm() {
 
-    const initialState = { message: '', data: null };
-    const [state, formAction, pending] = useActionState(addGameAction, initialState);
-    const [errors, setErrors] = useState({});
+    const initialState = { success: false, message: '', data: null };
+    const [state, handleForm, pending] = useActionState(addGameAction, initialState);
 
-    async function handleSubmit(e) {
-        e.preventDefault();
-
-        const formData = new FormData(e.currentTarget);
-        const raw = Object.fromEntries(formData);
-
-        // validation avec Zod
-        const result = sessionSchema.safeParse({
-            ...raw,
-            buyIn: Number(raw.buyIn || 0),
-            smallBlind: Number(raw.smallBlind || 1),
-            bigBlind: Number(raw.bigBlind || 2),
-            levelDurationMin: Number(raw.levelDurationMin || 10),
-            enableBlindTimer: !!raw.enableBlindTimer,
-            allowRebuys: !!raw.allowRebuys,
-            isPrivate: !!raw.isPrivate,
-            sendInvitesNow: !!raw.sendInvitesNow,
-        });
-
-        if (!result.success) {
-            // on mappe les erreurs par champ
-            const fieldErrors = {};
-            result.error.issues.forEach((issue) => {
-                const path = issue.path[0]; // ex: "title"
-                fieldErrors[path] = issue.message;
-            });
-            setErrors(fieldErrors);
-            return;
-        }
-
-        // si OK → envoie vers server action
-        return formAction(formData);
+    //TODO: redirect vers la page by Id de la session
+    if (state?.success) {
+        redirect("/games/123");
     }
 
     return (
-        <form onSubmit={handleSubmit} className="form form--session">
+        <form action={handleForm} className="form form--session">
             <h2>Game <span className="red">Settings</span></h2>
 
             <div className="form__row">
-                <label><FontAwesomeIcon icon={faDiamond}/> Title <span className="red">*</span></label>
+                <label><FontAwesomeIcon icon={faDiamond} /> Title <span className="red">*</span></label>
                 <input name="title" placeholder="Friday Night Poker" />
-                {errors.title && <p className="form__error">{errors.title}</p>}
+                {getFieldError(state?.errorMessage, "title") && (
+                    <p className="form__error">{getFieldError(state?.errorMessage, "title")}</p>
+                )}
             </div>
 
             <div className="form__row">
-                <label><FontAwesomeIcon icon={faCalendar}/> Date & Time <span className="red">*</span></label>
+                <label><FontAwesomeIcon icon={faCalendar} /> Date & Time <span className="red">*</span></label>
                 <input type="datetime-local" name="dateTime" />
-                {errors.dateTime && <p className="form__error">{errors.dateTime}</p>}
+                {getFieldError(state?.errorMessage, "dateTime") && (
+                    <p className="form__error">{getFieldError(state?.errorMessage, "dateTime")}</p>
+                )}
             </div>
 
             <div className="form__row">
-                <label><FontAwesomeIcon icon={faLocationDot}/> Location <span className="red">*</span></label>
+                <label><FontAwesomeIcon icon={faLocationDot} /> Location <span className="red">*</span></label>
                 <input name="location" placeholder="Brussels, at John's place" />
-                {errors.location && <p className="form__error">{errors.location}</p>}
+                {getFieldError(state?.errorMessage, "location") && (
+                    <p className="form__error">{getFieldError(state?.errorMessage, "location")}</p>
+                )}
             </div>
 
             <div className="form__grid">
                 <div className="form__row">
-                    <label><FontAwesomeIcon icon={faDollarSign}/> Buy-in</label>
+                    <label><FontAwesomeIcon icon={faDollarSign} /> Buy-in</label>
                     <input type="number" min={0} step="1" name="buyIn" />
-                    {errors.buyIn && <p className="form__error">{errors.buyIn}</p>}
+                    {getFieldError(state?.errorMessage, "buyIn") && (
+                        <p className="form__error">{getFieldError(state?.errorMessage, "buyIn")}</p>
+                    )}
                 </div>
                 <div className="form__row">
                     <label>Currency</label>
@@ -82,27 +61,35 @@ export default function GameAddForm() {
                         <option value="USD">USD</option>
                         <option value="GBP">GBP</option>
                     </select>
-                    {errors.currency && <p className="form__error">{errors.currency}</p>}
+                    {getFieldError(state?.errorMessage, "currency") && (
+                        <p className="form__error">{getFieldError(state?.errorMessage, "currency")}</p>
+                    )}
                 </div>
             </div>
 
             <fieldset className="form__fieldset">
-                <legend><FontAwesomeIcon icon={faCoins}/> Blinds</legend>
+                <legend><FontAwesomeIcon icon={faCoins} /> Blinds</legend>
                 <div className="form__grid">
                     <div className="form__row">
                         <label>Small Blind</label>
                         <input type="number" min={1} step="1" name="smallBlind" />
-                        {errors.smallBlind && <p className="form__error">{errors.smallBlind}</p>}
+                        {getFieldError(state?.errorMessage, "smallBlind") && (
+                            <p className="form__error">{getFieldError(state?.errorMessage, "smallBlind")}</p>
+                        )}
                     </div>
                     <div className="form__row">
                         <label>Big Blind</label>
                         <input type="number" min={1} step="1" name="bigBlind" />
-                        {errors.bigBlind && <p className="form__error">{errors.bigBlind}</p>}
+                        {getFieldError(state?.errorMessage, "bigBlind") && (
+                            <p className="form__error">{getFieldError(state?.errorMessage, "bigBlind")}</p>
+                        )}
                     </div>
                     <div className="form__row">
                         <label>Level Duration (min)</label>
                         <input type="number" min={1} max={60} step="1" name="levelDurationMin" />
-                        {errors.levelDurationMin && <p className="form__error">{errors.levelDurationMin}</p>}
+                        {getFieldError(state?.errorMessage, "levelDurationMin") && (
+                            <p className="form__error">{getFieldError(state?.errorMessage, "levelDurationMin")}</p>
+                        )}
                     </div>
                 </div>
 
@@ -113,12 +100,14 @@ export default function GameAddForm() {
             </fieldset>
 
             <fieldset className="form__fieldset">
-                <legend><FontAwesomeIcon icon={faGear}/> Options</legend>
+                <legend><FontAwesomeIcon icon={faGear} /> Options</legend>
 
                 <div className="form__row">
                     <label>Max Players</label>
                     <input type="number" min={2} max={20} name="maxPlayers" placeholder="(optional)" />
-                    {errors.maxPlayers && <p className="form__error">{errors.maxPlayers}</p>}
+                    {getFieldError(state?.errorMessage, "maxPlayers") && (
+                        <p className="form__error">{getFieldError(state?.errorMessage, "maxPlayers")}</p>
+                    )}
                 </div>
 
                 <label className="form__checkbox">
@@ -133,9 +122,11 @@ export default function GameAddForm() {
             </fieldset>
 
             <div className="form__row">
-                <label><FontAwesomeIcon icon={faEnvelope}/> Invite by email (comma separated)</label>
+                <label><FontAwesomeIcon icon={faEnvelope} /> Invite by email (comma separated)</label>
                 <input name="invitedEmails" placeholder="alice@mail.com, bob@mail.com" />
-                {errors.invitedEmails && <p className="form__error">{errors.invitedEmails}</p>}
+                {getFieldError(state?.errorMessage, "invitedEmails") && (
+                    <p className="form__error">{getFieldError(state?.errorMessage, "invitedEmails")}</p>
+                )}
             </div>
 
             <label className="form__checkbox">
@@ -144,13 +135,15 @@ export default function GameAddForm() {
             </label>
 
             <div className="form__row">
-                <label><FontAwesomeIcon icon={faPenToSquare}/> Notes</label>
+                <label><FontAwesomeIcon icon={faPenToSquare} /> Notes</label>
                 <textarea name="notes" rows={4} placeholder="House rules, snacks, parking, etc." />
-                {errors.notes && <p className="form__error">{errors.notes}</p>}
+                {getFieldError(state?.errorMessage, "notes") && (
+                    <p className="form__error">{getFieldError(state?.errorMessage, "notes")}</p>
+                )}
             </div>
 
             <button className="btn btn--full" type="submit" disabled={pending}>
-                <FontAwesomeIcon icon={faPlus}/> {pending ? "Creating..." : "Create session"}
+                <FontAwesomeIcon icon={faPlus} /> {pending ? "Creating..." : "Create session"}
             </button>
         </form>
     );
