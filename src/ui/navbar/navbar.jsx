@@ -35,12 +35,23 @@ export default function Navbar() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add("no-scroll");
+        } else {
+            document.body.classList.remove("no-scroll");
+        }
+
+        return () => document.body.classList.remove("no-scroll"); // cleanup
+    }, [isOpen]);
+
+
     // Desktop
     if (!isMobile) {
         return (
             <nav className="nav nav--desktop">
                 {links.map(({ href, name }) => (
-                    <Link key={href} href={href} className="nav__item">
+                    <Link key={href} href={href} className={pathname === href ? "active nav__item" : "nav__item"}>
                         {name}
                     </Link>
                 ))}
@@ -53,19 +64,19 @@ export default function Navbar() {
     return (
         <nav className="nav">
             <div className="nav__toggle" onClick={() => setIsOpen(true)}>
-                <FontAwesomeIcon icon={faBars} className="nav__toggle"  size="xl"/>
+                <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
             </div>
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
-            <Link href={'/'} onClick={() => setIsOpen(false)}>
-                <Image src="/pokerbuddy_logo_temp.png"
-                    className="logo logo--header"
-                    alt="PokerBuddy logo"
-                    width={80}
-                    height={80}
-                    priority />
-            </Link>
+                <Link href={'/'} onClick={() => setIsOpen(false)}>
+                    <Image src="/pokerbuddy_logo_temp.png"
+                        className="logo logo--header"
+                        alt="PokerBuddy logo"
+                        width={80}
+                        height={80}
+                        priority />
+                </Link>
                 <div className={isOpen ? "nav__close" : "nav__toggle"} onClick={() => setIsOpen(false)}>
-                    <FontAwesomeIcon icon={faXmark}/>
+                    <FontAwesomeIcon icon={faXmark} />
                 </div>
                 {links.map(({ href, name }) => (
                     <Link

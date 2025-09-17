@@ -35,4 +35,27 @@
         font-size: 25px;
         cursor: pointer;
     }
+
+    &--desktop{
+        display: flex;
+        gap: 1.75rem;
+
+        .nav__item{
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .active{
+            color: var(--secondary-color);
+            border-bottom: 1px solid var(--secondary-color);
+        }
+    }
+
+    &__item{
+        transition: .3s all ease-in-out;
+
+        &:hover{
+            color: var(--secondary-color);
+        }
+    }
 }

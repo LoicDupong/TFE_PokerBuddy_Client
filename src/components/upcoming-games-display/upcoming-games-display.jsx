@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faHourglassStart, faLocationDot,faClock, faPlus, faCircleInfo} from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link.js';
 
 export default function UpcomingGamesDisplay() {
 
@@ -18,7 +19,9 @@ export default function UpcomingGamesDisplay() {
               <p><FontAwesomeIcon icon={faClock} className="fa-icon" /> <span className="gray">Meet up:</span> 19:00</p>
               <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> 20:00</p>
               <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> 30€</p>
-              <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
+              <Link href='/games/thisId'>
+                <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
+              </Link>
             </div>
           </div>
 

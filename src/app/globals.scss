@@ -40,6 +40,12 @@ body {
   margin: 0;
 }
 
+body.no-scroll {
+  overflow: hidden;
+  height: 100vh;
+}
+
+
 img {
   display: block;
   max-width: 100%;
@@ -125,7 +131,7 @@ a {
   }
 }
 
-.loading{
+.loading {
   position: absolute;
   transform: translate(10%, 200%);
   letter-spacing: 2px;

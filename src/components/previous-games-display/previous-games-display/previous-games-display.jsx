@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faTrophy,faUserGroup, faSackDollar,faChartBar } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link.js';
 
 export default function PreviousGamesDisplay() {
 
@@ -19,7 +20,9 @@ export default function PreviousGamesDisplay() {
                     <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> 7</p>
                     <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> 30€</p>
                     <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> 240€</p>
-                    <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
+                    <Link href={'/games/thisId'}>
+                        <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
+                    </Link>
                 </div>
             </div>
 

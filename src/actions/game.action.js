@@ -3,7 +3,7 @@
 import { validateSession } from "@/schemas/sessionSchema.js";
 
 
-export async function sessionAction(prevState, formData) {
+export async function addGameAction(prevState, formData) {
     const data = Object.fromEntries(formData);
     const validation = validateSession(data);
 
@@ -16,7 +16,7 @@ export async function sessionAction(prevState, formData) {
   }
 
   // TODO: sauvegarder en DB via ton backend
-  
+
   return {
     success: true,
     errorMessage: [],
