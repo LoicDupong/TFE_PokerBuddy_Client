@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const sessionSchema = z.object({
+ const sessionSchema = z.object({
   title: z.string().min(1, "Title is required"),
   dateTime: z.string().min(1, "Date & Time is required"),
   location: z.string().min(1, "Location is required"),
@@ -38,7 +38,7 @@ export const sessionSchema = z.object({
 .superRefine((data, ctx) => {
   if (data.bigBlind <= data.smallBlind) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       path: ["bigBlind"], // erreur attachée au champ bigBlind
       message: "Big blind must be greater than small blind",
     });

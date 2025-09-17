@@ -1,11 +1,11 @@
 "use server";
 
-import { validateLogin } from "@/schemas/authSchema.js";
+import { validateRegister } from "@/schemas/authSchema.js";
 
 
-export async function loginAction(prevState, formData) {
+export async function registerAction(prevState, formData) {
     const data = Object.fromEntries(formData);
-    const validation = validateLogin(data);
+    const validation = validateRegister(data);
 
     if (!validation.ok) {
     return {
