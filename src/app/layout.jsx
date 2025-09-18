@@ -31,6 +31,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="apple-mobile-web-app-title" content="PokerBuddy" />
+      </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Header />

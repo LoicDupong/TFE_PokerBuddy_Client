@@ -1,10 +1,12 @@
 import styles from "./page.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign, faHourglassStart, faLocationDot,faClock, faTrophy, faPeopleGroup, faUserGroup, faSackDollar, faPlus, faCircleInfo, faChartBar, faBook } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faBook } from '@fortawesome/free-solid-svg-icons';
 import Link from "next/link.js";
 import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display/previous-games-display.jsx";
 import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-games-display.jsx";
 import LeaderboardDisplay from "@/components/leaderboard-display/leaderboard-display.jsx";
+import PushNotificationManager from "@/components/pwa/pushNotificationManager.jsx";
+import InstallPrompt from "@/components/pwa/installPrompt.jsx";
 
 export default function HomePage() {
   return (
@@ -17,6 +19,8 @@ export default function HomePage() {
                 <Link href={'/games/create'}>
                     <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
                 </Link>
+                {/*<PushNotificationManager/>*/} {/* bouton Subscribe / Unsubscribe */}
+                {/*<InstallPrompt/>*/}  {/* option pour l’installation PWA */} 
             </div>
         </div>
         <div className="games__container">

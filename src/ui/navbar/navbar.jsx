@@ -89,11 +89,11 @@ export default function Navbar() {
             </div>
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
                 <Link href={'/'} onClick={() => setIsOpen(false)}>
-                    <Image src="/pokerbuddy_logo_temp.png"
+                    <Image src="/pokerbuddy_logo_light.png"
                         className="logo logo--header"
                         alt="PokerBuddy logo"
-                        width={80}
-                        height={80}
+                        width={135}
+                        height={70}
                         priority />
                 </Link>
                 <div className={isOpen ? "nav__close" : "nav__toggle"} onClick={() => setIsOpen(false)}>
