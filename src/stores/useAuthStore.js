@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../lib/api"; // axios setup
+import api from "../utils/api"; // axios setup
 
 const useAuthStore = create((set, get) => ({
   user: null,
@@ -9,6 +9,38 @@ const useAuthStore = create((set, get) => ({
   setAuth: (user, token) => {
     localStorage.setItem("token", token);
     set({ user, token });
+  },
+
+  // 🔹 Login → /auth/login
+  login: async (email, password) => {
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      const { token, user } = res.data;
+
+      // Hydrate store + localStorage
+      get().setAuth(user, token);
+
+      return { success: true, data: { user, token } };
+    } catch (error) {
+      console.error("Login error:", error);
+      return { success: false, error: error.response?.data || error.message };
+    }
+  },
+
+  // 🔹 Register → /auth/register
+  register: async (username, email, password) => {
+    try {
+      const res = await api.post("/auth/register", { username, email, password });
+      const { token, user } = res.data;
+
+      // Hydrate store + localStorage
+      get().setAuth(user, token);
+
+      return { success: true, data: { user, token } };
+    } catch (error) {
+      console.error("Register error:", error);
+      return { success: false, error: error.response?.data || error.message };
+    }
   },
 
   // Charger l’utilisateur connecté (GET /auth/me)

@@ -1,29 +1,56 @@
 'use client';
 
-import Link from "next/link.js";
+import Link from "next/link";
+import { useId, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 
-import { useActionState, useId } from "react";
-import { registerAction } from "@/actions/register.action.js";
-import { redirect } from "next/navigation";
+import { validateRegister } from "@/schemas/authSchema.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
-
 import useAuthStore from "@/stores/useAuthStore";
 
 export default function RegisterForm() {
-    const inputId = useId();
-
+    const register = useAuthStore((state) => state.register);
     const setAuth = useAuthStore((state) => state.setAuth);
 
-    const initialState = { success: false, message: '', data: null };
-    const [state, handleRegister, isPending] = useActionState(registerAction, initialState);
+    const inputId = useId();
+    const router = useRouter();
 
-    // Redirection si succès
-    if (state?.success) {
-        const { user, token } = state.data; 
-        setAuth(user, token)
-        redirect("/profile");
+    const [errorMessage, setErrorMessage] = useState([]);
+    const [isPending, setIsPending] = useState(false);
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        setIsPending(true);
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        // ✅ Validation avec Zod
+        const validation = validateRegister(data);
+        if (!validation.ok) {
+            setErrorMessage(validation.errors);
+            setIsPending(false);
+            return;
+        }
+
+        // ✅ Appel API via store
+        const res = await register(
+            validation.data.username,
+            validation.data.email,
+            validation.data.password
+        );
+
+        if (res.success) {
+            const { user, token } = res.data;
+            setAuth(user, token);
+            router.push("/login");
+        } else {
+            setErrorMessage([{ field: "form", message: res.error?.error || "Registration failed" }]);
+        }
+
+        setIsPending(false);
     }
 
     return (
@@ -32,7 +59,7 @@ export default function RegisterForm() {
                 Create <br /><span className="red">new account</span>
             </h1>
 
-            <form action={handleRegister} className="form form--auth" id="register-form">
+            <form onSubmit={handleRegister} className="form form--auth" id="register-form">
                 <div className="form__row">
                     <label htmlFor={inputId + "username"}>
                         <FontAwesomeIcon icon={faUser} /> Username
@@ -42,11 +69,10 @@ export default function RegisterForm() {
                         id={inputId + "username"}
                         name="username"
                         placeholder="Choose a username"
-                        defaultValue={state?.data?.username || ""}
                         required
                     />
-                    {getFieldError(state?.errorMessage, "username") && (
-                        <p className="form__error">{getFieldError(state?.errorMessage, "username")}</p>
+                    {getFieldError(errorMessage, "username") && (
+                        <p className="form__error">{getFieldError(errorMessage, "username")}</p>
                     )}
                 </div>
 
@@ -59,11 +85,10 @@ export default function RegisterForm() {
                         id={inputId + "email"}
                         name="email"
                         placeholder="Enter your email"
-                        defaultValue={state?.data?.email || ""}
                         required
                     />
-                    {getFieldError(state?.errorMessage, "email") && (
-                        <p className="form__error">{getFieldError(state?.errorMessage, "email")}</p>
+                    {getFieldError(errorMessage, "email") && (
+                        <p className="form__error">{getFieldError(errorMessage, "email")}</p>
                     )}
                 </div>
 
@@ -78,8 +103,8 @@ export default function RegisterForm() {
                         placeholder="Enter your password"
                         required
                     />
-                    {getFieldError(state?.errorMessage, "password") && (
-                        <p className="form__error">{getFieldError(state?.errorMessage, "password")}</p>
+                    {getFieldError(errorMessage, "password") && (
+                        <p className="form__error">{getFieldError(errorMessage, "password")}</p>
                     )}
                 </div>
 
@@ -94,14 +119,19 @@ export default function RegisterForm() {
                         placeholder="Confirm your password"
                         required
                     />
-                    {getFieldError(state?.errorMessage, "confirmPassword") && (
-                        <p className="form__error">{getFieldError(state?.errorMessage, "confirmPassword")}</p>
+                    {getFieldError(errorMessage, "confirmPassword") && (
+                        <p className="form__error">{getFieldError(errorMessage, "confirmPassword")}</p>
                     )}
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending}>
                     <FontAwesomeIcon icon={faUserPlus} /> {isPending ? "Registering…" : "Register"}
                 </button>
+
+                {/* Erreur globale */}
+                {getFieldError(errorMessage, "form") && (
+                    <p className="form__error">{getFieldError(errorMessage, "form")}</p>
+                )}
             </form>
 
             <p className="auth__redirect">

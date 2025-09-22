@@ -7,31 +7,33 @@ import Image from "next/image";
 import { usePathname } from "next/navigation.js";
 import { useEffect, useState } from "react";
 
+import useAuthStore from "@/stores/useAuthStore";
 
-const links = [
-    { href: '/', name: 'Home' },
-    { href: '/games', name: 'Games' },
-    { href: '/profile', name: 'Profile' },
-    { href: '/leaderboard', name: 'Leaderboard' },
-    { href: '/auth/login', name: 'Login' },
-    { href: '/games/create', name: 'Create Game' },
+const baseLinks = [
+    { href: "/", name: "Home" },
+    { href: "/games", name: "Games" },
+    { href: "/profile", name: "Profile" },
+    { href: "/leaderboard", name: "Leaderboard" },
+    { href: "/games/create", name: "Create Game" },
 ];
 
 const learnLinks = [
-    { href: '/learn/rules', name: 'Poker Rules' },
-    { href: '/learn/hands', name: 'Poker Hands' },
-    { href: '/learn/strategy', name: 'Poker Strategy' },
-    { href: '/learn/terms', name: 'Poker Terms' },
+    { href: "/learn/rules", name: "Poker Rules" },
+    { href: "/learn/hands", name: "Poker Hands" },
+    { href: "/learn/strategy", name: "Poker Strategy" },
+    { href: "/learn/terms", name: "Poker Terms" },
 ];
-
 
 export default function Navbar() {
     const pathname = usePathname();
-    const mobile = 950
+    const mobile = 950;
 
     const [isMobile, setIsMobile] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
     const [learnOpen, setLearnOpen] = useState(false);
+
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
 
     useEffect(() => {
         // fonction de resize
@@ -52,16 +54,33 @@ export default function Navbar() {
         return () => document.body.classList.remove("no-scroll"); // cleanup
     }, [isOpen]);
 
+    // 🔹 Liens dynamiques
+    const links = [...baseLinks];
+    if (user) {
+        links.push({ href: "/", name: "Logout", action: logout });
+    } else {
+        links.push({ href: "/auth/login", name: "Login" });
+    }
 
     // Desktop
     if (!isMobile) {
         return (
             <nav className="nav nav--desktop">
-                {links.map(({ href, name }) => (
-                    <Link key={href} href={href} className={pathname === href ? "active nav__item" : "nav__item"}>
-                        {name}
-                    </Link>
-                ))}
+                {links.map(({ href, name, action }) =>
+                    action ? (
+                        <Link key={name} href={href} onClick={action} className="nav__item">
+                            {name}
+                        </Link>
+                    ) : (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={pathname === href ? "active nav__item" : "nav__item"}
+                        >
+                            {name}
+                        </Link>
+                    )
+                )}
 
                 {/* Learn dropdown desktop */}
                 <div className="nav__dropdown">
@@ -80,7 +99,6 @@ export default function Navbar() {
         );
     }
 
-
     // Mobile
     return (
         <nav className="nav">
@@ -88,31 +106,55 @@ export default function Navbar() {
                 <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
             </div>
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
-                <Link href={'/'} onClick={() => setIsOpen(false)}>
-                    <Image src="/pokerbuddy_logo_light.png"
+                <Link href={"/"} onClick={() => setIsOpen(false)}>
+                    <Image
+                        src="/pokerbuddy_logo_light.png"
                         className="logo logo--header"
                         alt="PokerBuddy logo"
                         width={135}
                         height={70}
-                        priority />
+                        priority
+                    />
                 </Link>
-                <div className={isOpen ? "nav__close" : "nav__toggle"} onClick={() => setIsOpen(false)}>
+                <div
+                    className={isOpen ? "nav__close" : "nav__toggle"}
+                    onClick={() => setIsOpen(false)}
+                >
                     <FontAwesomeIcon icon={faXmark} />
                 </div>
-                {links.map(({ href, name }) => (
-                    <Link
-                        key={href}
-                        href={href}
-                        className={pathname === href ? "active nav__item" : "nav__item"}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        {name}
-                    </Link>
-                ))}
+                {links.map(({ href, name, action }) =>
+                    action ? (
+                        <Link
+                            key={name}
+                            onClick={() => {
+                                action();
+                                setIsOpen(false);
+                            }}
+                            className="nav__item"
+                        >
+                            {name}
+                        </Link>
+                    ) : (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={pathname === href ? "active nav__item" : "nav__item"}
+                            onClick={() => setIsOpen(false)}
+                        >
+                            {name}
+                        </Link>
+                    )
+                )}
                 {/* Learn dropdown mobile */}
-                <div className="nav__item nav__item--dropdown" onClick={() => setLearnOpen(!learnOpen)}>
+                <div
+                    className="nav__item nav__item--dropdown"
+                    onClick={() => setLearnOpen(!learnOpen)}
+                >
                     Learn{" "}
-                    <FontAwesomeIcon icon={learnOpen ? faChevronUp : faChevronDown} className="nav__icon" />
+                    <FontAwesomeIcon
+                        icon={learnOpen ? faChevronUp : faChevronDown}
+                        className="nav__icon"
+                    />
                 </div>
                 <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
                     {learnLinks.map(({ href, name }) => (
