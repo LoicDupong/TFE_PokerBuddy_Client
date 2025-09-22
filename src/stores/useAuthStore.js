@@ -5,7 +5,7 @@ const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
 
-  // Hydrate depuis les données reçues du back (loginAction)
+  // Hydrate depuis les données reçues du back
   setAuth: (user, token) => {
     localStorage.setItem("token", token);
     set({ user, token });

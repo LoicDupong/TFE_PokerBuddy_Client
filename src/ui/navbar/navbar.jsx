@@ -9,13 +9,6 @@ import { useEffect, useState } from "react";
 
 import useAuthStore from "@/stores/useAuthStore";
 
-const baseLinks = [
-    { href: "/", name: "Home" },
-    { href: "/games", name: "Games" },
-    { href: "/profile", name: "Profile" },
-    { href: "/leaderboard", name: "Leaderboard" },
-    { href: "/games/create", name: "Create Game" },
-];
 
 const learnLinks = [
     { href: "/learn/rules", name: "Poker Rules" },
@@ -25,6 +18,24 @@ const learnLinks = [
 ];
 
 export default function Navbar() {
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+
+
+    const links = [
+        { href: "/", name: "Home" },
+        { href: "/games", name: "Games" },
+        { href: "/profile", name: "Profile" },
+        { href: "/leaderboard", name: "Leaderboard" },
+        { href: "/games/create", name: "Create Game" },
+        { href: "/", name: "Logout", action: logout }
+    ];
+
+    const baseLinks = [
+        { href: "/", name: "Home" },
+        { href: "/auth/login", name: "Login" }
+    ];
+
     const pathname = usePathname();
     const mobile = 950;
 
@@ -32,8 +43,6 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [learnOpen, setLearnOpen] = useState(false);
 
-    const user = useAuthStore((state) => state.user);
-    const logout = useAuthStore((state) => state.logout);
 
     useEffect(() => {
         // fonction de resize
@@ -54,19 +63,26 @@ export default function Navbar() {
         return () => document.body.classList.remove("no-scroll"); // cleanup
     }, [isOpen]);
 
-    // 🔹 Liens dynamiques
-    const links = [...baseLinks];
-    if (user) {
-        links.push({ href: "/", name: "Logout", action: logout });
-    } else {
-        links.push({ href: "/auth/login", name: "Login" });
-    }
-
     // Desktop
     if (!isMobile) {
         return (
             <nav className="nav nav--desktop">
-                {links.map(({ href, name, action }) =>
+                {user ? 
+                links.map(({ href, name, action }) =>
+                    action ? (
+                        <Link key={name} href={href} onClick={action} className="nav__item">
+                            {name}
+                        </Link>
+                    ) : (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={pathname === href ? "active nav__item" : "nav__item"}
+                        >
+                            {name}
+                        </Link>
+                    )
+                ) : baseLinks.map(({ href, name, action }) =>
                     action ? (
                         <Link key={name} href={href} onClick={action} className="nav__item">
                             {name}
@@ -81,6 +97,7 @@ export default function Navbar() {
                         </Link>
                     )
                 )}
+                
 
                 {/* Learn dropdown desktop */}
                 <div className="nav__dropdown">
@@ -122,10 +139,35 @@ export default function Navbar() {
                 >
                     <FontAwesomeIcon icon={faXmark} />
                 </div>
-                {links.map(({ href, name, action }) =>
+                {user ? links.map(({ href, name, action }) =>
                     action ? (
                         <Link
                             key={name}
+                            href={href}
+                            onClick={() => {
+                                action();
+                                setIsOpen(false);
+                            }}
+                            className="nav__item"
+                        >
+                            {name}
+                        </Link>
+                    ) : (
+                        <Link
+                            key={href}
+                            href={href}
+                            className={pathname === href ? "active nav__item" : "nav__item"}
+                            onClick={() => setIsOpen(false)}
+                        >
+                            {name}
+                        </Link>
+                    )
+                ) : 
+                baseLinks.map(({ href, name, action }) =>
+                    action ? (
+                        <Link
+                            key={name}
+                            href={href}
                             onClick={() => {
                                 action();
                                 setIsOpen(false);
@@ -145,6 +187,7 @@ export default function Navbar() {
                         </Link>
                     )
                 )}
+                
                 {/* Learn dropdown mobile */}
                 <div
                     className="nav__item nav__item--dropdown"

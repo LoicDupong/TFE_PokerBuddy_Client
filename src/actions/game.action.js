@@ -1,13 +1,17 @@
 "use server";
 
 import { validateSession } from "@/schemas/sessionSchema.js";
+import gameService from "@/services/game.service.js";
 
 
 export async function addGameAction(prevState, formData) {
-    const data = Object.fromEntries(formData);
-    const validation = validateSession(data);
+  const data = Object.fromEntries(formData);
+  const validation = validateSession(data);
 
-    if (!validation.ok) {
+  console.log(data);
+
+
+  if (!validation.ok) {
     return {
       success: false,
       errorMessage: validation.errors,
@@ -15,11 +19,21 @@ export async function addGameAction(prevState, formData) {
     };
   }
 
-  // TODO: sauvegarder en DB via ton backend
+  // Appel backend
+  const res = await gameService.create(validation.data);
+
+  if (!res.success) {
+    return {
+      success: false,
+      errorMessage: [{ field: "_", message: res.errorMessage }],
+      data,
+    };
+  }
+
 
   return {
     success: true,
     errorMessage: [],
-    data: validation.data,
+    data: res.data,
   };
 }

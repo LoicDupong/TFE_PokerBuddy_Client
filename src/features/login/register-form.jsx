@@ -45,7 +45,7 @@ export default function RegisterForm() {
         if (res.success) {
             const { user, token } = res.data;
             setAuth(user, token);
-            router.push("/login");
+            router.push("/auth/login");
         } else {
             setErrorMessage([{ field: "form", message: res.error?.error || "Registration failed" }]);
         }
