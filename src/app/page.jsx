@@ -19,8 +19,8 @@ export default function HomePage() {
                 <Link href={'/games/create'}>
                     <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
                 </Link>
-                {/*<PushNotificationManager/>*/} {/* bouton Subscribe / Unsubscribe */}
-                {/*<InstallPrompt/>*/}  {/* option pour l’installation PWA */} 
+                <PushNotificationManager/> {/* bouton Subscribe / Unsubscribe */}
+                <InstallPrompt/>  {/* option pour l’installation PWA */} 
             </div>
         </div>
         <div className="games__container">
