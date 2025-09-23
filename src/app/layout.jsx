@@ -4,6 +4,8 @@ import "./styles/base/base.scss";
 import "./styles/base/typography.scss";
 import "./styles/pages/home.scss";
 import "./styles/pages/profile.scss";
+import "./styles/pages/manager.scss";
+
 
 import Header from "@/ui/header/header.jsx";
 import "../ui/header/header.scss";

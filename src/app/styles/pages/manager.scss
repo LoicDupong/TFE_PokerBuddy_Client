@@ -1,60 +1,192 @@
-.manager {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
+main:has(.manager) {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: inherit;
+  height: inherit;
+}
 
-  &__header {
-    text-align: center;
-    margin-bottom: 2rem;
+
+.manager {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  padding: 0.5rem 2rem;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  >* {
+    position: absolute;
   }
 
-  &__info {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
+  .divider {
+    width: 100%;
+  }
 
-    .info__item {
-      background: var(--card-bg, #222);
-      padding: 1rem;
-      border-radius: 12px;
-      text-align: center;
+  .logo {
+    margin-bottom: .5rem;
+  }
 
-      span {
-        font-size: 0.8rem;
-        color: #aaa;
-      }
-      h2 {
-        font-size: 1.5rem;
-        margin-top: 0.5rem;
-      }
+  &__header {
+    top: 8%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+  }
+
+  &__sidebar {
+    height: 100vh;
+    padding: 2rem 0 1.2rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+
+    &.left {
+      padding-right: 1rem;
+      border-right: 1px solid rgba(156, 163, 175, .54);
+      left: 2%;
+      top: 50%;
+      transform: translate(0%, -50%);
+      align-items: flex-start;
+    }
+
+    &.right {
+      padding-left: 1rem;
+      border-left: 1px solid rgba(156, 163, 175, .54);
+      right: 2%;
+      top: 50%;
+      transform: translate(0%, -50%);
+      align-items: flex-end;
+      justify-content: space-between;
+      text-align: right;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__main {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    h2 {
+      font-size: 6.5rem;
+      font-weight: bold;
+      color: var(--red, #e74c3c);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin: 0.5rem 0;
+    }
+
+    small {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: #aaa;
     }
   }
 
   &__controls {
-    display: flex;
-    gap: 1rem;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, 0%);
 
-    .btn--control {
-      padding: 0.8rem 1.2rem;
-      font-size: 1rem;
-      border-radius: 12px;
-      background: var(--red);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+
+  }
+
+  &__message {
+    display: none;
   }
 }
 
-.manager__timer {
-  margin: 2rem 0;
-  text-align: center;
+@media screen and (orientation: portrait) {
+  .manager {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1rem;
+    height: 100vh;
+    overflow: auto;
 
-  h1 {
-    font-size: 3rem;
-    font-weight: bold;
-    color: var(--red);
+    >* {
+      position: static; // on enlève les absolute
+      transform: none !important;
+    }
+
+    &__header {
+      margin-bottom: 1rem;
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    &__main {
+      flex: 0 0 auto;
+      margin: 1rem 0;
+      text-align: center;
+
+      h2 {
+        font-size: 4rem; // réduit pour mobile portrait
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      small {
+        font-size: 0.9rem;
+      }
+    }
+
+    &__sidebar {
+      flex: 0 0 auto;
+      width: 100%;
+      border: none !important;
+      padding: 0.5rem 0;
+      align-items: center !important;
+      text-align: center !important;
+
+      &.left,
+      &.right {
+        border: none;
+        padding: 0;
+        height: auto;
+      }
+
+      p {
+        font-size: 0.9rem;
+      }
+    }
+
+    &__controls {
+      flex: 0 0 auto;
+      padding-bottom: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    &__message {
+      display: block;
+      font-style: italic;
+    }
   }
 }

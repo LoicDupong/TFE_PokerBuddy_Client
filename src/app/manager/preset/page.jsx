@@ -19,20 +19,16 @@ export default function PresetForm() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Preset ready:", preset);
-        router.push("/games/manager");
+        router.push("/manager");
     };
 
     return (
-        <form className="form form--session" onSubmit={handleSubmit}>
-            <h2>
-                Game <span className="red">Preset</span>
-            </h2>
+        <form className="form form--preset" onSubmit={handleSubmit}>
+            <h2>Game <span className="red">Preset</span></h2>
 
-            {/* Nom + Date */}
+            {/* Title */}
             <div className="form__row">
-                <label>
-                    <FontAwesomeIcon icon={faDiamond} /> Title
-                </label>
+                <label>Title</label>
                 <input
                     name="title"
                     value={preset.title}
@@ -41,24 +37,10 @@ export default function PresetForm() {
                 />
             </div>
 
-            <div className="form__row">
-                <label>
-                    <FontAwesomeIcon icon={faCalendar} /> Start Time
-                </label>
-                <input
-                    type="time"
-                    name="dateTime"
-                    value={preset.dateTime}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Buy-in + Currency + Chips */}
+            {/* Buy-in & Chips */}
             <div className="form__grid">
                 <div className="form__row">
-                    <label>
-                        <FontAwesomeIcon icon={faDollarSign} /> Buy-in
-                    </label>
+                    <label>Buy-in</label>
                     <input
                         type="number"
                         name="buyIn"
@@ -67,21 +49,7 @@ export default function PresetForm() {
                     />
                 </div>
                 <div className="form__row">
-                    <label>Currency</label>
-                    <select
-                        name="currency"
-                        value={preset.currency}
-                        onChange={handleChange}
-                    >
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                        <option value="GBP">GBP</option>
-                    </select>
-                </div>
-                <div className="form__row">
-                    <label>
-                        <FontAwesomeIcon icon={faSackDollar} /> Chips / Player
-                    </label>
+                    <label>Chips / Player</label>
                     <input
                         type="number"
                         name="chipsPerPlayer"
@@ -93,9 +61,7 @@ export default function PresetForm() {
 
             {/* Blinds */}
             <fieldset className="form__fieldset">
-                <legend>
-                    <FontAwesomeIcon icon={faCoins} /> Blinds
-                </legend>
+                <legend>Blinds</legend>
                 <div className="form__grid">
                     <div className="form__row">
                         <label>Small Blind</label>
@@ -116,9 +82,7 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label>
-                            <FontAwesomeIcon icon={faClock} /> Level Duration (min)
-                        </label>
+                        <label>Level Duration (min)</label>
                         <input
                             type="number"
                             name="levelDurationMin"
@@ -139,12 +103,9 @@ export default function PresetForm() {
                 </label>
             </fieldset>
 
-            {/* Options utiles en live */}
+            {/* Options */}
             <fieldset className="form__fieldset">
-                <legend>
-                    <FontAwesomeIcon icon={faGear} /> Options
-                </legend>
-
+                <legend>Options</legend>
                 <div className="form__row">
                     <label>Max Players</label>
                     <input
@@ -162,13 +123,27 @@ export default function PresetForm() {
                         checked={preset.allowRebuys}
                         onChange={handleChange}
                     />
-                    <span>Allow rebuys (until break)</span>
+                    <span>Allow rebuys</span>
                 </label>
+
+                <div className="form__row">
+                    <label>Prize Distribution</label>
+                    <select
+                        name="payout"
+                        value={preset.payout || "70/20/10"}
+                        onChange={handleChange}
+                    >
+                        <option value="70/20/10">70 / 20 / 10</option>
+                        <option value="50/30/20">50 / 30 / 20</option>
+                        <option value="100">Winner takes all</option>
+                    </select>
+                </div>
             </fieldset>
 
             <button className="btn btn--full" type="submit">
-                <FontAwesomeIcon icon={faPlus} /> Use Preset
+                Use Preset
             </button>
         </form>
+
     );
 }

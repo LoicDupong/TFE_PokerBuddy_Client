@@ -24,7 +24,7 @@ export default function ProfilePage() {
     return (
         <>
             <h1>
-                <span className="red">{user.username}</span> Profile
+                <span className="red">Your</span> Profile
             </h1>
             <section className="section section__user">
                 <div className="cards">
