@@ -133,4 +133,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     &--auth{
         gap: 1.75rem;
     }
+
+    
+    &--edit{
+        .user__avatar{
+            margin: 0;
+        }
+        input, textarea {
+            width: 100%;
+        }
+
+        .user__description{
+            margin: 0;
+        }
+
+        .btn--user{
+            margin: 0;
+        }
+        
+    }
+}
+
+/* Cache l’input natif */
+.input--file {
+  display: none;
+}
+
+/* Nom du fichier */
+.file__name {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #aaa;
 }

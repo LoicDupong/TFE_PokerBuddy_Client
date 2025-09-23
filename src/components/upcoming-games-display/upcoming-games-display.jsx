@@ -67,7 +67,7 @@ export default function UpcomingGamesDisplay() {
                 minute: "2-digit",
               })}</p>
               <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
-              <Link href='/games/thisId'>
+              <Link href={"games/" + g.id}>
                 <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
               </Link>
             </div>

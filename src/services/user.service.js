@@ -13,10 +13,10 @@ const userService = {
     }
   },
 
-  // 🔹 GET /auth/me
+  // 🔹 GET /user/me
   getMe: async () => {
     try {
-      const res = await api.get(`/auth/me`);
+      const res = await api.get("/user/me");
       return res.data;
     } catch (error) {
       console.error("getMe error:", error);
@@ -24,20 +24,24 @@ const userService = {
     }
   },
 
-  // 🔹 PATCH /auth/me
+  // 🔹 PATCH /user/me
   updateMe: async (formData) => {
     try {
-      const data = Object.fromEntries(formData);
-      const res = await api.patch(`/auth/me`, {
-        username: data.username,
-        avatar: data.avatar,
-        description: data.description,
+      const form = new FormData();
+      if (formData.username) form.append("username", formData.username);
+      if (formData.description) form.append("description", formData.description);
+      if (formData.avatar) form.append("avatar", formData.avatar); // File object
+
+      const res = await api.patch(`/user/me`, form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       return {
         success: true,
         errorMessage: [],
-        data: res.data, // renvoie directement le user mis à jour
+        data: res.data,
       };
     } catch (error) {
       return {
@@ -48,10 +52,10 @@ const userService = {
     }
   },
 
-  // 🔹 DELETE /auth/me
+  // 🔹 DELETE /user/me
   deleteMe: async () => {
     try {
-      const res = await api.delete(`/auth/me`);
+      const res = await api.delete(`/user/me`);
       return {
         success: true,
         data: res.data,

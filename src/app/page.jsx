@@ -29,7 +29,9 @@ export default function HomePage() {
                         </Link>
                         {/* <PushNotificationManager />  */}
                         {/* bouton Subscribe / Unsubscribe */}
-                        <InstallPrompt />  {/* option pour l’installation PWA */}
+                        <div className="hero__item">
+                            <InstallPrompt />
+                        </div>  {/* option pour l’installation PWA */}
                     </div>
                 </div>
                 <div className="games__container">
@@ -68,16 +70,22 @@ export default function HomePage() {
                     <div className="hero__header">
                         <h1 className="title title--hero">Welcome on<br /><span className="red">PokerBuddy</span></h1>
                         <h2 className="subtitle subtitle--hero">Ready for your next poker session?</h2>
-                        <p className="text--hero">New user ? Join us to discover all our features !</p>
+                        <p className="text--hero">New user ? <br /> Join us to discover all our features !</p>
                         <Link href={'auth/login'}>
-                            <div className="btn btn--create"><FontAwesomeIcon icon={faUserPlus} /> Register</div>
+                            <div className="btn btn--login"><FontAwesomeIcon icon={faUserPlus} /> Register</div>
                         </Link>
-                        <p className="text--hero">Already have an account ?</p>
-                        <Link href={'auth/login'}>
-                            <div className="btn btn--create"><FontAwesomeIcon icon={faUser} /> Login</div>
-                        </Link>
+                        <div className="hero__item">
+                            <p className="text--hero">Already have an account ?</p>
+                            <Link href={'auth/login'}>
+                                <div className="btn btn--login"><FontAwesomeIcon icon={faUser} /> Login</div>
+                            </Link>
+                        </div>
 
-                        <InstallPrompt />  {/* option pour l’installation PWA */}
+                        {/* <PushNotificationManager />  */}
+                        {/* bouton Subscribe / Unsubscribe */}
+                        <div className="hero__item">
+                            <InstallPrompt />
+                        </div>  {/* option pour l’installation PWA */}
                     </div>
                 </div>
                 <div className="learning__container">

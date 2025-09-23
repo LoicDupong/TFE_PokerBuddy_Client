@@ -1,7 +1,6 @@
 'use client';
 
 import { addGameAction } from "@/actions/game.action.js";
-import { sessionSchema } from "@/schemas/sessionSchema.js";
 import { useActionState, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,7 +14,7 @@ export default function GameAddForm() {
 
     //TODO: redirect vers la page by Id de la session
     if (state?.success) {
-        redirect("/games/123");
+        redirect("/games");
     }
 
     return (

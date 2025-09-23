@@ -1,30 +1,40 @@
-.user{
-    .icon--avatar{
+.user {
+    .icon--avatar {
         border: 5px solid var(--primary-text);
         border-radius: 50%;
         padding: 1.5rem;
         width: 50px;
         height: 50px;
     }
-    &__avatar{
+
+    &__avatar {
         margin-bottom: 1.5rem;
+
+        img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 5px solid var(--primary-text);
+            border-radius: 50%;
+        }
     }
 
-    &__description{
+    &__description {
         margin-bottom: 2rem;
     }
 
-    &__stats{
+    &__stats {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
 
     // friend user
-    &--friend{
-        &__avatar{
+    &--friend {
+        &__avatar {
             text-align: center;
         }
-        .icon--avatar{
+
+        .icon--avatar {
             width: 30px;
             height: 30px;
             border-width: 2px;

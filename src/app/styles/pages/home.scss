@@ -5,6 +5,12 @@
 //     }
 // }
 
+.hero{
+  &__item{
+    margin-top: 2rem;
+  }
+}
+
 .leaderboard{
     &__table{
         overflow-x: auto;

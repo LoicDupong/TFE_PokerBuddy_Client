@@ -1,37 +1,65 @@
+"use client";
+
+import gameService from "@/services/game.service.js";
+import { shortDateTime } from "@/utils/date.utils.js";
 import { faClock, faComment, faCrown, faDollarSign, faFlagCheckered, faHashtag, faHourglassEnd, faHourglassStart, faMoneyCheckDollar, faRankingStar, faSackDollar, faStar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
+import { useParams } from "next/navigation.js";
+import { useEffect, useState } from "react";
 
 
 export default function GameDetailsPage() {
+  const { id } = useParams();
+  const [game, setGame] = useState(null);
 
-  const today = new Date().toLocaleString();
+  useEffect(() => {
+    (async () => {
+      const data = await gameService.getById(id);
+      setGame(data.game);
+    })();
+  }, [id]);
+
+  console.log(game);
+
+  // Dates
+  const timeStart = shortDateTime(game.dateStart);
+  const timeEnd = shortDateTime(game.dateEnd);
+
+  //Winner
+  const winner = game.results?.find(r => r.rank === 1)?.user;
+  console.log(winner);
+
+
+  if (!game) return <p>Loading...</p>;
   return (
     <>
       <h1>Game Details</h1>
       <div className="divider"></div>
       <div className="card">
         <div className="card__header">
-          <h3 className="title title--card">Game Name</h3>
-          <h4 className="subtitle subtitle--card">Texas Hold'em</h4>
+          <h3 className="title title--card">{game.name}</h3>
+          <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + game.host.id}>{game.host.username}</Link></h4>
         </div>
         <div className="card__body">
           <div className="card__infos">
-            <p><FontAwesomeIcon icon={faHashtag} className="fa-icon" /> <span className="gray">Game ID:</span> #7726951</p>
-            <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Started:</span>{today}</p>
-            <p><FontAwesomeIcon icon={faHourglassEnd} className="fa-icon" /> <span className="gray">Ended:</span>{today}</p>
-            <p><FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span> <span className="title--winner">Player X</span></p>
+            <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Started:</span> {timeStart}</p>
+            <p><FontAwesomeIcon icon={faHourglassEnd} className="fa-icon" /> <span className="gray">Ended:</span> {timeEnd}</p>
+            <p><FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
+              {winner ? (
+                <Link href={`/profile/${winner.id}`} className="title--winner"><span className="title--winner">{winner.username}</span></Link>
+              ) : "N/A"}</p>
             <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> 7</p>
-            <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds 20/40</p>
+            <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
-            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> 30€</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> 240€</p>
-            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> 3</p>
+            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}€</p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {game.prizePool}€</p>
+            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
             <ul>
-              <li>1. 130€</li>
-              <li>2. 70€</li>
-              <li>3. 40€</li>
+              <li>1. {(game.prizePool - game.buyIn) * 0.70}€</li>
+              <li>2. {(game.prizePool - game.buyIn) * 0.30}€</li>
+              <li>3. {game.buyIn}€</li>
             </ul>
           </div>
 
@@ -55,11 +83,11 @@ export default function GameDetailsPage() {
           <div className="divider"></div>
 
           <div className="card__stats">
-            <h3><FontAwesomeIcon icon={faStar} size="sm"/> Extras</h3>
+            <h3><FontAwesomeIcon icon={faStar} size="sm" /> Extras</h3>
             <div className="last__hand"><p><span className="gray">Last Hand: </span>Suited AK</p></div>
             <div className="largest__allin"><p><span className="gray">Largest All in: </span>10K</p></div>
             <div className="card__note">
-              <h3><FontAwesomeIcon icon={faComment} size="sm"/> Note:</h3>
+              <h3><FontAwesomeIcon icon={faComment} size="sm" /> Note:</h3>
               <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum assumenda amet facere nemo ex, cupiditate nam vero reiciendis autem nobis commodi suscipit illo quam necessitatibus pariatur accusamus provident quod quaerat.</p>
             </div>
           </div>
