@@ -49,7 +49,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="user__stat">
                                 <h2 className="title title--stat">
-                                    {user.stats.winRate.toFixed(2)}%
+                                    {user.stats.winRate}%
                                 </h2>
                                 <p className="subtitle">Win Rate</p>
                             </div>

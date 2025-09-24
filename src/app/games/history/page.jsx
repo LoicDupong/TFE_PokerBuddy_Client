@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartBar, faCircleInfo, faClock, faDollarSign, faHourglassStart, faLocationDot, faPlus, faSackDollar, faTrophy, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import UpcomingGamesDisplay from '@/components/upcoming-games-display/upcoming-games-display.jsx';
-import PreviousGamesDisplay from '@/components/previous-games-display/previous-games-display/previous-games-display.jsx';
+import PreviousGamesDisplay from '@/components/previous-games-display/previous-games-display.jsx';
 
 export default function GamesPage() {
   const gamePlayed = 15;

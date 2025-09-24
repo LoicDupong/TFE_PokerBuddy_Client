@@ -6,12 +6,39 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/stores/useAuthStore.js";
 
 export default function ProfileByIdPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [user, setUser] = useState(null);
 
   const [message, setMessage] = useState("");
+
+  const currentUser = useAuthStore((state) => state.user)
+
+  useEffect(() => {
+    (async () => {
+      const data = await userService.getUserById(id);
+      if (data) setUser(data.user);
+    })();
+  }, [id]);
+
+  // Log seulement quand user change
+  useEffect(() => {
+    console.log("👤 user updated:", user);
+  }, [user]);
+
+
+  if (!user) return <p>Loading...</p>;
+
+
+  // si la page by Id == l'id du user actuellement connecté => redirect
+  if (id === currentUser.id) {
+    router.push('/profile');
+  }
+
 
   async function handleAddFriend() {
     try {
@@ -27,14 +54,7 @@ export default function ProfileByIdPage() {
     }
   }
 
-  useEffect(() => {
-    (async () => {
-      const data = await userService.getUserById(id);
-      if (data) setUser(data.user);
-    })();
-  }, [id]);
 
-  if (!user) return <p>Loading...</p>;
 
   return (
     <>
@@ -64,7 +84,7 @@ export default function ProfileByIdPage() {
               </div>
               <div className="user__stat">
                 <h2 className="title title--stat">
-                  {user.stats?.winRate ? `${user.stats.winRate.toFixed(2)}%` : "0%"}
+                  {user.stats.winRate ? `${user.stats.winRate}%` : "0%"}
                 </h2>
                 <p className="subtitle">Win Rate</p>
               </div>

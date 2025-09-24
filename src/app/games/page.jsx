@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import userService from "@/services/user.service.js";
 import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-games-display.jsx";
-import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display/previous-games-display.jsx";
+import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display.jsx";
+import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";
 
 export default function GamesPage() {
   const [stats, setStats] = useState(null);
@@ -18,7 +19,7 @@ export default function GamesPage() {
   }, []);
 
   console.log(stats);
-  
+
 
   if (!stats) {
     return <p>Loading stats...</p>;
@@ -72,7 +73,13 @@ export default function GamesPage() {
       <div className="divider"></div>
 
       <section className="section section--current-games">
-        <h3>
+        <ActiveGameDisplay />
+      </section>
+
+      <div className="divider"></div>
+
+      <section className="section section--current-games">
+        <h3 className="title--section">
           <span className="red">Upcoming</span> Games
         </h3>
         <UpcomingGamesDisplay />
@@ -81,7 +88,7 @@ export default function GamesPage() {
       <div className="divider"></div>
 
       <section className="section section--previous-games">
-        <h3>
+        <h3 className="title--section">
           <span className="red">Previous</span> Games
         </h3>
         <PreviousGamesDisplay />

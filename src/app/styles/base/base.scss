@@ -127,6 +127,17 @@ main {
         border: 1px solid var(--primary-text-trans);
     }
 
+    &__status{
+        padding: 0 0.5rem;
+        background-color: var(--secondary-color-trans);
+        border: 1px solid var(--secondary-color);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 12px;
+    }
 
 }
 

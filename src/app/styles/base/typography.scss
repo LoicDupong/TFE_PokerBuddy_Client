@@ -38,11 +38,16 @@ p {
   }
 
   &--friend {
-    font-size: 18px;
+    font-size: 12px;
+    text-align: center;
   }
 
   &--auth {
     margin-bottom: 2rem;
+  }
+
+  &--section{
+    font-size: 30px;
   }
 }
 
