@@ -67,14 +67,16 @@ export default function ProfilePage() {
                 <h2>Friends ({user.friends.length})</h2>
                 <div className="cards cards--friends">
                     {user.friends.map((f) => (
-                        <div key={f.id} className="card user user--friend">
-                            <div className="user__avatar user--friend__avatar">
-                                <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
+                        <Link key={f.id} href={`profile/${f.id}`}>
+                            <div className="card user user--friend">
+                                <div className="user__avatar user--friend__avatar">
+                                    <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
+                                </div>
+                                <div className="user__infos">
+                                    <h2 className="title title--friend">{f.username}</h2>
+                                </div>
                             </div>
-                            <div className="user__infos">
-                                <h2 className="title title--friend">{f.username}</h2>
-                            </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
                 <div className="btn btn--full">

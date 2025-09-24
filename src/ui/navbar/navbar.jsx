@@ -28,12 +28,14 @@ export default function Navbar() {
         { href: "/profile", name: "Profile" },
         { href: "/leaderboard", name: "Leaderboard" },
         { href: "/games/create", name: "Create Game" },
+        { href: "/manager", name: "Game Manager" },
         { href: "/", name: "Logout", action: logout }
     ];
 
     const baseLinks = [
         { href: "/", name: "Home" },
-        { href: "/auth/login", name: "Login" }
+        { href: "/auth/login", name: "Login" },
+        { href: "/manager", name: "Game Manager" },
     ];
 
     const pathname = usePathname();
