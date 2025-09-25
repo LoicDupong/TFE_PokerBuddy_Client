@@ -40,34 +40,80 @@ input[type=checkbox] {
     }
 }
 
-/* Chrome, Edge, Safari */
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);   /* noir → blanc */
-  opacity: 1;
-  cursor: pointer;
+.input__container{
+    position: relative;
+    width: 100%;
 }
 
-/* Placeholder text en blanc */
-input[type="datetime-local"]::placeholder {
-  color: var(--secondary-text);
-  opacity: 1;
+.input--icon {
+    position: relative;
+    width: 100%;
+
+    input {
+        width: 100%;
+        padding-left: 2.5rem; // espace si icône à gauche
+        box-sizing: border-box;
+    }
+
+    .input__icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-text);
+        pointer-events: none; // bloque l’icône par défaut
+    }
+
+    &.left .input__icon {
+        left: 0.6rem;
+    }
+
+    // si tu veux rendre l’icône clickable → override pointer-events
+    &.clickable .input__icon {
+        pointer-events: auto;
+        cursor: pointer;
+    }
 }
 
-/* Safari & Firefox hacks */
-input[type="datetime-local"]:invalid {
-  color: var(--secondary-text);
+/* Retirer l’icône native */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    display: none;
+    -webkit-appearance: none;
+    pointer-events: none;
 }
 
-/* Pour forcer le dark style natif sur Firefox */
-input[type="datetime-local"] {
-  color-scheme: dark;
+/* Firefox */
+input[type="datetime-local"]::-moz-focus-inner,
+input[type="date"]::-moz-focus-inner,
+input[type="time"]::-moz-focus-inner {
+    border: 0;
 }
 
-/* Chrome, Edge, Safari */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);   /* inverse les couleurs → noir devient blanc */
-  opacity: .5;
-  cursor: pointer;
+/* Dark mode forcé */
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"] {
+    color-scheme: dark;
+}
+
+
+input[name="prizePool"] {
+    color: var(--secondary-text);
+    border: none;
+
+    &:focus {
+        border: none;
+    }
+
+    &:focus-within {
+        border: none;
+    }
+
+    &:hover {
+        border: none;
+    }
 }
 
 
@@ -130,38 +176,61 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         margin-top: 0.25rem;
     }
 
-    &--auth{
+    &--auth {
         gap: 1.75rem;
     }
 
-    
-    &--edit{
-        .user__avatar{
+
+    &--edit {
+        .user__avatar {
             margin: 0;
         }
-        input, textarea {
+
+        input,
+        textarea {
             width: 100%;
         }
 
-        .user__description{
+        .user__description {
             margin: 0;
         }
 
-        .btn--user{
+        .btn--user {
             margin: 0;
         }
-        
+
     }
 }
 
-/* Cache l’input natif */
-.input--file {
-  display: none;
+.input {
+    &--payout {
+        position: relative;
+
+        input {
+            width: 100%;
+            padding-right: 2rem;
+            /* espace pour le symbole % */
+        }
+
+        &::after {
+            content: "%";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-text);
+            pointer-events: none; // évite de bloquer le clic
+        }
+    }
+
+    &--file {
+        display: none;
+    }
 }
 
 /* Nom du fichier */
 .file__name {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #aaa;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #aaa;
 }

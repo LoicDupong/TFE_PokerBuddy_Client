@@ -4,3 +4,10 @@ export function shortDateTime(date) {
     timeStyle: "short",
   });
 }
+
+
+export function shortTime(date) {
+  return new Date(date).toLocaleString("fr-FR", {
+    timeStyle: "short",
+  });
+}

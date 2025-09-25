@@ -13,6 +13,7 @@ import "../ui/navbar/navbar.scss";
 import Footer from "@/ui/footer/footer.jsx";
 import "../ui/footer/footer.scss";
 import "../ui/styles/form.scss";
+import "../ui/styles/modal.scss";
 
 
 const geistSans = Geist({

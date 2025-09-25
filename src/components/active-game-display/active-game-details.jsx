@@ -40,8 +40,6 @@ export default function ActiveGameDetails() {
 
   return (
     <>
-      <h1>Game Details</h1>
-      <div className="divider"></div>
       <div className="card">
         <div className="card__header">
           <h3 className="title title--card">{games.name}</h3>

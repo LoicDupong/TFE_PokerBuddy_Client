@@ -3,21 +3,22 @@ import api from "@/utils/api.js";
 
 const gameService = {
     // 🔹 POST /games
-    create: async (formData) => {
+    create: async (data) => {
         try {
-            const data = Object.fromEntries(formData);
             const res = await api.post('/games', data);
             return {
                 success: true,
                 data: res.data,
             };
         } catch (error) {
+            console.error("GameService create error:", error.response?.data || error.message);
             return {
                 success: false,
                 errorMessage: [error.response?.data?.error || "Game creation failed"],
             };
         }
     },
+
 
     // 🔹 GET /games (toutes les games liées au user connecté)
     getAll: async () => {
@@ -43,13 +44,15 @@ const gameService = {
     // 🔹 PATCH /games/:id
     update: async (id, formData) => {
         try {
-            const data = Object.fromEntries(formData);
-            const res = await api.patch(`/games/${id}`, data);
+            const res = await api.patch(`/games/${id}`, formData);
+
             return {
                 success: true,
                 data: res.data,
             };
         } catch (error) {
+            console.log(error);
+
             return {
                 success: false,
                 errorMessage: [error.response?.data?.error || "Game update failed"],

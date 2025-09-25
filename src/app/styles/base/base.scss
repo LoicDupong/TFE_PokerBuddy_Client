@@ -66,6 +66,12 @@ main {
     &--control {
         padding: .5rem 1rem;
     }
+
+    &--edit{
+        margin-top: 0;
+        width: 100%;
+        text-align: center;
+    }
 }
 
 .cards {
