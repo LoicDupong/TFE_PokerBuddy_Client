@@ -19,6 +19,7 @@ import {
     faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import GameInvite from "../invite/game-invite.jsx";
+import gameInviteService from "@/services/gameInvite.service.js";
 
 export default function GameAddForm() {
     const router = useRouter();
@@ -360,6 +361,7 @@ export default function GameAddForm() {
                     value={JSON.stringify(invites)}
                     readOnly
                 />
+                {console.log(JSON.stringify(invites))}
 
                 <button
                     className="btn btn--full"

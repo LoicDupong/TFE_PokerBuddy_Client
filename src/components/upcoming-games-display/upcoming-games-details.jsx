@@ -1,63 +1,62 @@
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faCrown, faDollarSign, faFlagCheckered, faHourglassEnd, faHourglassStart, faMoneyCheckDollar, faPlayCircle, faRankingStar, faSackDollar, faStar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { faComment, faDollarSign, faFlagCheckered, faHourglassStart, faMoneyCheckDollar, faPlayCircle, faRankingStar, faSackDollar, faStar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import useAuthStore from '@/stores/useAuthStore.js';
 import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import gameService from '@/services/game.service.js';
 import { shortDateTime, shortTime } from '@/utils/date.utils.js';
+import { useParams } from 'next/navigation.js';
 
 export default function UpcomingGamesDetails() {
+  const { id } = useParams();
 
   const user = useAuthStore((state) => state.user)
   user ?? console.log(user);
 
 
-  const [games, setGames] = useState(null);
+  const [game, setGame] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      const data = await gameService.getAll();
-      const gamesArray = data?.games || data;
-      const pendingGame = gamesArray.filter(d => d.status === "pending")
-      setGames(...pendingGame);
+      (async () => {
+          const data = await gameService.getById(id);
+          setGame(data.game);
+        })();
+    }, [id]);
 
-    })();
-  }, []);
+  if (!game || game.length === 0) return <UpcomingGamesSkeleton />;
 
-  if (!games || games.length === 0) return <UpcomingGamesSkeleton />;
-
-  console.log(games);
+  console.log(game);
 
   // Dates
-  const timeStart = shortDateTime(games.dateStart);
-  const realStart = shortTime(games.realStart);
+  const timeStart = shortDateTime(game.dateStart);
+  const realStart = shortTime(game.realStart);
 
 
   return (
     <>
       <div className="card">
         <div className="card__header">
-          <h3 className="title title--card">{games.name}</h3>
-          <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + games.host.id}>{games.host.username}</Link></h4>
+          <h3 className="title title--card">{game.name}</h3>
+          <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + game.host.id}>{game.host.username}</Link></h4>
         </div>
         <div className="card__body">
           <div className="card__infos">
-            <p className="card__status">{games.status}</p>
+            <p className="card__status">{game.status}</p>
             <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart}</p>
             <p><FontAwesomeIcon icon={faPlayCircle} className="fa-icon" /> <span className="gray">Table start:</span> {realStart}</p>
-            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {games.playerLinks.length}</p>
-            <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {games.smallBlind}/{games.bigBlind}</p>
+            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {game.playerLinks.length}</p>
+            <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
-            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games.buyIn}€</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {games.prizePool}€</p>
-            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {games.placesPaid}</p>
+            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}€</p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {game.prizePool}€</p>
+            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
             <ul>
-              {games.payoutDistribution.map((p) => (
-                <li key={p.place}>{p.place}. {(games.prizePool * p.percent) / 100}€</li>
+              {game.payoutDistribution.map((p) => (
+                <li key={p.place}>{p.place}. {(game.prizePool * p.percent) / 100}€</li>
               ))}
             </ul>
           </div>
@@ -68,8 +67,8 @@ export default function UpcomingGamesDetails() {
             <div className="card__list players__list">
               <h3>Players list</h3>
               <ul>
-                {games.results.map((r) => (
-                  <li key={r.id}>• {r.player.userName}</li>
+                {game.playerLinks.map((r) => (
+                  <li key={r.id}>• {r.userName || r.guestName}</li>
                 ))}
               </ul>
             </div>
@@ -79,7 +78,7 @@ export default function UpcomingGamesDetails() {
 
           <div className="card__note">
             <h3><FontAwesomeIcon icon={faComment} size="sm" /> Note:</h3>
-            <p>{games.description}</p>
+            <p>{game.description}</p>
 
           </div>
         </div>

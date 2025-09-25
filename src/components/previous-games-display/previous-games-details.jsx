@@ -22,7 +22,6 @@ export default function PreviousGameDetails() {
     }, [id]);
     
     console.log(game);
-    if (!game) return <p>Loading...</p>;
     
     if (!game || game.length === 0) return <PreviousGamesSkeleton />;
   // Dates
@@ -71,7 +70,7 @@ export default function PreviousGameDetails() {
               <h3>Players list</h3>
               <ul>
                 {game.results.map((r) => (
-                  <li key={r.id}>{r.rank}. {r.player.userName} {r.rank == 1 ? <FontAwesomeIcon icon={faCrown} className="fa-icon" /> : ""}</li>
+                  <li key={r.id}>{r.rank}. {r.player.userName || r.player.guestName} {r.rank == 1 ? <FontAwesomeIcon icon={faCrown} className="fa-icon" /> : ""}</li>
                 ))}
               </ul>
             </div>

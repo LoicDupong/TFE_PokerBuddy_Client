@@ -21,9 +21,10 @@ const gameService = {
 
 
     // 🔹 GET /games (toutes les games liées au user connecté)
-    getAll: async () => {
+    getAll: async (filter) => {
         try {
-            const res = await api.get("/games");
+            const url = filter ? `/games?filter=${filter}` : "/games";
+            const res = await api.get(url);
             return res.data;
         } catch (error) {
             console.error("getAllGames error:", error);

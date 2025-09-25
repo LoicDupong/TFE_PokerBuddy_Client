@@ -1,11 +1,10 @@
-
 import api from "../utils/api"; // axios setup
 
 const gameInviteService = {
-  // 🔹 POST /games/:id/invite → inviter user ou guest
+  // 🔹 POST /games/:id/invites → inviter user ou guest
   invite: async (gameId, { userId, guestName }) => {
     try {
-      const res = await api.post(`/games/${gameId}/invite`, {
+      const res = await api.post(`/games/${gameId}/invites`, {
         userId,
         guestName,
       });
@@ -22,10 +21,10 @@ const gameInviteService = {
     }
   },
 
-  // 🔹 GET /games/:id/invite → liste des invites
+  // 🔹 GET /games/:id/invites → liste des invites
   getInvites: async (gameId) => {
     try {
-      const res = await api.get(`/games/${gameId}/invite`);
+      const res = await api.get(`/games/${gameId}/invites`);
       return res.data;
     } catch (error) {
       console.error("getInvites error:", error);
@@ -33,10 +32,22 @@ const gameInviteService = {
     }
   },
 
-  // 🔹 PATCH /games/:id/confirm → confirmer l’invite d’un user connecté
-  confirm: async (gameId) => {
+  getMyInvites: async () => {
     try {
-      const res = await api.patch(`/games/${gameId}/confirm`);
+      const res = await api.get(`/games/invites/me`);
+      return res.data.invites;
+    } catch (error) {
+      console.error("getMyInvites error:", error);
+      return null;
+    }
+  },
+
+  // 🔹 PATCH /games/:id/invites/confirm → accepter/refuser une invitation
+  respond: async (gameId, action = "accepted") => {
+    try {
+      const res = await api.patch(`/games/${gameId}/invites/confirm`, {
+        status: action, // "accepted" | "refused"
+      });
 
       return {
         success: true,
@@ -45,7 +56,7 @@ const gameInviteService = {
     } catch (error) {
       return {
         success: false,
-        errorMessage: [error.response?.data?.error || "Confirm invite failed"],
+        errorMessage: [error.response?.data?.error || "Responding to invite failed"],
       };
     }
   },

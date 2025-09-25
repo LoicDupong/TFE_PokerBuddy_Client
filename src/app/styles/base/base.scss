@@ -67,10 +67,23 @@ main {
         padding: .5rem 1rem;
     }
 
-    &--edit{
+    &--edit {
         margin-top: 0;
         width: 100%;
         text-align: center;
+    }
+
+    &__invites {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    &--accept {
+        background-color: var(--primary-color-light);
+    }
+
+    &--info {
+        background-color: var(--primary-text-trans);
     }
 }
 
@@ -86,6 +99,23 @@ main {
 
     &--friends {
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))
+    }
+
+    &--invites {
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+
+        &.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        &.expanded {
+            max-height: 1000px; // assez grand pour contenir le contenu
+            opacity: 1;
+        }
     }
 }
 
@@ -133,7 +163,7 @@ main {
         border: 1px solid var(--primary-text-trans);
     }
 
-    &__status{
+    &__status {
         padding: 0 0.5rem;
         background-color: var(--secondary-color-trans);
         border: 1px solid var(--secondary-color);
@@ -144,7 +174,6 @@ main {
         letter-spacing: 2px;
         font-size: 12px;
     }
-
 }
 
 .fa-icon {

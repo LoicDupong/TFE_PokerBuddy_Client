@@ -15,7 +15,7 @@ export default function PreviousGamesDisplay() {
 
     useEffect(() => {
         (async () => {
-            const data = await gameService.getAll();
+            const data = await gameService.getAll("finished");
             const gamesArray = data?.games || data;
             const finishedGames = gamesArray.filter(g => g.status === "finished");
             setGames(finishedGames);
