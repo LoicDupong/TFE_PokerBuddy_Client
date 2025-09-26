@@ -67,6 +67,16 @@ const userService = {
       };
     }
   },
+
+  searchByUsername: async (username) => {
+    try {
+      const res = await api.get(`/user/search`, { params: { username } });
+      return res.data.users;
+    } catch (error) {
+      console.error("searchByUsername error:", error);
+      return [];
+    }
+  },
 };
 
 export default userService;

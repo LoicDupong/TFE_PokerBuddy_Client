@@ -34,7 +34,7 @@ const gameInviteService = {
 
   getMyInvites: async () => {
     try {
-      const res = await api.get(`/games/invites/me`);
+      const res = await api.get(`/games/invites/me`);      
       return res.data.invites;
     } catch (error) {
       console.error("getMyInvites error:", error);
@@ -42,10 +42,10 @@ const gameInviteService = {
     }
   },
 
-  // 🔹 PATCH /games/:id/invites/confirm → accepter/refuser une invitation
-  respond: async (gameId, action = "accepted") => {
+  // 🔹 PATCH /invites/:inviteId/respond
+  respond: async (inviteId, action = "accepted") => {
     try {
-      const res = await api.patch(`/games/${gameId}/invites/confirm`, {
+      const res = await api.patch(`/games/invites/${inviteId}`, {
         status: action, // "accepted" | "refused"
       });
 
@@ -60,6 +60,7 @@ const gameInviteService = {
       };
     }
   },
+
 };
 
 export default gameInviteService;

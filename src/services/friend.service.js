@@ -1,5 +1,3 @@
-
-import { act } from "react";
 import api from "../utils/api"; // axios setup
 
 const friendService = {
@@ -14,10 +12,20 @@ const friendService = {
     }
   },
 
+  getInvites: async () => {
+    try {
+      const res = await api.get("/friends/invite");
+      return res.data.invites;
+    } catch (error) {
+      console.error("getInvites error:", error);
+      return null;
+    }
+  },
+
   // 🔹 POST /friends → envoyer une demande d’ami
   sendRequest: async (friendId) => {
     try {
-      const res = await api.post("/friends", { friendId });
+      const res = await api.post("/friends/invite", { friendId });
       return {
         success: true,
         data: res.data,
@@ -33,9 +41,9 @@ const friendService = {
   },
 
   // 🔹 PATCH /friends/:id/ → accepter/refuser une demande
-  acceptRequest: async (requestId, action) => {
+  respond: async (requestId, action) => {
     try {
-      const res = await api.patch(`/friends/${requestId}`, { action });
+      const res = await api.patch(`/friends/invite/${requestId}`, { action });
       return {
         success: true,
         data: res.data,

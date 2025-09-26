@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign, faHourglassStart, faLocationDot, faClock, faPlus, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faHourglassStart, faLocationDot, faClock, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link.js';
 import gameService from '@/services/game.service.js';
 import { useEffect, useState } from 'react';

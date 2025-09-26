@@ -5,6 +5,7 @@ import userService from "@/services/user.service.js";
 import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-games-display.jsx";
 import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display.jsx";
 import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";
+import InvitesDisplay from "@/components/invites-display/invites-display.jsx";
 
 export default function GamesPage() {
   const [stats, setStats] = useState(null);
@@ -70,6 +71,10 @@ export default function GamesPage() {
         </div>
       </section>
 
+      <div className="divider"></div>
+
+      <InvitesDisplay />
+      
       <div className="divider"></div>
 
       <section className="section section--current-games">
