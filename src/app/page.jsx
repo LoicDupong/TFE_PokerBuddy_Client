@@ -31,7 +31,7 @@ export default function HomePage() {
                         </Link>
                         <div className="hero__item">
                             <p className="text--hero">Start managing your poker games now</p>
-                            <Link href={'/manager'}>
+                            <Link href={'/manager/preset'}>
                                 <div className="btn"><FontAwesomeIcon icon={faDice} /> Live Game Manager</div>
                             </Link>
                         </div>
@@ -94,7 +94,7 @@ export default function HomePage() {
                         {/* bouton Subscribe / Unsubscribe */}
                         <div className="hero__item">
                             <p className="text--hero">Try the Game Manager now</p>
-                            <Link href={'/manager'}>
+                            <Link href={'/manager/preset'}>
                                 <div className="btn"><FontAwesomeIcon icon={faDice} /> Live Game Manager</div>
                             </Link>
                         </div>  {/* option pour l’installation PWA */}

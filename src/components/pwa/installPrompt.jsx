@@ -58,13 +58,10 @@ export default function InstallPrompt() {
           </div>
 
           <div className="install-popup__content">
-            {isIOS && (
               <p>
-                To install this app on your iOS device, tap the share button{' '}
-                <FontAwesomeIcon icon={faShareFromSquare} /> and then{' '}
+                To install this app on your mobile device, tap the share button <FontAwesomeIcon icon={faShareFromSquare} /> and then{' '}
                 <FontAwesomeIcon icon={faPlus} /> Add to Home Screen
               </p>
-            )}
           </div>
         </div>
       )}

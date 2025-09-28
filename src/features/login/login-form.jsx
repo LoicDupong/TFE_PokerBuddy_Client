@@ -41,7 +41,7 @@ export default function LoginForm() {
         if (res.success) {
             const { user, token } = res.data;
             setAuth(user, token);
-            router.push("/profile");
+            router.push("/");
         } else {
             setErrorMessage([{ field: "form", message: res.error?.error || "Login failed" }]);
         }

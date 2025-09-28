@@ -13,17 +13,17 @@ export default function PreviousGameDetails() {
   const { id } = useParams();
   const [game, setGame] = useState(null);
 
-  
+
   useEffect(() => {
-      (async () => {
-          const data = await gameService.getById(id);
-          setGame(data.game);
-        })();
-    }, [id]);
-    
-    console.log(game);
-    
-    if (!game || game.length === 0) return <PreviousGamesSkeleton />;
+    (async () => {
+      const data = await gameService.getById(id);
+      setGame(data.game);
+    })();
+  }, [id]);
+
+  console.log(game);
+
+  if (!game || game.length === 0) return <PreviousGamesSkeleton />;
   // Dates
   const timeStart = shortDateTime(game.dateStart);
   const timeEnd = shortDateTime(game.dateEnd);
@@ -69,10 +69,17 @@ export default function PreviousGameDetails() {
             <div className="card__list players__list">
               <h3>Players list</h3>
               <ul>
-                {game.results.map((r) => (
-                  <li key={r.id}>{r.rank}. {r.player.userName || r.player.guestName} {r.rank == 1 ? <FontAwesomeIcon icon={faCrown} className="fa-icon" /> : ""}</li>
-                ))}
+                {game.results
+                  .slice()
+                  .sort((a, b) => a.rank - b.rank)
+                  .map((r) => (
+                    <li key={r.id}>
+                      {r.rank}. {r.player.user?.username || r.player.guestName}
+                      {r.rank === 1 && <FontAwesomeIcon icon={faCrown} className="fa-icon" />}
+                    </li>
+                  ))}
               </ul>
+
             </div>
           </div>
 

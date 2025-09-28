@@ -113,7 +113,9 @@ export default function Navbar() {
                         ))}
                     </div>
                 </div>
-                <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
+                <Link href={'/profile'} className="notification has-notification">
+                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification has-notification" size="xl" />
+                </Link>
             </nav>
         );
     }
@@ -123,7 +125,9 @@ export default function Navbar() {
         <nav className="nav">
             {user ?
                 (<>
-                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
+                    <Link href={'/profile'} className="notification has-notification">
+                        <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
+                    </Link>
                     <div className="nav__toggle" onClick={() => setIsOpen(true)}>
                         <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
                     </div>

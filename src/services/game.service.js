@@ -77,6 +77,28 @@ const gameService = {
         }
     },
 
+    mapToPreset: (game) => {
+        if (!game) return {};
+
+        return {
+            title: game.name,
+            dateTime: game.dateStart,
+            location: game.location,
+            buyIn: game.buyIn,
+            smallBlind: game.smallBlind,
+            bigBlind: game.bigBlind,
+            levelDurationMin: game.levelDurationMin || 15,
+            maxPlayers: game.maxPlayers,
+            allowRebuys: game.allowRebuys,
+            payout: game.payoutDistribution?.map(p => p.percent).join("/") || "70/20/10",
+            players: game.playerLinks?.map((p) => ({
+                id: p.id,
+                name: p.user?.username || p.guestName,
+            })) || [],
+            notes: game.description || "",
+        };
+    },
+
 };
 
 export default gameService;

@@ -1,11 +1,10 @@
-
 import api from "../utils/api"; // axios setup
 
 const gameResultsService = {
-  // 🔹 GET /results → liste des résultats (par user connecté ou toutes les games finies selon backend)
-  getResults: async () => {
+  // 🔹 GET /games/:gameId/results → récupérer les résultats d’une game
+  getResults: async (gameId) => {
     try {
-      const res = await api.get("/results");
+      const res = await api.get(`/games/${gameId}/results`);
       return res.data;
     } catch (error) {
       console.error("getResults error:", error);
@@ -13,13 +12,13 @@ const gameResultsService = {
     }
   },
 
-  // 🔹 POST /results → enregistrer résultats d'une game finie
-  createResults: async (gameId, results) => {
+  // 🔹 POST /games/:gameId/results → enregistrer les résultats d’une game
+  createResults: async (gameId, results, finishedAt) => {
     try {
       // results attendu = [{ gamePlayerId, rank, prize }, ...]
-      const res = await api.post("/results", {
-        gameId,
+      const res = await api.post(`/games/${gameId}/results`, {
         results,
+        finishedAt, // optionnel
       });
 
       return {

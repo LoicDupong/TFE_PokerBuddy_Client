@@ -160,3 +160,19 @@
         }
     }
 }
+
+.has-notification{
+    position: relative;
+    cursor: pointer;
+    &::after{
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 15px;
+        height: 15px;
+        background-color: var(--secondary-color);
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+    }
+}

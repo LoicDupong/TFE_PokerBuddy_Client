@@ -30,7 +30,7 @@
         width: 90%;
         max-width: 600px;
         max-height: 80vh;
-        overflow-y: auto;
+        // overflow-y: auto;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
         animation: fadeInUp 0.3s ease;
     }
@@ -57,27 +57,27 @@
         }
     }
 
-    .cards{
+    .cards {
         padding-bottom: 0.5rem;
     }
 }
 
-.section__friends{
+.section__friends {
     margin-top: 1rem;
 }
 
-.selected-container{
+.selected-container {
     margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
 }
 
-.section__selected{
+.section__selected {
     margin-top: 1rem;
 }
 
-.selected-friend{
+.selected-friend {
     background-color: var(--secondary-color-trans);
     border: 1px solid var(--secondary-color);
     border-radius: 10px;
@@ -95,6 +95,72 @@
         opacity: 1;
     }
 }
+
 /* =======================
-   FORM STYLES
+   END GAME RESULTS FORM
    ======================= */
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    overflow: auto;
+}
+
+.results-row {
+    display: grid;
+    grid-template-columns: 1fr 150px 100px; // joueur / rank / prize
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--secondary-color-trans);
+    border: 1px solid var(--secondary-color);
+    border-radius: 8px;
+}
+
+.player-name {
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.results-row input {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--primary-text);
+    background: var(--primary-color);
+    color: var(--primary-text);
+    font-size: 0.9rem;
+
+    &:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 5px var(--accent);
+    }
+}
+
+.modal__form label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+
+    input[type="datetime-local"] {
+        margin-top: 0.5rem;
+        padding: 0.4rem;
+        border-radius: 6px;
+        border: 1px solid var(--primary-text);
+        background: var(--primary-color);
+        color: var(--primary-text);
+    }
+}
+.drag-handle {
+  cursor: grab;
+  color: var(--secondary-text);
+  margin-right: 0.5rem;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
