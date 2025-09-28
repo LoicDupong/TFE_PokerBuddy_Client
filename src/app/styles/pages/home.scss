@@ -8,6 +8,10 @@
 .hero{
   &__item{
     margin-top: 2rem;
+
+    .btn{
+      margin: 0;
+    }
   }
 }
 

@@ -12,6 +12,7 @@ export default function LearnHandsPage() {
           width={1000}
           height={550}
           priority />
+    
         <div className="divider"></div>
         <article>
           <p>

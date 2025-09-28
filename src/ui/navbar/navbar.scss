@@ -1,5 +1,7 @@
 .nav {
 
+    display: flex;
+    gap: 2rem;
     // --- Mobile par défaut ---
     &--mobile {
         display: flex;

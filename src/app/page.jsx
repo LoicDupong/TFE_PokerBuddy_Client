@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faBook, faUser, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faBook, faUser, faUserPlus, faDice } from '@fortawesome/free-solid-svg-icons';
 import Link from "next/link.js";
 import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display.jsx";
 import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-games-display.jsx";
@@ -17,9 +17,10 @@ export default function HomePage() {
 
     if (user) {
         console.log(user);
-        
+
         return (
             <>
+                <InstallPrompt />
                 <div className="hero__container">
                     <div className="hero__header">
                         <h1 className="title title--hero">Welcome, <br /> <span className="red">{user.username}</span></h1>
@@ -28,10 +29,15 @@ export default function HomePage() {
                         <Link href={'/games/create'}>
                             <div className="btn btn--create"><FontAwesomeIcon icon={faPlus} /> Create New Game</div>
                         </Link>
+                        <div className="hero__item">
+                            <p className="text--hero">Start managing your poker games now</p>
+                            <Link href={'/manager'}>
+                                <div className="btn"><FontAwesomeIcon icon={faDice} /> Live Game Manager</div>
+                            </Link>
+                        </div>
                         {/* <PushNotificationManager />  */}
                         {/* bouton Subscribe / Unsubscribe */}
                         <div className="hero__item">
-                            <InstallPrompt />
                         </div>  {/* option pour l’installation PWA */}
                     </div>
                 </div>
@@ -68,6 +74,7 @@ export default function HomePage() {
     } else {
         return (
             <>
+                <InstallPrompt />
                 <div className="hero__container">
                     <div className="hero__header">
                         <h1 className="title title--hero">Welcome on<br /><span className="red">PokerBuddy</span></h1>
@@ -86,10 +93,14 @@ export default function HomePage() {
                         {/* <PushNotificationManager />  */}
                         {/* bouton Subscribe / Unsubscribe */}
                         <div className="hero__item">
-                            <InstallPrompt />
+                            <p className="text--hero">Try the Game Manager now</p>
+                            <Link href={'/manager'}>
+                                <div className="btn"><FontAwesomeIcon icon={faDice} /> Live Game Manager</div>
+                            </Link>
                         </div>  {/* option pour l’installation PWA */}
                     </div>
                 </div>
+                <div className="divider"></div>
                 <div className="learning__container">
                     <div className="learning-new">
                         <h2 className="title title--section">New to poker ?</h2>

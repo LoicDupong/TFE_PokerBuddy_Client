@@ -15,6 +15,7 @@ import "../ui/footer/footer.scss";
 import "../ui/styles/form.scss";
 import "../ui/styles/modal.scss";
 
+import "../components/pwa/installPrompt.scss";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

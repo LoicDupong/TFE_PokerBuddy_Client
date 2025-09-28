@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faChevronDown, faChevronUp, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faBell, faChevronDown, faChevronUp, faXmark } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link.js";
 import Image from "next/image";
 import { usePathname } from "next/navigation.js";
@@ -23,12 +23,11 @@ export default function Navbar() {
 
 
     const links = [
-        { href: "/", name: "Home" },
-        { href: "/games", name: "Games" },
-        { href: "/profile", name: "Profile" },
-        { href: "/leaderboard", name: "Leaderboard" },
+        { href: "/games", name: "Dashboard" },
         { href: "/games/create", name: "Create Game" },
         { href: "/manager", name: "Game Manager" },
+        { href: "/leaderboard", name: "Leaderboard" },
+        { href: "/profile", name: "Profile" },
         { href: "/", name: "Logout", action: logout }
     ];
 
@@ -69,37 +68,37 @@ export default function Navbar() {
     if (!isMobile) {
         return (
             <nav className="nav nav--desktop">
-                {user ? 
-                links.map(({ href, name, action }) =>
-                    action ? (
-                        <Link key={name} href={href} onClick={action} className="nav__item">
-                            {name}
-                        </Link>
-                    ) : (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={pathname === href ? "active nav__item" : "nav__item"}
-                        >
-                            {name}
-                        </Link>
-                    )
-                ) : baseLinks.map(({ href, name, action }) =>
-                    action ? (
-                        <Link key={name} href={href} onClick={action} className="nav__item">
-                            {name}
-                        </Link>
-                    ) : (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={pathname === href ? "active nav__item" : "nav__item"}
-                        >
-                            {name}
-                        </Link>
-                    )
-                )}
-                
+                {user ?
+                    links.map(({ href, name, action }) =>
+                        action ? (
+                            <Link key={name} href={href} onClick={action} className="nav__item">
+                                {name}
+                            </Link>
+                        ) : (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={pathname === href ? "active nav__item" : "nav__item"}
+                            >
+                                {name}
+                            </Link>
+                        )
+                    ) : baseLinks.map(({ href, name, action }) =>
+                        action ? (
+                            <Link key={name} href={href} onClick={action} className="nav__item">
+                                {name}
+                            </Link>
+                        ) : (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={pathname === href ? "active nav__item" : "nav__item"}
+                            >
+                                {name}
+                            </Link>
+                        )
+                    )}
+
 
                 {/* Learn dropdown desktop */}
                 <div className="nav__dropdown">
@@ -114,6 +113,7 @@ export default function Navbar() {
                         ))}
                     </div>
                 </div>
+                <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
             </nav>
         );
     }
@@ -121,9 +121,19 @@ export default function Navbar() {
     // Mobile
     return (
         <nav className="nav">
-            <div className="nav__toggle" onClick={() => setIsOpen(true)}>
-                <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
-            </div>
+            {user ?
+                (<>
+                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
+                    <div className="nav__toggle" onClick={() => setIsOpen(true)}>
+                        <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
+                    </div>
+                </>) : (
+                    <div className="nav__toggle" onClick={() => setIsOpen(true)}>
+                        <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
+                    </div>
+                )
+            }
+
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
                 <Link href={"/"} onClick={() => setIsOpen(false)}>
                     <Image
@@ -164,32 +174,32 @@ export default function Navbar() {
                             {name}
                         </Link>
                     )
-                ) : 
-                baseLinks.map(({ href, name, action }) =>
-                    action ? (
-                        <Link
-                            key={name}
-                            href={href}
-                            onClick={() => {
-                                action();
-                                setIsOpen(false);
-                            }}
-                            className="nav__item"
-                        >
-                            {name}
-                        </Link>
-                    ) : (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={pathname === href ? "active nav__item" : "nav__item"}
-                            onClick={() => setIsOpen(false)}
-                        >
-                            {name}
-                        </Link>
-                    )
-                )}
-                
+                ) :
+                    baseLinks.map(({ href, name, action }) =>
+                        action ? (
+                            <Link
+                                key={name}
+                                href={href}
+                                onClick={() => {
+                                    action();
+                                    setIsOpen(false);
+                                }}
+                                className="nav__item"
+                            >
+                                {name}
+                            </Link>
+                        ) : (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={pathname === href ? "active nav__item" : "nav__item"}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                {name}
+                            </Link>
+                        )
+                    )}
+
                 {/* Learn dropdown mobile */}
                 <div
                     className="nav__item nav__item--dropdown"
