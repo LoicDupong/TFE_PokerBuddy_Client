@@ -17,6 +17,8 @@ import "../ui/styles/modal.scss";
 
 import "../components/pwa/installPrompt.scss";
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -43,6 +45,7 @@ export default function RootLayout({ children }) {
         <Header />
         <main>{children}</main>
         <Footer />
+        <SpeedInsights/>
       </body>
     </html>
   );
