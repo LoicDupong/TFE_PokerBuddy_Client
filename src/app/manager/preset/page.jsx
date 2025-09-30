@@ -175,12 +175,6 @@ export default function PresetForm() {
                 </div>
             </div>
 
-            {/* Prize Pool (auto) */}
-            <div className="form__row">
-                <label>Prize Pool</label>
-                <input type="number" value={preset.prizePool || 0} readOnly />
-            </div>
-
             {/* Blinds */}
             <fieldset className="form__fieldset">
                 <legend>Blinds</legend>
@@ -225,9 +219,36 @@ export default function PresetForm() {
                 </label>
             </fieldset>
 
-            {/* Options */}
+
+            {/* Players */}
             <fieldset className="form__fieldset">
-                <legend>Options</legend>
+                <legend>Players</legend>
+                {(preset.players || []).map((player) => (
+                    <div key={player.id} className="form__row">
+                        <input
+                            type="text"
+                            placeholder="Player name"
+                            value={player.name}
+                            onChange={(e) =>
+                                handlePlayerChange(player.id, e.target.value)
+                            }
+                        />
+                        <button
+                            type="button"
+                            className="btn btn--small"
+                            onClick={() => handleRemovePlayer(player.id)}
+                        >
+                            <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                    </div>
+                ))}
+                <button
+                    type="button"
+                    className="btn btn--small"
+                    onClick={handleAddPlayer}
+                >
+                    <FontAwesomeIcon icon={faPlus} /> Add Player
+                </button>
                 <div className="form__row">
                     <label>Max Players</label>
                     <input
@@ -296,38 +317,14 @@ export default function PresetForm() {
                 >
                     Total: {totalPercent}% (must equal 100%)
                 </p>
+
+                {/* Prize Pool (auto) */}
+                <div className="form__row">
+                    <label>Prize Pool</label>
+                    <input type="number" value={preset.prizePool || 0} readOnly />
+                </div>
             </fieldset>
 
-            {/* Players */}
-            <fieldset className="form__fieldset">
-                <legend>Players</legend>
-                {(preset.players || []).map((player) => (
-                    <div key={player.id} className="form__row">
-                        <input
-                            type="text"
-                            placeholder="Player name"
-                            value={player.name}
-                            onChange={(e) =>
-                                handlePlayerChange(player.id, e.target.value)
-                            }
-                        />
-                        <button
-                            type="button"
-                            className="btn btn--small"
-                            onClick={() => handleRemovePlayer(player.id)}
-                        >
-                            <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                    </div>
-                ))}
-                <button
-                    type="button"
-                    className="btn btn--small"
-                    onClick={handleAddPlayer}
-                >
-                    <FontAwesomeIcon icon={faPlus} /> Add Player
-                </button>
-            </fieldset>
 
             <button className="btn btn--full" type="submit">
                 Use Preset

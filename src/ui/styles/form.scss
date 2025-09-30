@@ -99,7 +99,7 @@ input[type="time"] {
 }
 
 
-input[name="prizePool"] {
+input[readonly] {
     color: var(--secondary-text);
     border: none;
 
