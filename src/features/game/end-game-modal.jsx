@@ -9,6 +9,7 @@ import {
     Droppable,
     Draggable,
 } from "@hello-pangea/dnd";
+import Link from "next/link.js";
 
 export default function EndGameModal({
     gameId,
@@ -184,9 +185,11 @@ export default function EndGameModal({
                     </DragDropContext>
 
                     {error && <p className="error">{error}</p>}
-                    <button type="submit" disabled={loading} className="btn btn--primary">
-                        {loading ? "Saving..." : "Save Results & Finish"}
-                    </button>
+                    <Link href={'/'}>
+                        <button type="submit" disabled={loading} className="btn btn--primary">
+                            {loading ? "Saving..." : "Save Results & Finish"}
+                        </button>
+                    </Link>
                 </form>
             </div>
         </div>

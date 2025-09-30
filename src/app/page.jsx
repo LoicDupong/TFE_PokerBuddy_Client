@@ -65,7 +65,9 @@ export default function HomePage() {
                         <h2 className="title title--section">New to poker ?</h2>
                         <p>Looking for a quick rundown on everything you need to know to get started playing poker?</p>
                         <p>Check out our guide to poker rules to get familiar with the basics of poker, as it’s crucial to know which hands beat which other hands, for example, or what blinds are, and how betting rounds work.</p>
-                        <div className="btn"><FontAwesomeIcon icon={faBook} /> How to play</div>
+                        <Link href={"/learn/rules"}>
+                            <div className="btn"><FontAwesomeIcon icon={faBook} /> How to play</div>
+                        </Link>
                     </div>
                 </div>
             </>

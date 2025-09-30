@@ -29,7 +29,8 @@ export default function FriendInviteDisplay() {
     const handleRespond = async (inviteId, response) => {
         try {
             await friendService.respond(inviteId, response);
-            setInvites(prev => prev.filter(invite => invite.inviteId !== inviteId));
+            setInvites(prev => prev.filter(invite => invite.id !== inviteId));
+            alert(`Invite ${response}ed successfully.`);
         } catch (err) {
             console.error("Error updating invite:", err);
             alert("Something went wrong, please try again.");
