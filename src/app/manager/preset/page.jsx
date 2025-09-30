@@ -224,7 +224,7 @@ export default function PresetForm() {
             <fieldset className="form__fieldset">
                 <legend>Players</legend>
                 {(preset.players || []).map((player) => (
-                    <div key={player.id} className="form__row">
+                    <div key={player.id} className="form__row form__addPlayer">
                         <input
                             type="text"
                             placeholder="Player name"
@@ -235,7 +235,7 @@ export default function PresetForm() {
                         />
                         <button
                             type="button"
-                            className="btn btn--small"
+                            className="btn btn--small btn-add"
                             onClick={() => handleRemovePlayer(player.id)}
                         >
                             <FontAwesomeIcon icon={faTrash} />
@@ -250,7 +250,7 @@ export default function PresetForm() {
                     <FontAwesomeIcon icon={faPlus} /> Add Player
                 </button>
                 <div className="form__row">
-                    <label>Max Players</label>
+                    <label>Players Number</label>
                     <input
                         type="number"
                         value={preset.players?.length || 0}

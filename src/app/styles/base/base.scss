@@ -85,6 +85,11 @@ main {
     &--info {
         background-color: var(--primary-text-trans);
     }
+
+    &--add{
+        margin-top: 0;
+        margin-bottom: 2rem;
+    }
 }
 
 .cards {
