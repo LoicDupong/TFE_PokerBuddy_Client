@@ -120,31 +120,29 @@ export default function GameAddForm() {
                 </div>
 
                 {/* Dates */}
-                <div className="form__grid">
-                    <div className="form__row input--icon left clickable">
-                        <label>
-                            Date & Time (planned) <span className="red">*</span>
-                        </label>
-                        <div className="input__container">
-                            <input id="dateStart" type="datetime-local" name="dateStart" />
-                            <FontAwesomeIcon
-                                icon={faCalendar}
-                                className="input__icon"
-                                onClick={() => document.getElementById("dateStart").showPicker()}
-                            />
-                        </div>
+                <div className="form__row input--icon left clickable">
+                    <label>
+                        Date & Time (planned) <span className="red">*</span>
+                    </label>
+                    <div className="input__container">
+                        <input id="dateStart" type="datetime-local" name="dateStart" />
+                        <FontAwesomeIcon
+                            icon={faCalendar}
+                            className="input__icon"
+                            onClick={() => document.getElementById("dateStart").showPicker()}
+                        />
                     </div>
+                </div>
 
-                    <div className="form__row input--icon left clickable">
-                        <label>Table start (optional)</label>
-                        <div className="input__container">
-                            <input id="realStart" type="time" name="realStart" />
-                            <FontAwesomeIcon
-                                icon={faClock}
-                                className="input__icon"
-                                onClick={() => document.getElementById("realStart").showPicker()}
-                            />
-                        </div>
+                <div className="form__row input--icon left clickable">
+                    <label>Table start (optional)</label>
+                    <div className="input__container">
+                        <input id="realStart" type="time" name="realStart" />
+                        <FontAwesomeIcon
+                            icon={faClock}
+                            className="input__icon"
+                            onClick={() => document.getElementById("realStart").showPicker()}
+                        />
                     </div>
                 </div>
 
