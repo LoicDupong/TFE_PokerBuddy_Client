@@ -11,6 +11,7 @@ import PushNotificationManager from "@/components/pwa/pushNotificationManager.js
 import InstallPrompt from "@/components/pwa/installPrompt.jsx";
 import useAuthStore from "@/stores/useAuthStore.js";
 import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";
+import GameInvitesDisplay from "@/components/game-invites-display/game-invites-display.jsx";
 
 export default function HomePage() {
     const user = useAuthStore((state) => state.user);
@@ -44,6 +45,7 @@ export default function HomePage() {
                     <ActiveGameDisplay />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Upcoming</span> Games</h3>
+                    <GameInvitesDisplay />
                     <UpcomingGamesDisplay />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Recent</span> Games</h3>

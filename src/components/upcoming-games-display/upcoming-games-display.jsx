@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign, faHourglassStart, faLocationDot, faClock, faPlus, faCircleInfo, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faLocationDot, faClock, faPlus, faCircleInfo, faMinus, faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link.js';
 import gameService from '@/services/game.service.js';
 import { useEffect, useState } from 'react';
@@ -43,14 +43,20 @@ export default function UpcomingGamesDisplay() {
               hour: "2-digit",
               minute: "2-digit",
             })}</p>
-            <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {dateStart.toLocaleTimeString("fr-FR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}</p>
             <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}€</p>
-            <Link href={"games/" + games[0].id}>
-              <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
-            </Link>
+            <div className="card__actions">
+              <Link href={"games/" + games[0].id}>
+                <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
+              </Link>
+              <a
+                href={`http://localhost:8080/games/${games[0].id}/ics`}
+                download
+                className="btn btn--small"
+                aria-label="Add to calendar"
+              >
+                <FontAwesomeIcon icon={faCalendarPlus} />
+              </a>
+            </div>
           </div>
         </div>
         {/* Si expand est actif → on affiche toutes sauf la première */}
@@ -77,18 +83,22 @@ export default function UpcomingGamesDisplay() {
                     minute: "2-digit",
                   })}
                 </p>
-                <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" />
-                  <span className="gray"> Table start:</span> {dateStart.toLocaleTimeString("fr-FR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" />
                   <span className="gray"> Entry price:</span> {g.buyIn}€
                 </p>
-                <Link href={"games/" + g.id}>
-                  <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
-                </Link>
+                <div className="card__actions">
+                  <Link href={"games/" + g.id}>
+                    <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
+                  </Link>
+                  <a
+                    href={`http://localhost:8080/games/${g.id}/ics`}
+                    download
+                    className="btn btn--small"
+                    aria-label="Add to calendar"
+                  >
+                    <FontAwesomeIcon icon={faCalendarPlus} />
+                  </a>
+                </div>
               </div>
             </div>
           )
@@ -132,14 +142,20 @@ export default function UpcomingGamesDisplay() {
                 hour: "2-digit",
                 minute: "2-digit",
               })}</p>
-              <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {dateStart.toLocaleTimeString("fr-FR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}</p>
               <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
-              <Link href={"games/" + g.id}>
-                <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
-              </Link>
+              <div className="card__actions">
+                <Link href={"games/" + g.id}>
+                  <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
+                </Link>
+                <a
+                  href={`http://localhost:8080/games/${g.id}/ics`}
+                  download
+                  className="btn btn--small"
+                  aria-label="Add to calendar"
+                >
+                  <FontAwesomeIcon icon={faCalendarPlus} />
+                </a>
+              </div>
             </div>
           </div>
         )

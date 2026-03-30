@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComment, faDollarSign, faFlagCheckered, faHourglassStart, faMoneyCheckDollar, faPlayCircle, faRankingStar, faSackDollar, faStar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarPlus, faComment, faDollarSign, faFlagCheckered, faHourglassStart, faMoneyCheckDollar, faPlayCircle, faRankingStar, faSackDollar, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import useAuthStore from '@/stores/useAuthStore.js';
@@ -68,7 +68,7 @@ export default function UpcomingGamesDetails() {
               <h3>Players list</h3>
               <ul>
                 {game.playerLinks.map((r) => (
-                  <li key={r.id}>• {r.userName || r.guestName}</li>
+                  <li key={r.id}>• {r.userName || r.guestName} <span className={`player__status player__status--${r.status}`}>{r.status}</span></li>
                 ))}
               </ul>
             </div>
@@ -79,7 +79,19 @@ export default function UpcomingGamesDetails() {
           <div className="card__note">
             <h3><FontAwesomeIcon icon={faComment} size="sm" /> Note:</h3>
             <p>{game.description}</p>
+          </div>
 
+          <div className="divider"></div>
+
+          <div className="card__calendar">
+            <a
+              href={`http://localhost:8080/games/${game.id}/ics`}
+              download
+              className="btn btn--small"
+              aria-label="Add to calendar"
+            >
+              <FontAwesomeIcon icon={faCalendarPlus} />
+            </a>
           </div>
         </div>
       </div>
