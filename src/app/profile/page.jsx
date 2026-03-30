@@ -18,6 +18,11 @@ export default function ProfilePage() {
     const [friends, setFriends] = useState(null);
     const [showInviteModal, setShowInviteModal] = useState(false);
 
+    const refreshFriends = async () => {
+        const data = await userService.getMe();
+        if (data) setFriends(data.user.friends || []);
+    };
+
     useEffect(() => {
         (async () => {
             const data = await userService.getMe();
@@ -95,7 +100,7 @@ export default function ProfilePage() {
                     ))}
                 </div>
 
-                <FriendInviteDisplay />
+                <FriendInviteDisplay onAccept={refreshFriends} />
 
                 <div className="btn btn--full" onClick={() => setShowInviteModal(true)}>
                     <FontAwesomeIcon icon={faUserPlus} /> Add friends

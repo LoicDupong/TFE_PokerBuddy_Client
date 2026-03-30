@@ -1,6 +1,6 @@
 "use client";
 
-import { faUser, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faUserMinus, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,6 +16,8 @@ export default function ProfileByIdPage() {
 
   const [message, setMessage] = useState("");
   const [friendStatus, setFriendStatus] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const currentUser = useAuthStore((state) => state.user)
 
@@ -23,6 +25,14 @@ export default function ProfileByIdPage() {
     (async () => {
       const data = await userService.getUserById(id);
       if (data) setUser(data.user);
+
+      const friendData = await friendService.getFriends();
+      if (friendData?.friends) {
+        const isFriend = friendData.friends.some(
+          (f) => f.User?.id === id || f.FriendUser?.id === id
+        );
+        if (isFriend) setFriendStatus("friends");
+      }
     })();
   }, [id]);
 
@@ -50,6 +60,17 @@ export default function ProfileByIdPage() {
     }
   }
 
+  async function handleConfirmRemove() {
+    setRemoving(true);
+    const res = await friendService.removeFriend(id);
+    setRemoving(false);
+    if (res.success) {
+      setFriendStatus(null);
+      setShowConfirmModal(false);
+    } else {
+      alert(res.errorMessage?.[0] || "Could not remove friend.");
+    }
+  }
 
 
   return (
@@ -85,7 +106,12 @@ export default function ProfileByIdPage() {
                 <p className="subtitle">Win Rate</p>
               </div>
             </div>
-            {friendStatus !== "sent" && (
+            {friendStatus === "friends" && (
+              <div className="btn btn--user" onClick={() => setShowConfirmModal(true)}>
+                <FontAwesomeIcon icon={faUserMinus} /> Remove Friend
+              </div>
+            )}
+            {friendStatus !== "sent" && friendStatus !== "friends" && (
               <div className="btn btn--user" onClick={handleAddFriend}>
                 <FontAwesomeIcon icon={faUserPlus} /> Add Friend
               </div>
@@ -94,6 +120,24 @@ export default function ProfileByIdPage() {
           </div>
         </div>
       </section>
+
+      {showConfirmModal && (
+        <div className="modal">
+          <div className="modal__overlay" onClick={() => setShowConfirmModal(false)}></div>
+          <div className="modal__content">
+            <h2>Remove friend?</h2>
+            <p>Are you sure you want to remove <strong>{user.username}</strong> from your friends?</p>
+            <div className="btn__group">
+              <button className="btn btn--primary" onClick={handleConfirmRemove} disabled={removing}>
+                Confirm
+              </button>
+              <button className="btn" onClick={() => setShowConfirmModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

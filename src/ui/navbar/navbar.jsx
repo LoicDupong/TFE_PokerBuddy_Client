@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation.js";
 import { useEffect, useState } from "react";
 
 import useAuthStore from "@/stores/useAuthStore";
+import useNotificationStore from "@/stores/useNotificationStore";
 
 
 const learnLinks = [
@@ -20,6 +21,7 @@ const learnLinks = [
 export default function Navbar() {
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
+    const { unreadCount, fetchNotifications } = useNotificationStore();
 
 
     const links = [
@@ -53,6 +55,14 @@ export default function Navbar() {
 
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    useEffect(() => {
+        if (!user) return;
+        fetchNotifications();
+        const onFocus = () => fetchNotifications();
+        window.addEventListener("focus", onFocus);
+        return () => window.removeEventListener("focus", onFocus);
+    }, [user, fetchNotifications]);
 
     useEffect(() => {
         if (isOpen) {
@@ -113,8 +123,8 @@ export default function Navbar() {
                         ))}
                     </div>
                 </div>
-                <Link href={'/profile'} className="notification has-notification">
-                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification has-notification" size="xl" />
+                <Link href={'/notifications'} className={`notification${unreadCount > 0 ? ' has-notification' : ''}`}>
+                    <FontAwesomeIcon icon={faBell} className={`nav__icon--notification${unreadCount > 0 ? ' has-notification' : ''}`} size="xl" />
                 </Link>
             </nav>
         );
@@ -125,7 +135,7 @@ export default function Navbar() {
         <nav className="nav">
             {user ?
                 (<>
-                    <Link href={'/profile'} className="notification has-notification">
+                    <Link href={'/notifications'} className={`notification${unreadCount > 0 ? ' has-notification' : ''}`}>
                         <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
                     </Link>
                     <div className="nav__toggle" onClick={() => setIsOpen(true)}>

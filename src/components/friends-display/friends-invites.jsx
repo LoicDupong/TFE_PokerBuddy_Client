@@ -13,7 +13,7 @@ import friendService from "@/services/friend.service.js";
 import FriendInvitesSkeleton from "./friends-invites-skeleton.jsx";
 import { useEffect, useState } from 'react';
 
-export default function FriendInviteDisplay() {
+export default function FriendInviteDisplay({ onAccept }) {
     const [invites, setInvites] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -34,6 +34,7 @@ export default function FriendInviteDisplay() {
         setLoadingId(null);
         if (result.success) {
             setInvites(prev => prev.filter(invite => invite.id !== inviteId));
+            if (response === "accept" && onAccept) onAccept();
         } else {
             alert(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
