@@ -16,8 +16,6 @@ export default function HomePage() {
     const user = useAuthStore((state) => state.user);
 
     if (user) {
-        console.log(user);
-
         return (
             <>
                 <InstallPrompt />

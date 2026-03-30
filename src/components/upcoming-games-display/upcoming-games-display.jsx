@@ -12,21 +12,18 @@ export default function UpcomingGamesDisplay() {
   const [games, setGames] = useState(null);
   const [isExpand, setIsExpand] = useState(false);
   const pathname = usePathname();
-  console.log(games);
 
   useEffect(() => {
     (async () => {
       const data = await gameService.getAll("upcoming");
-      const gamesArray = data?.games || data;
-      const pendingGame = gamesArray.filter(d => d.status === "pending")
-      setGames(pendingGame);
-
+      const gamesArray = data?.games || data || [];
+      setGames(gamesArray);
     })();
   }, []);
 
   if (!games || games.length === 0) return <UpcomingGamesSkeleton />;
 
-  if (pathname !== "games") {
+  if (pathname !== "/games") {
     const dateStart = new Date(games[0].dateStart);
     return (
       <div className="cards cards--planned">

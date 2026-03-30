@@ -15,6 +15,7 @@ export default function ProfileByIdPage() {
   const [user, setUser] = useState(null);
 
   const [message, setMessage] = useState("");
+  const [friendStatus, setFriendStatus] = useState(null);
 
   const currentUser = useAuthStore((state) => state.user)
 
@@ -24,12 +25,6 @@ export default function ProfileByIdPage() {
       if (data) setUser(data.user);
     })();
   }, [id]);
-
-  // Log seulement quand user change
-  useEffect(() => {
-    console.log("👤 user updated:", user);
-  }, [user]);
-
 
   if (!user) return <p>Loading...</p>;
 
@@ -45,8 +40,9 @@ export default function ProfileByIdPage() {
       const res = await friendService.sendRequest(id);
       if (res.success) {
         setMessage("✅ Friend request sent !");
+        setFriendStatus("sent");
       } else {
-        setMessage(`❌ ${res.error}`);
+        setMessage(`❌ ${res.errorMessage?.[0] || "Friend request failed"}`);
       }
     } catch (err) {
       console.error(err);
@@ -89,10 +85,12 @@ export default function ProfileByIdPage() {
                 <p className="subtitle">Win Rate</p>
               </div>
             </div>
-            <div className="btn btn--user" onClick={handleAddFriend}>
-              <FontAwesomeIcon icon={faUserPlus} /> Add Friend
-              {message && <p>{message}</p>}
-            </div>
+            {friendStatus !== "sent" && (
+              <div className="btn btn--user" onClick={handleAddFriend}>
+                <FontAwesomeIcon icon={faUserPlus} /> Add Friend
+              </div>
+            )}
+            {message && <p>{message}</p>}
           </div>
         </div>
       </section>

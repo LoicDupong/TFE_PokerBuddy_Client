@@ -22,10 +22,7 @@ export default function ProfilePage() {
         (async () => {
             const data = await userService.getMe();
             if (data) {
-                const acceptedFriends = data.user.Friends.filter(friendship =>
-                    friendship.Friend.status === "accepted"
-                );
-                setFriends(acceptedFriends);
+                setFriends(data.user.friends || []);
                 setUser(data.user);
             }
         })();
@@ -33,7 +30,6 @@ export default function ProfilePage() {
 
 
     if (!user) return <p>Loading...</p>;
-    console.log(friends);
 
     return (
         <>
@@ -86,7 +82,7 @@ export default function ProfilePage() {
                 <h2 className="red">Friends ({friends.length})</h2>
                 <div className="cards cards--friends">
                     {friends.map((f) => (
-                        <Link key={f.id} href={`profile/${f.id}`}>
+                        <Link key={f.id} href={`/profile/${f.id}`}>
                             <div className="card user user--friend">
                                 <div className="user__avatar user--friend__avatar">
                                     <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
@@ -107,7 +103,7 @@ export default function ProfilePage() {
             </section>
 
             {showInviteModal && (
-                <FriendInvite onClose={() => setShowInviteModal(false)} />
+                <FriendInvite onClose={() => setShowInviteModal(false)} friends={friends || []} />
             )}
         </>
     );

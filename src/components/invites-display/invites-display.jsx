@@ -17,31 +17,38 @@ import InvitesSkeleton from './invites-skeleton.jsx';
 export default function InvitesDisplay() {
     const [invites, setInvites] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [loadingId, setLoadingId] = useState(null);
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
-        (async () => {
+        const fetchInvites = async () => {
             const dataInvites = await gameInviteService.getMyInvites();
             if (dataInvites) setInvites(dataInvites);
-        })();
+            setLoading(false);
+        };
+
+        fetchInvites();
+        window.addEventListener("focus", fetchInvites);
+        return () => window.removeEventListener("focus", fetchInvites);
     }, []);
 
-    console.log(invites);
-
-
     const handleRespond = async (inviteId, response) => {
-        try {
-            await gameInviteService.respond(inviteId, response);
+        if (loadingId) return;
+        setLoadingId(inviteId);
+        const result = await gameInviteService.respond(inviteId, response);
+        setLoadingId(null);
+        if (result.success) {
             setInvites(prev => prev.filter(invite => invite.inviteId !== inviteId));
-        } catch (err) {
-            console.error("Error updating invite:", err);
-            alert("Something went wrong, please try again.");
+        } else {
+            alert(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 
 
 
-    if (!invites || invites.length === 0) return <InvitesSkeleton />;
+    if (loading) return <InvitesSkeleton />;
+    if (invites.length === 0) return <p>No game invites at the moment.</p>;
 
     return (
         <>
@@ -71,12 +78,14 @@ export default function InvitesDisplay() {
                                     <div className="btn__invites">
                                         <button
                                             className="btn btn--accept"
+                                            disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "accepted")}>
                                             <FontAwesomeIcon icon={faCheck} />
                                         </button>
 
                                         <button
                                             className="btn btn--decline"
+                                            disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "refused")}>
                                             <FontAwesomeIcon icon={faXmark} />
                                         </button>

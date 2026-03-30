@@ -21,8 +21,6 @@ export default function PreviousGameDetails() {
     })();
   }, [id]);
 
-  console.log(game);
-
   if (!game || game.length === 0) return <PreviousGamesSkeleton />;
   // Dates
   const timeStart = shortDateTime(game.dateStart);

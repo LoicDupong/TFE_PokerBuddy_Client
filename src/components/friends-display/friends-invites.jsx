@@ -16,28 +16,31 @@ import { useEffect, useState } from 'react';
 export default function FriendInviteDisplay() {
     const [invites, setInvites] = useState([]);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [loadingId, setLoadingId] = useState(null);
 
     useEffect(() => {
         (async () => {
             const dataInvites = await friendService.getInvites();
             if (dataInvites) setInvites(dataInvites);
+            setLoading(false);
         })();
     }, []);
 
-    console.log(invites);
-
     const handleRespond = async (inviteId, response) => {
-        try {
-            await friendService.respond(inviteId, response);
+        if (loadingId) return;
+        setLoadingId(inviteId);
+        const result = await friendService.respond(inviteId, response);
+        setLoadingId(null);
+        if (result.success) {
             setInvites(prev => prev.filter(invite => invite.id !== inviteId));
-            alert(`Invite ${response}ed successfully.`);
-        } catch (err) {
-            console.error("Error updating invite:", err);
-            alert("Something went wrong, please try again.");
+        } else {
+            alert(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 
-    if (!invites || invites.length === 0) return <FriendInvitesSkeleton />;
+    if (loading) return <FriendInvitesSkeleton />;
+    if (invites.length === 0) return <p>No friend requests at the moment.</p>;
 
     return (
         <>
@@ -69,12 +72,14 @@ export default function FriendInviteDisplay() {
                                 <div className="btn__invites">
                                     <button
                                         className="btn btn--accept"
+                                        disabled={loadingId === invite.id}
                                         onClick={() => handleRespond(invite.id, "accept")}>
                                         <FontAwesomeIcon icon={faCheck} />
                                     </button>
 
                                     <button
                                         className="btn btn--decline"
+                                        disabled={loadingId === invite.id}
                                         onClick={() => handleRespond(invite.id, "decline")}>
                                         <FontAwesomeIcon icon={faXmark} />
                                     </button>

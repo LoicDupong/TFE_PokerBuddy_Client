@@ -132,7 +132,6 @@ export default function PresetForm() {
                 (p) => p.name.trim() !== ""
             ),
         });
-        console.log("Preset ready:", preset);
         router.push("/manager");
     };
 

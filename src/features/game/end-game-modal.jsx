@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faGripLines } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +10,6 @@ import {
     Droppable,
     Draggable,
 } from "@hello-pangea/dnd";
-import Link from "next/link.js";
 
 export default function EndGameModal({
     gameId,
@@ -18,6 +18,7 @@ export default function EndGameModal({
     buyIn = 0,
     onClose,
 }) {
+    const router = useRouter();
     const [finishedAt, setFinishedAt] = useState(new Date().toISOString());
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -92,6 +93,7 @@ export default function EndGameModal({
 
         if (res.success) {
             onClose();
+            router.push('/');
         } else {
             setError(res.errorMessage);
         }
@@ -185,11 +187,9 @@ export default function EndGameModal({
                     </DragDropContext>
 
                     {error && <p className="error">{error}</p>}
-                    <Link href={'/'}>
-                        <button type="submit" disabled={loading} className="btn btn--primary">
-                            {loading ? "Saving..." : "Save Results & Finish"}
-                        </button>
-                    </Link>
+                    <button type="submit" disabled={loading} className="btn btn--primary">
+                        {loading ? "Saving..." : "Save Results & Finish"}
+                    </button>
                 </form>
             </div>
         </div>

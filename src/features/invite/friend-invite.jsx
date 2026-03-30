@@ -6,10 +6,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
 
-export default function FriendInvite({ onClose }) {
+export default function FriendInvite({ onClose, friends = [] }) {
     const [username, setUsername] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [sentIds, setSentIds] = useState(new Set());
 
     // 🔍 Cherche un user par username
     const searchUser = async () => {
@@ -21,18 +22,15 @@ export default function FriendInvite({ onClose }) {
         setLoading(false);
     };
 
-    console.log("results", results);
-    
 
 
     // ➕ Envoie une demande d’ami
     const addFriend = async (friendId) => {
         const res = await friendService.sendRequest(friendId);
         if (res.success) {
-            alert("Friend request sent!");
-            setResults(results.filter((u) => u.id !== friendId)); // retire de la liste
+            setSentIds(prev => new Set([...prev, friendId]));
         } else {
-            alert(res.errorMessage[0]);
+            alert(res.errorMessage?.[0] || "Friend request failed");
         }
     };
 
@@ -85,12 +83,22 @@ export default function FriendInvite({ onClose }) {
                                     <h2 className="title title--friend">{u.username}</h2>
                                 </div>
                             </div>
-                            <button
-                                className="btn btn--small btn--primary"
-                                onClick={() => addFriend(u.id)}
-                            >
-                                <FontAwesomeIcon icon={faUserPlus} /> Add
-                            </button>
+                            {friends.some(f => f.id === u.id) ? (
+                                <button className="btn btn--small" disabled>
+                                    Friend
+                                </button>
+                            ) : sentIds.has(u.id) ? (
+                                <button className="btn btn--small" disabled>
+                                    Request Sent
+                                </button>
+                            ) : (
+                                <button
+                                    className="btn btn--small btn--primary"
+                                    onClick={() => addFriend(u.id)}
+                                >
+                                    <FontAwesomeIcon icon={faUserPlus} /> Add
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>

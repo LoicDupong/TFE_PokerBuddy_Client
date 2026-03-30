@@ -10,15 +10,11 @@ import ActiveGameSkeleton from './active-game-skeleton.jsx';
 export default function ActiveGameDisplay() {
     const [games, setGames] = useState(null);
 
-    console.log(games);
-
     useEffect(() => {
         (async () => {
-            const data = await gameService.getAll();
-            const gamesArray = data?.games || data;
-            const activeGame = gamesArray.filter(d => d.status === "active")
-            setGames(activeGame);
-
+            const data = await gameService.getAll("today");
+            const gamesArray = data?.games || data || [];
+            setGames(gamesArray);
         })();
     }, []);
 

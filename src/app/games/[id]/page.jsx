@@ -7,6 +7,7 @@ import gameService from "@/services/game.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
 import { faPenToSquare, faUserPlus, faGears } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link.js";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -36,9 +37,11 @@ export default function GameDetailsPage() {
           <h1>Game Details</h1>
           <div className="divider"></div>
           <div className="btn__container">
-            <div className="btn btn--edit">
-              <FontAwesomeIcon icon={faPenToSquare} /> Edit
-            </div>
+            <Link href={`/games/${id}/edit`}>
+              <div className="btn btn--edit">
+                <FontAwesomeIcon icon={faPenToSquare} /> Edit
+              </div>
+            </Link>
             <div className="btn btn--edit btn--invite">
               <FontAwesomeIcon icon={faUserPlus} /> Invite
             </div>
@@ -65,9 +68,11 @@ export default function GameDetailsPage() {
             <div className="btn btn--edit" onClick={handleGameManager}>
               <FontAwesomeIcon icon={faGears} /> Game Manager
             </div>
-            <div className="btn btn--edit">
-              <FontAwesomeIcon icon={faPenToSquare} /> Edit Game
-            </div>
+            <Link href={`/games/${id}/edit`}>
+              <div className="btn btn--edit">
+                <FontAwesomeIcon icon={faPenToSquare} /> Edit Game
+              </div>
+            </Link>
           </div>
           <ActiveGameDetails />
         </>
