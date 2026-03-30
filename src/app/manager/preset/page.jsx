@@ -243,7 +243,7 @@ export default function PresetForm() {
                 ))}
                 <button
                     type="button"
-                    className="btn btn--small"
+                    className="btn btn--addPlayer"
                     onClick={handleAddPlayer}
                 >
                     <FontAwesomeIcon icon={faPlus} /> Add Player

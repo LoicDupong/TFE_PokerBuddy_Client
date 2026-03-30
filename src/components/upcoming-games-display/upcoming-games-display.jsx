@@ -29,7 +29,7 @@ export default function UpcomingGamesDisplay() {
       <div className="cards cards--planned">
         <div className="card card--planned">
           <div className="card__header">
-            <h3 className="title title--card">{games[0].name} <br /> -{" "}
+            <h3 className="title title--card">{games[0].name} -{" "}
               {dateStart.toLocaleDateString("fr-FR", {
                 day: "2-digit",
                 month: "2-digit",

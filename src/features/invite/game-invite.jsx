@@ -5,7 +5,7 @@ import { faXmark, faUser, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
-export default function GameInvite({ invites, setInvites, onClose }) {
+export default function GameInvite({ invites, setInvites, onClose, onConfirm }) {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -128,7 +128,7 @@ export default function GameInvite({ invites, setInvites, onClose }) {
                 </div>
 
                 {/* Confirm */}
-                <button className="btn btn--full btn--primary" onClick={onClose}>
+                <button className="btn btn--full btn--primary" onClick={onConfirm ?? onClose}>
                     Confirm
                 </button>
             </div>

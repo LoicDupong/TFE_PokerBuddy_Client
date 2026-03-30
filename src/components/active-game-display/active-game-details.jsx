@@ -42,8 +42,18 @@ export default function ActiveGameDetails() {
         </div>
         <div className="card__body">
           <div className="card__infos">
-            <p className="card__status">{game.status}</p>
-            <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart}</p>
+            <p className="card__status">{game.status}</p>              
+            <div className="card__calendar">
+                <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart} </p>
+                <a
+                  href={`http://localhost:8080/games/${game.id}/ics`}
+                  download
+                  className="btn btn--small"
+                  aria-label="Add to calendar"
+                >
+                  <FontAwesomeIcon icon={faCalendarPlus} />
+                </a>
+            </div>
             <p><FontAwesomeIcon icon={faPlayCircle} className="fa-icon" /> <span className="gray">Table start:</span> {realStart}</p>
             <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {game.playerLinks.length}</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
@@ -79,18 +89,6 @@ export default function ActiveGameDetails() {
             <p>{game.description}</p>
           </div>
 
-          <div className="divider"></div>
-
-          <div className="card__calendar">
-            <a
-              href={`http://localhost:8080/games/${game.id}/ics`}
-              download
-              className="btn btn--small"
-              aria-label="Add to calendar"
-            >
-              <FontAwesomeIcon icon={faCalendarPlus} />
-            </a>
-          </div>
         </div>
       </div>
     </>

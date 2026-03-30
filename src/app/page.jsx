@@ -12,9 +12,11 @@ import InstallPrompt from "@/components/pwa/installPrompt.jsx";
 import useAuthStore from "@/stores/useAuthStore.js";
 import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";
 import GameInvitesDisplay from "@/components/game-invites-display/game-invites-display.jsx";
+import { useState } from "react";
 
 export default function HomePage() {
     const user = useAuthStore((state) => state.user);
+    const [upcomingKey, setUpcomingKey] = useState(0);
 
     if (user) {
         return (
@@ -45,8 +47,8 @@ export default function HomePage() {
                     <ActiveGameDisplay />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Upcoming</span> Games</h3>
-                    <GameInvitesDisplay />
-                    <UpcomingGamesDisplay />
+                    <GameInvitesDisplay onAccept={() => setUpcomingKey((k) => k + 1)} />
+                    <UpcomingGamesDisplay key={upcomingKey} />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Recent</span> Games</h3>
                     <PreviousGamesDisplay />

@@ -55,9 +55,11 @@ export default function PreviousGamesDisplay() {
                                 <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {games[0].results?.length || 0}</p>
                                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}€</p>
                                 <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {games[0].prizePool}€</p>
-                                <Link href={`/games/${games[0].id}`}>
-                                    <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
-                                </Link>
+                                <div className="card__actions">
+                                    <Link href={`/games/${games[0].id}`}>
+                                        <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
+                                    </Link>
+                                </div>
                             </>
                         ) : (
                             <>

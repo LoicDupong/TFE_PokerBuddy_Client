@@ -1,11 +1,12 @@
 "use client";
 
-import { faCheck, faClock, faLocationDot, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faClock, faEye, faLocationDot, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import gameInviteService from "@/services/gameInvite.service.js";
+import Link from "next/link.js";
 
-export default function GameInvitesDisplay() {
+export default function GameInvitesDisplay({ onAccept }) {
     const [invites, setInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
 
@@ -22,6 +23,7 @@ export default function GameInvitesDisplay() {
         setActingId(null);
         if (res.success) {
             setInvites((prev) => prev.filter((i) => i.inviteId !== inviteId));
+            if (action === "accepted") onAccept?.();
         }
     };
 
@@ -45,7 +47,7 @@ export default function GameInvitesDisplay() {
                                 {dateStart.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}{" "}
                                 {dateStart.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                             </p>
-                            <div className="btn__invites">
+                            <div className="card__actions">
                                 <button
                                     className="btn btn--accept"
                                     disabled={!!actingId}
@@ -60,6 +62,11 @@ export default function GameInvitesDisplay() {
                                 >
                                     <FontAwesomeIcon icon={faXmark} />
                                 </button>
+                                <Link href={`/games/${invite.gameId}`}>
+                                    <div className="btn btn--card">
+                                        <FontAwesomeIcon icon={faEye} /> View
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     </div>

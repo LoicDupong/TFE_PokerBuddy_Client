@@ -1,7 +1,6 @@
 "use client";
 
 import FriendInviteDisplay from '@/components/friends-display/friends-invites.jsx';
-import InvitesDisplay from '@/components/invites-display/invites-display.jsx';
 import FriendInvite from '@/features/invite/friend-invite.jsx';
 import userService from '@/services/user.service.js';
 import {
@@ -78,9 +77,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </section>
-
-            {/* --- INVITES --- */}
-            <InvitesDisplay />
 
             {/* --- FRIENDS --- */}
             <section className="section section__friends">

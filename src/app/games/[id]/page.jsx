@@ -10,12 +10,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import GameInvite from "@/features/invite/game-invite.jsx";
+import gameInviteService from "@/services/gameInvite.service.js";
 
 export default function GameDetailsPage() {
   const { id } = useParams();
   const [game, setGame] = useState(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invites, setInvites] = useState({ friends: [], guests: [] });
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!user) router.replace('/');
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +33,18 @@ export default function GameDetailsPage() {
   }, [id]);
 
   if (!game) return <p>Loading...</p>;
+  if (!user) return null;
+
+  const handleInviteConfirm = async () => {
+    for (const f of invites.friends) {
+      await gameInviteService.invite(id, { userId: f.id });
+    }
+    for (const g of invites.guests) {
+      await gameInviteService.invite(id, { guestName: g });
+    }
+    setShowInviteModal(false);
+    setInvites({ friends: [], guests: [] });
+  };
 
   if (game.status === "finished") {
     return <PreviousGameDetails />;
@@ -42,11 +62,19 @@ export default function GameDetailsPage() {
                 <FontAwesomeIcon icon={faPenToSquare} /> Edit
               </div>
             </Link>
-            <div className="btn btn--edit btn--invite">
+            <div className="btn btn--edit btn--invite" onClick={() => setShowInviteModal(true)}>
               <FontAwesomeIcon icon={faUserPlus} /> Invite
             </div>
           </div>
           <UpcomingGamesDetails />
+          {showInviteModal && (
+            <GameInvite
+              invites={invites}
+              setInvites={setInvites}
+              onClose={() => setShowInviteModal(false)}
+              onConfirm={handleInviteConfirm}
+            />
+          )}
         </>
       );
     }
