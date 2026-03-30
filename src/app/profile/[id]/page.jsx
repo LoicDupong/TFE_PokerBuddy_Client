@@ -65,8 +65,7 @@ export default function ProfileByIdPage() {
     const res = await friendService.removeFriend(id);
     setRemoving(false);
     if (res.success) {
-      setFriendStatus(null);
-      setShowConfirmModal(false);
+      router.push('/profile');
     } else {
       alert(res.errorMessage?.[0] || "Could not remove friend.");
     }

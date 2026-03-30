@@ -117,6 +117,16 @@ export default function NotificationsPage() {
             );
         }
 
+        if (n.type === "game_result_reminder") {
+            return (
+                <div className="notification__actions">
+                    <Link href={`/games/${n.referenceId}`} className="notification__link">
+                        Submit results
+                    </Link>
+                </div>
+            );
+        }
+
         return null;
     };
 
