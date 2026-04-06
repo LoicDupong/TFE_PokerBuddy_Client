@@ -21,6 +21,11 @@ main {
     letter-spacing: 1px;
     cursor: pointer;
 
+    &__group {
+        display: flex;
+        gap: 1rem;
+    }
+
     &--card {
         margin-top: 0;
         padding: .3rem .8rem;
@@ -119,7 +124,7 @@ main {
     }
 
     &--friends {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))
+        grid-template-columns: repeat(3, 1fr);
     }
 
     &--invites {
@@ -270,4 +275,23 @@ main {
 
 .active {
     color: var(--primary-color);
+}
+
+.notification{
+
+    &__item{
+        margin-bottom: 1rem;
+    }
+
+    &__link{
+        text-decoration: underline;
+        color: var(--primary-color-light);
+    }
+
+    &__actions{
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+        gap: 0.5rem;
+    }
 }

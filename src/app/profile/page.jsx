@@ -59,16 +59,6 @@ export default function ProfilePage() {
                         <div className="user__description">
                             <p>{user.description || "No description set."}</p>
                         </div>
-                        <div className="user__stats">
-                            <div className="user__stat">
-                                <h2 className="title title--stat">{user.stats.totalGames}</h2>
-                                <p className="subtitle">Games Played</p>
-                            </div>
-                            <div className="user__stat">
-                                <h2 className="title title--stat">{user.stats.winRate}%</h2>
-                                <p className="subtitle">Win Rate</p>
-                            </div>
-                        </div>
                         <Link href={"/profile/edit"}>
                             <div className="btn btn--user">
                                 <FontAwesomeIcon icon={faPenToSquare} /> Edit Profile
@@ -86,7 +76,11 @@ export default function ProfilePage() {
                         <Link key={f.id} href={`/profile/${f.id}`}>
                             <div className="card user user--friend">
                                 <div className="user__avatar user--friend__avatar">
-                                    <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
+                                    {f.avatar ? (
+                                        <img src={`http://localhost:8080${f.avatar}`} alt={f.username} />
+                                    ) : (
+                                        <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
+                                    )}
                                 </div>
                                 <div className="user__infos">
                                     <h2 className="title title--friend">{f.username}</h2>

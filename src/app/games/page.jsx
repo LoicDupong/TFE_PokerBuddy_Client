@@ -49,7 +49,7 @@ export default function GamesPage() {
               <h3 className="title title--card">Total Win</h3>
             </div>
             <div className="card__body">
-              <p>{stats.totalGamesWon}</p>
+              <p>{stats.wins}</p>
             </div>
           </div>
           <div className="card card--stat">

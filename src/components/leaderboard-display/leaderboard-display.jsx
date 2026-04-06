@@ -1,50 +1,72 @@
+"use client";
 
+import leaderboardService from "@/services/leaderboard.service.js";
+import Link from "next/link.js";
+import { useEffect, useState } from "react";
 
-export default function LeaderboardDisplay() {
+export default function LeaderboardDisplay({ compact = false }) {
+    const limit = compact ? 3 : 10;
+    const [players, setPlayers] = useState([]);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+
+    useEffect(() => {
+        leaderboardService.getLeaderboard(page, limit).then((data) => {
+            if (data) {
+                setPlayers(data.players);
+                setPages(data.pages);
+            }
+        });
+    }, [page]);
+
+    if (players.length === 0) return <p>No friends with stats yet.</p>;
 
     return (
-        
-        /*// TODO : Faire un map pour chaque joueurs dans le leaderboard */
-
-        <div className="leaderboard__table">
+        <div>
+            <div className={`leaderboard__table${compact ? "" : " leaderboard__table--full"}`}>
                 <table>
-                  <thead>
-                    <tr>
-                      <th>Ranking</th>
-                      <th>Player Name</th>
-                      <th>Games Played</th>
-                      <th>Games Won</th>
-                      <th>Games First</th>
-                      <th>Winrate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td><a href="">Alice</a></td>
-                      <td>120</td>
-                      <td>85</td>
-                      <td>30</td>
-                      <td>70.8%</td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td><a href="">Bob</a></td>
-                      <td>98</td>
-                      <td>60</td>
-                      <td>22</td>
-                      <td>61.2%</td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td><a href="">Charlie</a></td>
-                      <td>75</td>
-                      <td>45</td>
-                      <td>15</td>
-                      <td>60.0%</td>
-                    </tr>
-                  </tbody>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Wins</th>
+                            <th>Winrate</th>
+                            {!compact && <th>Games</th>}
+                            {!compact && <th>Avg Place</th>}
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {players.map((p) => (
+                            <tr key={p.id}>
+                                <td>{p.rank}</td>
+                                <td>
+                                    <Link href={`/profile/${p.id}`} className={`leaderboard__player-link${p.rank === 1 ? " red" : ""}`}>
+                                        {p.username}
+                                    </Link>
+                                </td>
+                                <td>{p.wins}</td>
+                                <td>{p.winRate}%</td>
+                                {!compact && <td>{p.totalGames}</td>}
+                                {!compact && <td>{p.avgPlacement ?? "—"}</td>}
+                                <td>{p.netResult >= 0 ? `+${p.netResult}` : p.netResult}€</td>
+                            </tr>
+                        ))}
+                    </tbody>
                 </table>
             </div>
-    )
+            {compact && (
+                <Link href="/leaderboard">
+                    <div className="btn btn--full">View full leaderboard</div>
+                </Link>
+            )}
+            {!compact && pages > 1 && (
+                <div className="pagination">
+                    <button className="btn btn--small" disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+                    <span>{page} / {pages}</span>
+                    <button className="btn btn--small" disabled={page === pages} onClick={() => setPage(p => p + 1)}>Next →</button>
+                </div>
+            )}
+        </div>
+    );
 }

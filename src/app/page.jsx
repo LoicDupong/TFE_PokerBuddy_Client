@@ -58,7 +58,7 @@ export default function HomePage() {
                 <div className="leaderboard__container">
                     <h2 className="title title--leaderboard title--section">My Leaderboard</h2>
 
-                    <LeaderboardDisplay />
+                    <LeaderboardDisplay compact />
                 </div>
                 <div className="divider"></div>
 

@@ -70,7 +70,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
                             <div className="card__body">
                                 <div className="user__avatar user--friend__avatar">
                                     {u.avatar ? (
-                                        <img src={u.avatar} alt={u.username} />
+                                        <img src={`http://localhost:8080${u.avatar}`} alt={u.username} />
                                     ) : (
                                         <FontAwesomeIcon
                                             icon={faUser}
