@@ -10,6 +10,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link.js';
 import friendService from "@/services/friend.service.js";
+import useToastStore from "@/stores/useToastStore.js";
 import FriendInvitesSkeleton from "./friends-invites-skeleton.jsx";
 import { useEffect, useState } from 'react';
 
@@ -18,6 +19,7 @@ export default function FriendInviteDisplay({ onAccept }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loadingId, setLoadingId] = useState(null);
+    const { showToast } = useToastStore();
 
     useEffect(() => {
         (async () => {
@@ -36,7 +38,7 @@ export default function FriendInviteDisplay({ onAccept }) {
             setInvites(prev => prev.filter(invite => invite.id !== inviteId));
             if (response === "accept" && onAccept) onAccept();
         } else {
-            alert(result.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 

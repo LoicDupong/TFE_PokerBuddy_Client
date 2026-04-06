@@ -18,6 +18,8 @@ import "../ui/styles/modal.scss";
 import "../components/pwa/installPrompt.scss";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import Toast from "@/components/toast/toast.jsx";
+import "../components/toast/toast.scss";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +47,7 @@ export default function RootLayout({ children }) {
         <Header />
         <main>{children}</main>
         <Footer />
+        <Toast />
         <SpeedInsights/>
       </body>
     </html>

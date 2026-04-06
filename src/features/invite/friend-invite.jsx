@@ -5,12 +5,14 @@ import { faXmark, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
+import useToastStore from "@/stores/useToastStore.js";
 
 export default function FriendInvite({ onClose, friends = [] }) {
     const [username, setUsername] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [sentIds, setSentIds] = useState(new Set());
+    const { showToast } = useToastStore();
 
     // 🔍 Cherche un user par username
     const searchUser = async () => {
@@ -30,7 +32,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
         if (res.success) {
             setSentIds(prev => new Set([...prev, friendId]));
         } else {
-            alert(res.errorMessage?.[0] || "Friend request failed");
+            showToast(res.errorMessage?.[0] || "Friend request failed");
         }
     };
 

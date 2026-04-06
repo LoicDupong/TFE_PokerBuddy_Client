@@ -1,6 +1,7 @@
 "use client";
 
 import userService from "@/services/user.service.js";
+import useToastStore from "@/stores/useToastStore.js";
 import { faCheck, faUser, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -11,6 +12,8 @@ export default function EditProfilePage() {
     const [formData, setFormData] = useState({ username: "", description: "", avatar: null });
     const [preview, setPreview] = useState(null); // 🔹 nouvelle state pour la preview
     const [success, setSuccess] = useState(false);
+    const [fileError, setFileError] = useState(null);
+    const { showToast } = useToastStore();
     const router = useRouter();
 
     useEffect(() => {
@@ -35,9 +38,10 @@ export default function EditProfilePage() {
         if (files) {
             const file = files[0];
             if (file && file.size > 2 * 1024 * 1024) {
-                alert("❌ File too large (max 2MB)");
+                setFileError("File too large (max 2MB)");
                 return;
             }
+            setFileError(null);
             setFormData({ ...formData, [name]: file });
             setPreview(URL.createObjectURL(file)); // 🔹 met à jour la preview
         } else {
@@ -55,7 +59,7 @@ export default function EditProfilePage() {
                 router.push("/profile");
             }, 500);
         } else {
-            alert(res.errorMessage?.[0] || "Update failed");
+            showToast(res.errorMessage?.[0] || "Update failed");
         }
     };
 
@@ -92,6 +96,7 @@ export default function EditProfilePage() {
                                     className="input--file"
                                 />
                                 {formData.avatar && <p className="file__name">{formData.avatar.name}</p>}
+                {fileError && <p className="form__error">{fileError}</p>}
                             </div>
                             <div className="user__infos">
                                 <label htmlFor="username">Username</label>

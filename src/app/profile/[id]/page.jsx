@@ -8,6 +8,7 @@ import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/useAuthStore.js";
+import useToastStore from "@/stores/useToastStore.js";
 
 export default function ProfileByIdPage() {
   const { id } = useParams();
@@ -19,7 +20,8 @@ export default function ProfileByIdPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [removing, setRemoving] = useState(false);
 
-  const currentUser = useAuthStore((state) => state.user)
+  const currentUser = useAuthStore((state) => state.user);
+  const { showToast } = useToastStore();
 
   useEffect(() => {
     (async () => {
@@ -67,7 +69,7 @@ export default function ProfileByIdPage() {
     if (res.success) {
       router.push('/profile');
     } else {
-      alert(res.errorMessage?.[0] || "Could not remove friend.");
+      showToast(res.errorMessage?.[0] || "Could not remove friend.");
     }
   }
 

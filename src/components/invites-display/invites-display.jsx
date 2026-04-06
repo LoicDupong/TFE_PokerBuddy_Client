@@ -12,6 +12,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
+import useToastStore from "@/stores/useToastStore.js";
 import InvitesSkeleton from './invites-skeleton.jsx';
 
 export default function InvitesDisplay() {
@@ -19,6 +20,7 @@ export default function InvitesDisplay() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [loadingId, setLoadingId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToastStore();
 
 
     useEffect(() => {
@@ -41,7 +43,7 @@ export default function InvitesDisplay() {
         if (result.success) {
             setInvites(prev => prev.filter(invite => invite.inviteId !== inviteId));
         } else {
-            alert(result.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 

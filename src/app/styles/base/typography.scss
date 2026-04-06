@@ -67,6 +67,12 @@ p {
   color: var(--secondary-text);
 }
 
+.form__error {
+  font-size: 13px;
+  color: var(--secondary-color);
+  margin-top: 0.3rem;
+}
+
 .red {
   color: var(--secondary-color)
 }

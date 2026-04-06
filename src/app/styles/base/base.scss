@@ -125,6 +125,12 @@ main {
 
     &--friends {
         grid-template-columns: repeat(3, 1fr);
+        .card{
+            min-height: stretch;
+                display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
     }
 
     &--invites {
@@ -237,6 +243,7 @@ main {
             padding: .5rem;
         }
     }
+
 }
 
 .player__status {

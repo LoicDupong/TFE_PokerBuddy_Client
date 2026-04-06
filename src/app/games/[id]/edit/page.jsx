@@ -4,6 +4,7 @@ import { useRouter, useParams } from "next/navigation.js";
 import { useEffect, useMemo, useState } from "react";
 import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useToastStore from "@/stores/useToastStore.js";
 import {
     faCalendar,
     faClock,
@@ -22,6 +23,7 @@ export default function EditGamePage() {
     const router = useRouter();
 
     const [game, setGame] = useState(null);
+    const { showToast } = useToastStore();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -121,7 +123,7 @@ export default function EditGamePage() {
         if (res.success) {
             router.push(`/games/${game.id}`);
         } else {
-            alert(res.errorMessage?.[0] || "Update failed");
+            showToast(res.errorMessage?.[0] || "Update failed");
         }
     };
 
