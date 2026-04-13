@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import useAuthStore from '@/stores/useAuthStore.js';
 import gameService from '@/services/game.service.js';
 import { shortDateTime, shortTime } from '@/utils/date.utils.js';
+import { apiUrl } from '@/utils/media.js';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
 import { useParams } from 'next/navigation.js';
 
@@ -46,7 +47,7 @@ export default function ActiveGameDetails() {
             <div className="card__calendar">
                 <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart} </p>
                 <a
-                  href={`http://localhost:8080/games/${game.id}/ics`}
+                  href={apiUrl(`/games/${game.id}/ics`)}
                   download
                   className="btn btn--small"
                   aria-label="Add to calendar"

@@ -7,6 +7,7 @@ import gameService from '@/services/game.service.js';
 import { useEffect, useState } from 'react';
 import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
+import { apiUrl } from '@/utils/media.js';
 
 export default function UpcomingGamesDisplay() {
   const [games, setGames] = useState(null);
@@ -49,7 +50,7 @@ export default function UpcomingGamesDisplay() {
                 <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
               </Link>
               <a
-                href={`http://localhost:8080/games/${games[0].id}/ics`}
+                href={apiUrl(`/games/${games[0].id}/ics`)}
                 download
                 className="btn btn--small"
                 aria-label="Add to calendar"
@@ -91,7 +92,7 @@ export default function UpcomingGamesDisplay() {
                     <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
                   </Link>
                   <a
-                    href={`http://localhost:8080/games/${g.id}/ics`}
+                    href={apiUrl(`/games/${g.id}/ics`)}
                     download
                     className="btn btn--small"
                     aria-label="Add to calendar"
@@ -148,7 +149,7 @@ export default function UpcomingGamesDisplay() {
                   <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
                 </Link>
                 <a
-                  href={`http://localhost:8080/games/${g.id}/ics`}
+                  href={apiUrl(`/games/${g.id}/ics`)}
                   download
                   className="btn btn--small"
                   aria-label="Add to calendar"

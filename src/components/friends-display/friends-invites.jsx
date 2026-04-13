@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link.js';
 import friendService from "@/services/friend.service.js";
 import useToastStore from "@/stores/useToastStore.js";
+import { serverUrl } from "@/utils/media.js";
 import FriendInvitesSkeleton from "./friends-invites-skeleton.jsx";
 import { useEffect, useState } from 'react';
 
@@ -63,7 +64,7 @@ export default function FriendInviteDisplay({ onAccept }) {
                                 <div className="card__body">
                                     <div className="user__avatar user--friend__avatar">
                                         {invite.User.avatar ? (
-                                            <img src={`http://localhost:8080${invite.User.avatar}`} alt="User avatar" />
+                                            <img src={serverUrl(invite.User.avatar)} alt="User avatar" />
                                         ) : (
                                             <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
                                         )}

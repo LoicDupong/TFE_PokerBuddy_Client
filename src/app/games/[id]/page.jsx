@@ -5,7 +5,7 @@ import PreviousGameDetails from "@/components/previous-games-display/previous-ga
 import UpcomingGamesDetails from "@/components/upcoming-games-display/upcoming-games-details.jsx";
 import gameService from "@/services/game.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
-import { faPenToSquare, faUserPlus, faGears } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faUserPlus, faGears, faDice } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
 import { useRouter, useParams } from "next/navigation";
@@ -64,6 +64,9 @@ export default function GameDetailsPage() {
             </Link>
             <div className="btn btn--edit btn--invite" onClick={() => setShowInviteModal(true)}>
               <FontAwesomeIcon icon={faUserPlus} /> Invite
+            </div>
+            <div className="btn btn--edit" onClick={() => router.push(`/manager/preset?gameId=${game.id}`)}>
+              <FontAwesomeIcon icon={faDice} /> Use Preset
             </div>
           </div>
           <UpcomingGamesDetails />

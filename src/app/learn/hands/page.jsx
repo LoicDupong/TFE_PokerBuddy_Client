@@ -6,12 +6,15 @@ export default function LearnHandsPage() {
       <section className="poker-hands">
         <h1>Poker Hand Rankings</h1>
         <div className="divider"></div>
-        <Image src="/poker-hands-chart.avif"
-          className="img img--chart"
-          alt="PokerBuddy logo"
-          width={1000}
-          height={550}
-          priority />
+        <div className="img--chart-wrapper">
+          <Image src="/poker-hands-chart.avif"
+            className="img img--chart"
+            alt="Poker hand rankings chart"
+            fill
+            priority
+            style={{ objectFit: "contain", objectPosition: "left top" }}
+          />
+        </div>
     
         <div className="divider"></div>
         <article>

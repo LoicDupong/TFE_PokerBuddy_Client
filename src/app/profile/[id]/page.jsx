@@ -9,6 +9,7 @@ import friendService from "@/services/friend.service.js";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/useAuthStore.js";
 import useToastStore from "@/stores/useToastStore.js";
+import { serverUrl } from "@/utils/media.js";
 
 export default function ProfileByIdPage() {
   const { id } = useParams();
@@ -84,7 +85,7 @@ export default function ProfileByIdPage() {
           <div className="card user">
             <div className="user__avatar">
               {user.avatar
-                ? <img src={`http://localhost:8080${user.avatar}`} alt="User avatar" />
+                ? <img src={serverUrl(user.avatar)} alt="User avatar" />
                 : <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
               }
             </div>

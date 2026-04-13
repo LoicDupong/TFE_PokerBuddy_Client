@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
 import useToastStore from "@/stores/useToastStore.js";
+import { serverUrl } from "@/utils/media.js";
 
 export default function FriendInvite({ onClose, friends = [] }) {
     const [username, setUsername] = useState("");
@@ -72,7 +73,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
                             <div className="card__body">
                                 <div className="user__avatar user--friend__avatar">
                                     {u.avatar ? (
-                                        <img src={`http://localhost:8080${u.avatar}`} alt={u.username} />
+                                        <img src={serverUrl(u.avatar)} alt={u.username} />
                                     ) : (
                                         <FontAwesomeIcon
                                             icon={faUser}

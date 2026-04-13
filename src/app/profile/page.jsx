@@ -11,6 +11,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
+import { serverUrl } from '@/utils/media.js';
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
@@ -47,7 +48,7 @@ export default function ProfilePage() {
                     <div className="card user">
                         <div className="user__avatar">
                             {user.avatar ? (
-                                <img src={`http://localhost:8080${user.avatar}`} alt="User avatar" />
+                                <img src={serverUrl(user.avatar)} alt="User avatar" />
                             ) : (
                                 <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
                             )}
@@ -77,7 +78,7 @@ export default function ProfilePage() {
                             <div className="card user user--friend">
                                 <div className="user__avatar user--friend__avatar">
                                     {f.avatar ? (
-                                        <img src={`http://localhost:8080${f.avatar}`} alt={f.username} />
+                                        <img src={serverUrl(f.avatar)} alt={f.username} />
                                     ) : (
                                         <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
                                     )}
@@ -92,7 +93,7 @@ export default function ProfilePage() {
 
                 <FriendInviteDisplay onAccept={refreshFriends} />
 
-                <div className="btn btn--full" onClick={() => setShowInviteModal(true)}>
+                <div className="btn btn--full" onClick={async () => { await refreshFriends(); setShowInviteModal(true); }}>
                     <FontAwesomeIcon icon={faUserPlus} /> Add friends
                 </div>
             </section>

@@ -30,7 +30,7 @@ export default function PresetForm() {
                         chipsPerPlayer: g.chipsPerPlayer || 0,
                         smallBlind: g.smallBlind,
                         bigBlind: g.bigBlind,
-                        levelDurationMin: g.levelDurationMin || 15,
+                        levelDurationMin: g.levelDuration || 15,
                         enableBlindTimer: g.enableBlindTimer ?? true,
                         allowRebuys: g.allowRebuys || false,
                         payoutDistribution: g.payoutDistribution || [],

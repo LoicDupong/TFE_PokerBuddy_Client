@@ -1,24 +1,27 @@
-
 export default function LearnTermsPage() {
   return (
-    <>
+    <section className="learn-page">
+      <h1>Poker Glossary</h1>
+      <div className="divider"></div>
+
       <article>
-        <h1>Poker Terms Explained</h1>
         <p>
-          It seems there’s a poker slang term for everything that could possibly happen in a game,
-          but don’t worry – our definitive guide to poker terminology is here to help you make sense of it all!
+          It seems there&apos;s a poker slang term for everything that could possibly happen in a game,
+          but don&apos;t worry – our definitive guide to poker terminology is here to help you make sense of it all!
         </p>
         <p>
-          You can use this page as a reference to look up any poker phrases you come across that you’re unfamiliar with,
+          You can use this page as a reference to look up any poker phrases you come across that you&apos;re unfamiliar with,
           or why not learn some new poker lingo to break out at your next home game?
         </p>
+      </article>
 
+      <article>
         <ul>
-          <li><h3>Action</h3><p>A player’s turn to act during a betting round; also describes betting activity in a hand.</p></li>
+          <li><h3>Action</h3><p>A player&apos;s turn to act during a betting round; also describes betting activity in a hand.</p></li>
           <li><h3>Add-on</h3><p>In tournaments, an optional extra buy-in of chips, usually at the end of the rebuy period.</p></li>
           <li><h3>All-in</h3><p>When a player bets all their remaining chips.</p></li>
           <li><h3>Ante</h3><p>A forced bet that all players must post before the deal, often in tournaments or stud.</p></li>
-          <li><h3>ATC</h3><p>Stands for “Any Two Cards” – used to describe very loose players.</p></li>
+          <li><h3>ATC</h3><p>Stands for &quot;Any Two Cards&quot; – used to describe very loose players.</p></li>
           <li><h3>Backdoor</h3><p>A draw that requires both turn and river cards to complete (e.g., backdoor flush draw).</p></li>
           <li><h3>Bad Beat</h3><p>When a strong favorite hand loses against improbable odds.</p></li>
           <li><h3>Bankroll</h3><p>The money a player has dedicated to playing poker.</p></li>
@@ -34,7 +37,7 @@ export default function LearnTermsPage() {
           <li><h3>Check</h3><p>To decline to bet when no bet has yet been made in the current round.</p></li>
           <li><h3>Community Cards</h3><p>Cards dealt face-up on the table that all players can use to form their hand.</p></li>
           <li><h3>Continuation Bet (C-Bet)</h3><p>A bet made by the pre-flop aggressor on the flop, regardless of whether they improved.</p></li>
-          <li><h3>Cry Call</h3><p>Calling a bet while suspecting you’re beaten, but unable to fold.</p></li>
+          <li><h3>Cry Call</h3><p>Calling a bet while suspecting you&apos;re beaten, but unable to fold.</p></li>
           <li><h3>Dealer</h3><p>The player (or staff) who distributes the cards; position rotates each hand.</p></li>
           <li><h3>Draw</h3><p>A hand that needs specific future cards to improve (flush draw, straight draw, etc.).</p></li>
           <li><h3>Equity</h3><p>The percentage chance of winning the pot based on your current hand and situation.</p></li>
@@ -80,7 +83,6 @@ export default function LearnTermsPage() {
           <li><h3>WSOP</h3><p>World Series of Poker, the largest and most prestigious live poker series.</p></li>
         </ul>
       </article>
-
-    </>
+    </section>
   );
 }

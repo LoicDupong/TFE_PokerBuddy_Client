@@ -8,6 +8,7 @@ import useAuthStore from '@/stores/useAuthStore.js';
 import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import gameService from '@/services/game.service.js';
 import { shortDateTime, shortTime } from '@/utils/date.utils.js';
+import { apiUrl } from '@/utils/media.js';
 import { useParams } from 'next/navigation.js';
 
 export default function UpcomingGamesDetails() {
@@ -48,7 +49,7 @@ export default function UpcomingGamesDetails() {
             <div className="card__calendar">
                 <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart} </p>
                 <a
-                  href={`http://localhost:8080/games/${game.id}/ics`}
+                  href={apiUrl(`/games/${game.id}/ics`)}
                   download
                   className="btn btn--small"
                   aria-label="Add to calendar"

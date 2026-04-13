@@ -1,6 +1,7 @@
 "use client";
 
 import userService from "@/services/user.service.js";
+import { serverUrl } from "@/utils/media.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { faCheck, faUser, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,7 +27,7 @@ export default function EditProfilePage() {
                     description: data.user.description || "",
                     avatar: null,
                 });
-                setPreview(data.user.avatar ? `http://localhost:8080${data.user.avatar}` : null);
+                setPreview(data.user.avatar ? serverUrl(data.user.avatar) : null);
             }
         })();
     }, []);

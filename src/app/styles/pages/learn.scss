@@ -1,0 +1,153 @@
+// ── Learn pages ────────────────────────────────────────────────────────────
+
+.poker-hands,
+.learn-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    h1 {
+        font-size: 38px;
+        letter-spacing: 1px;
+    }
+
+    h2 {
+        font-size: 22px;
+        color: var(--primary-color-light);
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        color: var(--secondary-text);
+        line-height: 1.75;
+    }
+
+    article {
+        background-color: var(--primary-text-trans);
+        border: 1px solid rgba(156, 163, 175, 0.15);
+        border-radius: 10px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        // subsection headings directly inside articles (rules, strategy)
+        h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary-text);
+            margin-top: 0.5rem;
+
+            &:first-child {
+                margin-top: 0;
+            }
+        }
+    }
+
+    ul {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        list-style: none;
+        padding: 0;
+
+        li {
+            border-bottom: 1px solid rgba(156, 163, 175, 0.1);
+            padding-bottom: 1.25rem;
+
+            &:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            h3 {
+                font-size: 15px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--primary-color-light);
+                margin-bottom: 0.3rem;
+                margin-top: 0;
+            }
+
+            p {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        }
+    }
+}
+
+// ── Hands chart ─────────────────────────────────────────────────────────────
+
+.img--chart-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 520px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--primary-text-trans);
+}
+
+.img--chart {
+    border-radius: 10px;
+}
+
+// ── Learn hub (index) ────────────────────────────────────────────────────────
+
+.learn-hub {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    h1 {
+        font-size: 38px;
+        letter-spacing: 1px;
+    }
+
+    &__intro {
+        color: var(--secondary-text);
+        line-height: 1.75;
+        max-width: 620px;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    &__card {
+        background-color: var(--primary-text-trans);
+        border: 1px solid rgba(156, 163, 175, 0.15);
+        border-radius: 10px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+
+        h2 {
+            font-size: 18px;
+            color: var(--primary-color-light);
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--secondary-text);
+            line-height: 1.6;
+        }
+
+        &:hover {
+            border-color: rgba(156, 163, 175, 0.4);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .learn-hub__grid {
+        grid-template-columns: 1fr;
+    }
+}
