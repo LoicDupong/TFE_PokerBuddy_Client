@@ -4,12 +4,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore from "@/stores/usePresetStore";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
 
 export default function PresetForm() {
     const { preset, setPreset } = usePresetStore();
     const router = useRouter();
+    const [playerError, setPlayerError] = useState(null);
+
+    const normalizeName = (name) =>
+        (name || "").trim().replace(/\s+/g, " ").toLowerCase();
+
     const searchParams = useSearchParams();
 
     const initialGameId = searchParams.get("gameId");
@@ -127,11 +132,20 @@ export default function PresetForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setPreset({
-            players: (preset.players || []).filter(
-                (p) => p.name.trim() !== ""
-            ),
-        });
+
+        const filteredPlayers = (preset.players || []).filter(
+            (p) => p.name?.trim() !== ""
+        );
+
+        const names = filteredPlayers.map((p) => normalizeName(p.name));
+        const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i);
+        if (hasDuplicates) {
+            setPlayerError("Two or more players have the same name. Please use unique names.");
+            return;
+        }
+
+        setPlayerError(null);
+        setPreset({ players: filteredPlayers });
         router.push("/manager");
     };
 
@@ -324,6 +338,8 @@ export default function PresetForm() {
                 </div>
             </fieldset>
 
+
+            {playerError && <p className="error">{playerError}</p>}
 
             <button className="btn btn--full" type="submit">
                 Use Preset

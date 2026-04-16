@@ -74,8 +74,24 @@ export default function EndGameModal({
 
     const totalPrizes = results.reduce((sum, r) => sum + (Number(r.prize) || 0), 0);
 
+    const normalizeName = (name) =>
+        (name || "").trim().replace(/\s+/g, " ").toLowerCase();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!gameId) {
+            setError(["No game linked to this session. Use the 'Use Preset' button from a game page."]);
+            return;
+        }
+
+        const names = results.map((r) => normalizeName(r.name));
+        const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i);
+        if (hasDuplicates) {
+            setError(["Two or more players have the same name. Please fix duplicate names before saving."]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -83,6 +99,7 @@ export default function EndGameModal({
             gamePlayerId: player.gamePlayerId,
             rank: index + 1, // ordre dans la liste = classement
             prize: parseInt(player.prize, 10) || 0,
+            guestName: player.name, // used by backend to create walk-in GamePlayer if ID is unknown
         }));
 
         const res = await gameResultsService.createResults(
