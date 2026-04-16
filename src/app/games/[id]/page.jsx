@@ -66,7 +66,7 @@ export default function GameDetailsPage() {
               <FontAwesomeIcon icon={faUserPlus} /> Invite
             </div>
             <div className="btn btn--edit" onClick={() => router.push(`/manager/preset?gameId=${game.id}`)}>
-              <FontAwesomeIcon icon={faDice} /> Use Preset
+              <FontAwesomeIcon icon={faDice} /> Manager
             </div>
           </div>
           <UpcomingGamesDetails />

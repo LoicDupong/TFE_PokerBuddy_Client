@@ -45,7 +45,9 @@ export default function PreviousGameDetails() {
             <p><FontAwesomeIcon icon={faHourglassEnd} className="fa-icon" /> <span className="gray">Ended:</span> {timeEnd}</p>
             <p><FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
               {winner ? (
-                <Link href={`/profile/${winner.user.id}`} className="title--winner"><span className="title--winner">{winner.user.username}</span></Link>
+                winner.user
+                  ? <Link href={`/profile/${winner.user.id}`} className="title--winner"><span className="title--winner">{winner.user.username}</span></Link>
+                  : <span className="title--winner">{winner.guestName}</span>
               ) : "N/A"}</p>
             <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {game.playerLinks.length}</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
