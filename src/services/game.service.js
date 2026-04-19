@@ -77,6 +77,24 @@ const gameService = {
         }
     },
 
+    generateInviteCode: async (id) => {
+        try {
+            const res = await api.post(`/games/${id}/invite-code`);
+            return { success: true, inviteCode: res.data.inviteCode };
+        } catch (error) {
+            return { success: false, error: error.response?.data?.error || "Failed to generate link" };
+        }
+    },
+
+    disableInviteCode: async (id) => {
+        try {
+            await api.delete(`/games/${id}/invite-code`);
+            return { success: true };
+        } catch (error) {
+            return { success: false };
+        }
+    },
+
     mapToPreset: (game) => {
         if (!game) return {};
 

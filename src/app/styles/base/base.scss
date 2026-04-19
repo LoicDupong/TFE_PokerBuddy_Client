@@ -113,6 +113,43 @@ main {
         margin-top: 0;
         margin-bottom: 2rem;
     }
+
+    &--danger {
+        background-color: transparent;
+        border: 1px solid var(--secondary-color);
+        color: var(--secondary-color);
+    }
+}
+
+.invite-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    border-radius: 10px;
+    background-color: var(--primary-text-trans);
+
+    h3 {
+        font-size: 15px;
+        color: var(--secondary-text);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    &__url {
+        width: 100%;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+        background: var(--primary-color);
+        color: var(--secondary-text);
+        font-size: 13px;
+        cursor: text;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .cards {
