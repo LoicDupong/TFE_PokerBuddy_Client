@@ -19,6 +19,7 @@ import "../ui/styles/modal.scss";
 import "../components/pwa/installPrompt.scss";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 import Toast from "@/components/toast/toast.jsx";
 import "../components/toast/toast.scss";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
         <Footer />
         <Toast />
         <SpeedInsights/>
+        <Analytics/>
       </body>
     </html>
   );
