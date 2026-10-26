@@ -22,6 +22,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
 import Toast from "@/components/toast/toast.jsx";
 import "../components/toast/toast.scss";
+import AuthInit from "@/components/auth/auth-init.jsx";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <AuthInit />
         <Header />
         <main>{children}</main>
         <Footer />

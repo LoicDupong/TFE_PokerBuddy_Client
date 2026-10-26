@@ -21,8 +21,13 @@ export default function ProfileByIdPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [removing, setRemoving] = useState(false);
 
-  const currentUser = useAuthStore((state) => state.user);
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const { showToast } = useToastStore();
+
+  // si la page by Id == l'id du user actuellement connecté => redirect
+  useEffect(() => {
+    if (currentUserId && id === currentUserId) router.replace('/profile');
+  }, [id, currentUserId, router]);
 
   useEffect(() => {
     (async () => {
@@ -40,12 +45,6 @@ export default function ProfileByIdPage() {
   }, [id]);
 
   if (!user) return <p>Loading...</p>;
-
-
-  // si la page by Id == l'id du user actuellement connecté => redirect
-  if (id === currentUser.id) {
-    router.push('/profile');
-  }
 
 
   async function handleAddFriend() {

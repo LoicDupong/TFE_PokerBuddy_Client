@@ -22,7 +22,7 @@ export default function ActiveGameDetails() {
   useEffect(() => {
       (async () => {
           const data = await gameService.getById(id);
-          setGame(data.game);
+          setGame(data?.game ?? null);
         })();
     }, [id]);
 

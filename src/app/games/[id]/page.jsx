@@ -20,22 +20,37 @@ export default function GameDetailsPage() {
   const [invites, setInvites] = useState({ friends: [], guests: [] });
   const [inviteCode, setInviteCode] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const isReady = useAuthStore((state) => state.isReady);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) router.replace('/');
-  }, [user]);
+    if (isReady && !user) router.replace('/');
+  }, [isReady, user, router]);
 
   useEffect(() => {
     (async () => {
       const data = await gameService.getById(id);
+      if (!data?.game) {
+        setNotFound(true);
+        return;
+      }
       setGame(data.game);
-      setInviteCode(data.game?.inviteCode || null);
+      setInviteCode(data.game.inviteCode || null);
     })();
   }, [id]);
 
-  if (!game) return <p>Loading...</p>;
+  if (notFound) {
+    return (
+      <>
+        <h1>Game not found</h1>
+        <p>This game doesn&apos;t exist anymore or couldn&apos;t be loaded.</p>
+        <Link href="/games" className="btn">Back to my games</Link>
+      </>
+    );
+  }
+  if (!game || !isReady) return <p>Loading...</p>;
   if (!user) return null;
 
   const handleInviteConfirm = async () => {

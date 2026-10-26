@@ -23,7 +23,7 @@ export default function UpcomingGamesDetails() {
   useEffect(() => {
       (async () => {
           const data = await gameService.getById(id);
-          setGame(data.game);
+          setGame(data?.game ?? null);
         })();
     }, [id]);
 

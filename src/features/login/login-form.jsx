@@ -4,15 +4,18 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { validateLogin } from "@/schemas/authSchema.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
+import { getSafeRedirect } from "@/utils/redirect.utils.js";
 import useAuthStore from "@/stores/useAuthStore";
 
 export default function LoginForm() {
     const inputId = useId();
     const router = useRouter();
+    // Page d'origine (ex: lien d'invitation /join/…) où revenir après le login
+    const redirect = getSafeRedirect(useSearchParams().get("redirect"));
 
     const login = useAuthStore((state) => state.login);
     const setAuth = useAuthStore((state) => state.setAuth);
@@ -41,7 +44,7 @@ export default function LoginForm() {
         if (res.success) {
             const { user, token } = res.data;
             setAuth(user, token);
-            router.push("/");
+            router.push(redirect || "/");
         } else {
             setErrorMessage([{ field: "form", message: res.error?.error || "Login failed" }]);
         }
@@ -98,7 +101,10 @@ export default function LoginForm() {
 
             <p className="auth__redirect">
                 Don’t have an account?{" "}
-                <Link href="/auth/register" className="link">
+                <Link
+                    href={redirect ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : "/auth/register"}
+                    className="link"
+                >
                     Register here
                 </Link>
             </p>

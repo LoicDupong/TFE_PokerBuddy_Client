@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import useAuthStore from "@/stores/useAuthStore";
@@ -8,25 +8,33 @@ import joinService from "@/services/join.service";
 
 export default function JoinPage() {
     const { token } = useParams();
-    const user = useAuthStore((state) => state.user);
+    const userId = useAuthStore((state) => state.user?.id);
+    const isReady = useAuthStore((state) => state.isReady);
     const router = useRouter();
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    // Évite un double POST (StrictMode en dev, user rafraîchi par /auth/me)
+    const hasJoined = useRef(false);
 
     useEffect(() => {
-        if (!user) {
-            router.replace(`/login?redirect=/join/${token}`);
+        if (!isReady) return;
+
+        if (!userId) {
+            router.replace(`/auth/login?redirect=${encodeURIComponent(`/join/${token}`)}`);
             return;
         }
+
+        if (hasJoined.current) return;
+        hasJoined.current = true;
 
         (async () => {
             const res = await joinService.joinByToken(token);
             if (res.success) setResult(res.data);
             else setError(res.error);
         })();
-    }, [user, token, router]);
+    }, [isReady, userId, token, router]);
 
-    if (!user) return null;
+    if (!isReady || !userId) return null;
 
     if (!result && !error) return <p>Joining game…</p>;
 

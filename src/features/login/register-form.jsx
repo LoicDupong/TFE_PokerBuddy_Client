@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { validateRegister } from "@/schemas/authSchema.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
+import { getSafeRedirect } from "@/utils/redirect.utils.js";
 import useAuthStore from "@/stores/useAuthStore";
 
 export default function RegisterForm() {
@@ -16,6 +17,8 @@ export default function RegisterForm() {
 
     const inputId = useId();
     const router = useRouter();
+    // Page d'origine (ex: lien d'invitation /join/…) où revenir après l'inscription
+    const redirect = getSafeRedirect(useSearchParams().get("redirect"));
 
     const [errorMessage, setErrorMessage] = useState([]);
     const [isPending, setIsPending] = useState(false);
@@ -44,8 +47,9 @@ export default function RegisterForm() {
 
         if (res.success) {
             const { user, token } = res.data;
+            // Le register renvoie déjà un token : l'utilisateur est connecté
             setAuth(user, token);
-            router.push("/auth/login");
+            router.push(redirect || "/");
         } else {
             setErrorMessage([{ field: "form", message: res.error?.error || "Registration failed" }]);
         }
@@ -136,7 +140,10 @@ export default function RegisterForm() {
 
             <p className="auth__redirect">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="link">
+                <Link
+                    href={redirect ? `/auth/login?redirect=${encodeURIComponent(redirect)}` : "/auth/login"}
+                    className="link"
+                >
                     Login here
                 </Link>
             </p>
