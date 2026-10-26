@@ -11,9 +11,10 @@ import {
     faPenToSquare,
     faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import usePresetStore from "@/stores/usePresetStore";
+import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
+import { NEW_TIMER, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link.js";
 import Image from "next/image";
 
@@ -24,49 +25,54 @@ const NO_PLAYERS = [];
 const NO_PAYOUT = [];
 
 export default function GameManager() {
-    const { preset } = usePresetStore();
+    const hydrated = usePresetHydrated();
+    const { preset, setPreset } = usePresetStore();
     const router = useRouter();
 
-    const [level, setLevel] = useState(1);
-    const [isRunning, setIsRunning] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(preset.levelDurationMin * 60); // en secondes
-    const [playersLeft, setPlayersLeft] = useState(preset.maxPlayers || 0);
     const [showEndModal, setShowEndModal] = useState(false);
+    const [now, setNow] = useState(() => Date.now());
 
-    const timerRef = useRef(null);
+    // Timer sauvegardé dans le preset : survit à un rechargement de la page
+    const timer = preset.timer ?? NEW_TIMER;
+    const level = timer.level;
+    const levelSeconds = (Number(preset.levelDurationMin) || 0) * 60;
+    const isRunning = timer.endsAt !== null;
+    const timeLeft = getTimeLeft(timer, levelSeconds, now); // en secondes
+    const playersLeft = preset.maxPlayers || 0;
 
-    // redirect si pas de preset
+    // redirect si pas de preset (une fois la sauvegarde relue)
     useEffect(() => {
-        if (!preset.title) {
+        if (hydrated && !preset.title) {
             router.push("/manager/preset");
         }
-    }, [preset, router]);
+    }, [hydrated, preset.title, router]);
 
-    // gestion timer
+    // Rafraîchit l'affichage ; le temps restant est recalculé depuis l'heure de fin à chaque tick
     useEffect(() => {
-        if (isRunning) {
-            timerRef.current = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timerRef.current);
-                        setIsRunning(false);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        } else {
-            clearInterval(timerRef.current);
-        }
-
-        return () => clearInterval(timerRef.current);
+        if (!isRunning) return;
+        setNow(Date.now());
+        const interval = setInterval(() => setNow(Date.now()), 500);
+        return () => clearInterval(interval);
     }, [isRunning]);
 
-    // reset timer quand changement de level
+    // Fin du niveau : le timer s'arrête à 00:00
     useEffect(() => {
-        setTimeLeft(preset.levelDurationMin * 60);
-        setIsRunning(false);
-    }, [level, preset.levelDurationMin]);
+        if (isRunning && timeLeft === 0) {
+            setPreset({ timer: pauseTimer(timer, levelSeconds, Date.now()) });
+        }
+    }, [isRunning, timeLeft, timer, levelSeconds, setPreset]);
+
+    const toggleTimer = () => {
+        const current = Date.now();
+        setNow(current);
+        setPreset({
+            timer: isRunning
+                ? pauseTimer(timer, levelSeconds, current)
+                : startTimer(timer, levelSeconds, current),
+        });
+    };
+
+    const changeLevel = (newLevel) => setPreset({ timer: goToLevel(newLevel) });
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -74,7 +80,7 @@ export default function GameManager() {
         return `${m}:${s}`;
     };
 
-    if (!preset.title) return null;
+    if (!hydrated || !preset.title) return null;
 
     // calculs utiles
     const prizePool = preset.buyIn * (preset.maxPlayers || 0); // simplifié (sans rebuys)
@@ -162,20 +168,20 @@ export default function GameManager() {
             <div className="manager__controls">
                 <button
                     className="btn btn--control"
-                    onClick={() => setLevel(Math.max(1, level - 1))}
+                    onClick={() => changeLevel(Math.max(1, level - 1))}
                 >
                     <FontAwesomeIcon icon={faBackwardStep} /> Prev
                 </button>
                 <button
                     className="btn btn--control"
-                    onClick={() => setIsRunning(!isRunning)}
+                    onClick={toggleTimer}
                 >
                     <FontAwesomeIcon icon={isRunning ? faPause : faPlay} />{" "}
                     {isRunning ? "Pause" : "Start"}
                 </button>
                 <button
                     className="btn btn--control"
-                    onClick={() => setLevel(level + 1)}
+                    onClick={() => changeLevel(level + 1)}
                 >
                     <FontAwesomeIcon icon={faForwardStep} /> Next
                 </button>

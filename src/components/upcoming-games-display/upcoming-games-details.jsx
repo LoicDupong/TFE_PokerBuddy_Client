@@ -9,6 +9,7 @@ import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import gameService from '@/services/game.service.js';
 import { shortDateTime, shortTime } from '@/utils/date.utils.js';
 import { apiUrl } from '@/utils/media.js';
+import { getConfirmedCount, getPayoutAmount, getPrizePool } from '@/utils/game.utils.js';
 import { useParams } from 'next/navigation.js';
 
 export default function UpcomingGamesDetails() {
@@ -35,6 +36,7 @@ export default function UpcomingGamesDetails() {
   const timeStart = shortDateTime(game.dateStart);
   // shortTime(null) afficherait 01:00 (1er janvier 1970)
   const realStart = game.realStart ? shortTime(game.realStart) : "—";
+  const prizePool = getPrizePool(game);
 
 
   return (
@@ -59,16 +61,16 @@ export default function UpcomingGamesDetails() {
                 </a>
             </div>
             <p><FontAwesomeIcon icon={faPlayCircle} className="fa-icon" /> <span className="gray">Table start:</span> {realStart}</p>
-            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {game.playerLinks.length}</p>
+            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {getConfirmedCount(game)} confirmed / {game.playerLinks.length} invited</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
             <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}€</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {game.prizePool}€</p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {prizePool}€</p>
             <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
             <ul>
-              {game.payoutDistribution.map((p) => (
-                <li key={p.place}>{p.place}. {(game.prizePool * p.percent) / 100}€</li>
+              {(game.payoutDistribution || []).map((p) => (
+                <li key={p.place}>{p.place}. {getPayoutAmount(prizePool, p.percent)}€</li>
               ))}
             </ul>
           </div>

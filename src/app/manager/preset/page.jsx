@@ -2,12 +2,15 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import usePresetStore from "@/stores/usePresetStore";
+import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
+import { goToLevel } from "@/utils/timer.utils.js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
 
 export default function PresetForm() {
+    // En premier : la sauvegarde doit être relue avant que les effets ci-dessous n'écrivent dans le preset
+    const hydrated = usePresetHydrated();
     const { preset, setPreset, resetPreset } = usePresetStore();
     const router = useRouter();
     const [playerError, setPlayerError] = useState(null);
@@ -21,7 +24,7 @@ export default function PresetForm() {
 
     // 🔹 Charger une game si on vient de /games/:gameId
     useEffect(() => {
-        if (!initialGameId) return;
+        if (!initialGameId || !hydrated) return;
 
         (async () => {
             try {
@@ -60,12 +63,14 @@ export default function PresetForm() {
                 console.error("Error loading game preset:", err);
             }
         })();
-    }, [initialGameId, setPreset, resetPreset]);
+    }, [initialGameId, hydrated, setPreset, resetPreset]);
 
     const handleChange = (e) => {
         const { name, type, value, checked } = e.target;
         setPreset({
             [name]: type === "checkbox" ? checked : value,
+            // Nouvelle durée de niveau : le niveau en cours repart sur un niveau complet, en pause
+            ...(name === "levelDurationMin" && preset.timer && { timer: goToLevel(preset.timer.level) }),
         });
     };
 
@@ -103,12 +108,13 @@ export default function PresetForm() {
 
     // 🔹 Calcul automatique du prizePool
     useEffect(() => {
+        if (!hydrated) return;
         const playersCount = preset.players?.length || 0;
         const buyIn = Number(preset.buyIn) || 0;
         setPreset({
             prizePool: playersCount * buyIn,
         });
-    }, [preset.players, preset.buyIn, setPreset]);
+    }, [hydrated, preset.players, preset.buyIn, setPreset]);
 
     // 🔹 Ajuster payoutDistribution si placesPaid change
     const handlePlacesPaidChange = (e) => {
@@ -154,6 +160,8 @@ export default function PresetForm() {
         setPreset({ players: filteredPlayers });
         router.push("/manager");
     };
+
+    if (!hydrated) return <p>Loading...</p>;
 
     return (
         <form className="form form--preset" onSubmit={handleSubmit}>

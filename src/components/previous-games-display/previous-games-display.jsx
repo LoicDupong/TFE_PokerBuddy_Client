@@ -5,6 +5,7 @@ import { faDollarSign, faTrophy, faUserGroup, faSackDollar, faChartBar } from '@
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import gameService from '@/services/game.service.js';
+import { getPrizePool } from '@/utils/game.utils.js';
 import PreviousGamesSkeleton from './previous-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
 
@@ -54,7 +55,7 @@ export default function PreviousGamesDisplay() {
                                 </p>
                                 <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {games[0].results?.length || 0}</p>
                                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}€</p>
-                                <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {games[0].prizePool}€</p>
+                                <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {getPrizePool(games[0])}€</p>
                                 <div className="card__actions">
                                     <Link href={`/games/${games[0].id}`}>
                                         <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
@@ -112,7 +113,7 @@ export default function PreviousGamesDisplay() {
                                     </p>
                                     <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {g.results?.length || 0}</p>
                                     <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
-                                    <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {g.prizePool}€</p>
+                                    <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {getPrizePool(g)}€</p>
                                     <Link href={`/games/${g.id}`}>
                                         <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
                                     </Link>
