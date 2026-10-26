@@ -28,6 +28,14 @@ export default function PresetForm() {
                 const data = await gameService.getById(initialGameId);
                 if (data?.game) {
                     const g = data.game;
+                    // Ceux qui ont refusé ne jouent pas ; les "pending" restent, l'hôte les retire s'ils ne viennent pas
+                    const players = (g.playerLinks || [])
+                        .filter((p) => p.status !== "refused")
+                        .map((p) => ({
+                            id: p.id,
+                            name: p.user?.username || p.userName || p.guestName,
+                            status: p.status,
+                        }));
                     const presetData = {
                         gameId: g.id, // ⚡ stocke l'ID de la game dans le preset
                         title: g.name,
@@ -41,12 +49,8 @@ export default function PresetForm() {
                         payoutDistribution: g.payoutDistribution || [],
                         placesPaid:
                             g.placesPaid || (g.payoutDistribution?.length ?? 0),
-                        players:
-                            g.playerLinks?.map((p) => ({
-                                id: p.id,
-                                name: p.userName || p.guestName,
-                            })) || [],
-                        maxPlayers: g.playerLinks?.length || 0,
+                        players,
+                        maxPlayers: players.length,
                     };
                     setPreset(presetData);
                 }
@@ -246,6 +250,14 @@ export default function PresetForm() {
                                 handlePlayerChange(player.id, e.target.value)
                             }
                         />
+                        {player.status === "pending" && (
+                            <span
+                                className="player__status player__status--pending"
+                                title="No answer to the invite yet — remove if absent"
+                            >
+                                pending
+                            </span>
+                        )}
                         <button
                             type="button"
                             className="btn btn--small btn-add"

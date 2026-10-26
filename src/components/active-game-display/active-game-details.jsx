@@ -77,7 +77,7 @@ export default function ActiveGameDetails() {
               <h3>Players list</h3>
               <ul>
                 {game.playerLinks.map((r) => (
-                  <li key={r.id}>• {r.userName || r.guestName} <span className={`player__status player__status--${r.status}`}>{r.status}</span></li>
+                  <li key={r.id}>• {r.user?.username || r.userName || r.guestName} <span className={`player__status player__status--${r.status}`}>{r.status}</span></li>
                 ))}
               </ul>
             </div>
