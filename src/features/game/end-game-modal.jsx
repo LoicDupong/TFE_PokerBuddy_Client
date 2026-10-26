@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
+import usePresetStore from "@/stores/usePresetStore";
+import { toDatetimeLocalValue } from "@/utils/date.utils.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faGripLines } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -19,7 +21,9 @@ export default function EndGameModal({
     onClose,
 }) {
     const router = useRouter();
-    const [finishedAt, setFinishedAt] = useState(new Date().toISOString());
+    const resetPreset = usePresetStore((state) => state.resetPreset);
+    // Valeur brute de l'input (heure locale) ; convertie en ISO seulement à l'envoi
+    const [finishedAt, setFinishedAt] = useState(() => toDatetimeLocalValue(new Date()));
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -92,6 +96,12 @@ export default function EndGameModal({
             return;
         }
 
+        const finishedDate = new Date(finishedAt);
+        if (!finishedAt || Number.isNaN(finishedDate.getTime())) {
+            setError(["Please set a valid end time."]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -105,10 +115,12 @@ export default function EndGameModal({
         const res = await gameResultsService.createResults(
             gameId,
             payload,
-            finishedAt
+            finishedDate.toISOString()
         );
 
         if (res.success) {
+            // La partie est close : le preset ne doit plus pointer dessus
+            resetPreset();
             onClose();
             router.push('/');
         } else {
@@ -135,10 +147,8 @@ export default function EndGameModal({
                         Finished At:
                         <input
                             type="datetime-local"
-                            value={new Date(finishedAt).toISOString().slice(0, 16)}
-                            onChange={(e) =>
-                                setFinishedAt(new Date(e.target.value).toISOString())
-                            }
+                            value={finishedAt}
+                            onChange={(e) => setFinishedAt(e.target.value)}
                         />
                     </label>
 

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useToastStore from "@/stores/useToastStore.js";
+import { toDatetimeLocalValue } from "@/utils/date.utils.js";
 import {
     faCalendar,
     faClock,
@@ -17,11 +18,6 @@ import {
     faSave,
     faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-
-const toLocalDatetimeString = (date) => {
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
 
 export default function EditGamePage() {
     const { id } = useParams();
@@ -67,7 +63,7 @@ export default function EditGamePage() {
                 setFormData({
                     name: data.game.name || "",
                     dateStart: data.game.dateStart
-                        ? toLocalDatetimeString(new Date(data.game.dateStart))
+                        ? toDatetimeLocalValue(new Date(data.game.dateStart))
                         : "",
                     realStart: data.game.realStart
                         ? (() => { const d = new Date(data.game.realStart); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; })()

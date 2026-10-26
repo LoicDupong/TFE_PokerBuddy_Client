@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
 
 export default function PresetForm() {
-    const { preset, setPreset } = usePresetStore();
+    const { preset, setPreset, resetPreset } = usePresetStore();
     const router = useRouter();
     const [playerError, setPlayerError] = useState(null);
 
@@ -52,13 +52,15 @@ export default function PresetForm() {
                         players,
                         maxPlayers: players.length,
                     };
+                    // Repartir d'un preset vide : rien ne doit rester de la partie précédente
+                    resetPreset();
                     setPreset(presetData);
                 }
             } catch (err) {
                 console.error("Error loading game preset:", err);
             }
         })();
-    }, [initialGameId, setPreset]);
+    }, [initialGameId, setPreset, resetPreset]);
 
     const handleChange = (e) => {
         const { name, type, value, checked } = e.target;
@@ -158,6 +160,18 @@ export default function PresetForm() {
             <h2>
                 Game <span className="red">Preset</span>
             </h2>
+
+            {/* Preset encore lié à une partie (ex: retour via "Edit" depuis le manager) */}
+            {preset.gameId && !initialGameId && (
+                <div className="form__row">
+                    <p className="gray">
+                        Linked to the game <strong>{preset.title}</strong>: results will be saved to it.
+                    </p>
+                    <button type="button" className="btn btn--small" onClick={resetPreset}>
+                        Start a free session instead
+                    </button>
+                </div>
+            )}
 
             {/* Title */}
             <div className="form__row">

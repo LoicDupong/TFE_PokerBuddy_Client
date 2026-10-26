@@ -113,7 +113,19 @@ export default function GameDetailsPage() {
   );
 
   if (game.status === "finished") {
-    return <PreviousGameDetails />;
+    // Partie close sans résultats (ancien passage auto après 24 h) : l'hôte peut encore les saisir
+    const canSubmitResults = user.id === game.host.id && (game.results?.length ?? 0) === 0;
+    return (
+      <PreviousGameDetails
+        actions={canSubmitResults && (
+          <div className="btn__container">
+            <div className="btn btn--edit" onClick={() => router.push(`/manager/preset?gameId=${game.id}`)}>
+              <FontAwesomeIcon icon={faDice} /> Submit results
+            </div>
+          </div>
+        )}
+      />
+    );
   }
 
   if (game.status === "pending") {

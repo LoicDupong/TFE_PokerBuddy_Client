@@ -19,6 +19,10 @@ import Image from "next/image";
 
 import EndGameModal from "@/features/game/end-game-modal.jsx";
 
+// Références stables : un nouveau [] à chaque tick du timer réinitialisait le classement de la modale
+const NO_PLAYERS = [];
+const NO_PAYOUT = [];
+
 export default function GameManager() {
     const { preset } = usePresetStore();
     const router = useRouter();
@@ -186,8 +190,8 @@ export default function GameManager() {
             {showEndModal && (
                 <EndGameModal
                     gameId={preset.gameId} // ⚡ il faut que ton preset contienne gameId
-                    players={preset.players || []}
-                    payoutDistribution={preset.payoutDistribution || []}
+                    players={preset.players ?? NO_PLAYERS}
+                    payoutDistribution={preset.payoutDistribution ?? NO_PAYOUT}
                     buyIn={preset.buyIn || 0}
                     onClose={() => setShowEndModal(false)}
                 />

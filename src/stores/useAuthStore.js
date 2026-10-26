@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import api from "../utils/api"; // axios setup
 import { decodeTokenPayload } from "../utils/jwt.utils";
+import usePresetStore from "./usePresetStore";
+import useNotificationStore from "./useNotificationStore";
 
 const useAuthStore = create((set, get) => ({
   user: null,
@@ -70,7 +72,9 @@ const useAuthStore = create((set, get) => ({
 
     try {
       const res = await api.get("/auth/me");
-      set({ user: res.data.user });
+      // Le serveur renvoie un token renouvelé (session glissante de 7 jours)
+      if (res.data.token) localStorage.setItem("token", res.data.token);
+      set({ user: res.data.user, token: res.data.token ?? token });
     } catch (error) {
       // 401 → déjà déconnecté par l'intercepteur ; erreur réseau → on garde la session
       console.error("FetchMe error:", error);
@@ -80,6 +84,9 @@ const useAuthStore = create((set, get) => ({
   // Déconnexion
   logout: () => {
     localStorage.removeItem("token");
+    // Rien ne doit rester pour le prochain utilisateur de l'appareil (partie liée au preset, notifs)
+    usePresetStore.getState().resetPreset();
+    useNotificationStore.setState({ notifications: [], unreadCount: 0 });
     set({ user: null, token: null, isReady: true });
   },
 }));

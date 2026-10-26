@@ -9,7 +9,8 @@ import { useParams } from "next/navigation.js";
 import { useEffect, useState } from "react";
 import PreviousGamesSkeleton from "./previous-games-skeleton.jsx";
 
-export default function PreviousGameDetails() {
+// actions : boutons affichés sous le titre (ex: "Submit results" pour l'hôte)
+export default function PreviousGameDetails({ actions = null }) {
   const { id } = useParams();
   const [game, setGame] = useState(null);
 
@@ -33,6 +34,7 @@ export default function PreviousGameDetails() {
     <>
       <h1>Game Details</h1>
       <div className="divider"></div>
+      {actions}
       <div className="card">
         <div className="card__header">
           <h3 className="title title--card">{game.name}</h3>
