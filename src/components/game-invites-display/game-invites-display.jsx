@@ -4,26 +4,36 @@ import { faCheck, faClock, faEye, faLocationDot, faXmark } from "@fortawesome/fr
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import gameInviteService from "@/services/gameInvite.service.js";
+import useToastStore from "@/stores/useToastStore.js";
+import { getLocalDayBounds } from "@/utils/date.utils.js";
+import { inviteResponseToast } from "@/utils/game.utils.js";
 import Link from "next/link.js";
 
 export default function GameInvitesDisplay({ onAccept }) {
     const [invites, setInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
+    const { showToast } = useToastStore();
 
     useEffect(() => {
-        gameInviteService.getMyInvites().then((data) => setInvites(data || []));
+        // Les parties du jour ont leurs boutons sur leur carte dans "Today's Games"
+        const { dayStart, dayEnd } = getLocalDayBounds();
+        const isToday = (i) => i.dateStart >= dayStart && i.dateStart < dayEnd;
+        gameInviteService.getMyInvites().then((data) => setInvites((data || []).filter((i) => !isToday(i))));
     }, []);
 
     if (invites.length === 0) return null;
 
-    const handleRespond = async (inviteId, action) => {
+    const handleRespond = async (invite, action) => {
         if (actingId) return;
-        setActingId(inviteId);
-        const res = await gameInviteService.respond(inviteId, action);
+        setActingId(invite.inviteId);
+        const res = await gameInviteService.respond(invite.inviteId, action);
         setActingId(null);
         if (res.success) {
-            setInvites((prev) => prev.filter((i) => i.inviteId !== inviteId));
+            setInvites((prev) => prev.filter((i) => i.inviteId !== invite.inviteId));
+            showToast(...inviteResponseToast(action, invite.gameName));
             if (action === "accepted") onAccept?.();
+        } else {
+            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 
@@ -51,14 +61,14 @@ export default function GameInvitesDisplay({ onAccept }) {
                                 <button
                                     className="btn btn--accept"
                                     disabled={!!actingId}
-                                    onClick={() => handleRespond(invite.inviteId, "accepted")}
+                                    onClick={() => handleRespond(invite, "accepted")}
                                 >
                                     <FontAwesomeIcon icon={faCheck} />
                                 </button>
                                 <button
                                     className="btn btn--decline"
                                     disabled={!!actingId}
-                                    onClick={() => handleRespond(invite.inviteId, "refused")}
+                                    onClick={() => handleRespond(invite, "refused")}
                                 >
                                     <FontAwesomeIcon icon={faXmark} />
                                 </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
 import usePresetStore from "@/stores/usePresetStore";
@@ -24,32 +24,33 @@ export default function EndGameModal({
 }) {
     const router = useRouter();
     const resetPreset = usePresetStore((state) => state.resetPreset);
+    const setPreset = usePresetStore((state) => state.setPreset);
+    const resultsDraft = usePresetStore((state) => state.preset.resultsDraft);
     // Valeur brute de l'input (heure locale) ; convertie en ISO seulement à l'envoi
     const [finishedAt, setFinishedAt] = useState(() => toDatetimeLocalValue(new Date()));
-    const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const prizePool = buyIn * (players?.length || 0);
 
     // 🔹 Pré-remplissage des prizes
-    useEffect(() => {
-        if (!players || players.length === 0) return;
+    const prefilled = useMemo(() => players.map((p, idx) => {
+        const dist = payoutDistribution.find((d) => d.place === idx + 1);
+        const percent = dist ? dist.percent : 0;
+        return {
+            gamePlayerId: p.id,
+            name: p.user ? p.user.username : p.name,
+            prize: Math.round((prizePool * percent) / 100),
+        };
+    }), [players, payoutDistribution, prizePool]);
 
-        const prefilled = players.map((p, idx) => {
-            const dist = payoutDistribution.find((d) => d.place === idx + 1);
-            const percent = dist ? dist.percent : 0;
-            return {
-                gamePlayerId: p.id,
-                name: p.user ? p.user.username : p.name,
-                prize: Math.round((prizePool * percent) / 100),
-            };
-        });
+    // Classement en cours gardé dans le preset (localStorage) : fermer la modale ou recharger
+    // la page ne le remet plus à zéro. Il repart du pré-remplissage si les joueurs, le buy-in
+    // ou la répartition changent entre-temps.
+    const draftKey = JSON.stringify([prefilled.map((r) => [r.gamePlayerId, r.name]).sort(), prizePool, payoutDistribution]);
+    const results = resultsDraft?.key === draftKey ? resultsDraft.results : prefilled;
+    const setResults = (next) => setPreset({ resultsDraft: { key: draftKey, results: next } });
 
-        setResults(prefilled);
-    }, [players, payoutDistribution, prizePool]);
-
-    // Gestion drag & drop
     // Gestion drag & drop
     const handleDragEnd = (result) => {
         if (!result.destination) return;
@@ -73,9 +74,7 @@ export default function EndGameModal({
 
     // Modifier un prize manuellement
     const handlePrizeChange = (index, value) => {
-        setResults((prev) =>
-            prev.map((r, i) => (i === index ? { ...r, prize: Number(value) } : r))
-        );
+        setResults(results.map((r, i) => (i === index ? { ...r, prize: Number(value) } : r)));
     };
 
     const totalPrizes = results.reduce((sum, r) => sum + (Number(r.prize) || 0), 0);

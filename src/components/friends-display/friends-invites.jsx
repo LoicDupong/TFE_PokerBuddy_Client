@@ -30,14 +30,17 @@ export default function FriendInviteDisplay({ onAccept }) {
         })();
     }, []);
 
-    const handleRespond = async (inviteId, response) => {
+    const handleRespond = async (invite, response) => {
         if (loadingId) return;
-        setLoadingId(inviteId);
-        const result = await friendService.respond(inviteId, response);
+        setLoadingId(invite.id);
+        const result = await friendService.respond(invite.id, response);
         setLoadingId(null);
         if (result.success) {
-            setInvites(prev => prev.filter(invite => invite.id !== inviteId));
-            if (response === "accept" && onAccept) onAccept();
+            setInvites(prev => prev.filter((i) => i.id !== invite.id));
+            if (response === "accept") {
+                showToast(`✅ You are now friends with ${invite.User.username}!`, "success", 5000);
+                onAccept?.();
+            }
         } else {
             showToast(result.errorMessage?.[0] || "Something went wrong, please try again.");
         }
@@ -77,14 +80,14 @@ export default function FriendInviteDisplay({ onAccept }) {
                                     <button
                                         className="btn btn--accept"
                                         disabled={loadingId === invite.id}
-                                        onClick={() => handleRespond(invite.id, "accept")}>
+                                        onClick={() => handleRespond(invite, "accept")}>
                                         <FontAwesomeIcon icon={faCheck} />
                                     </button>
 
                                     <button
                                         className="btn btn--decline"
                                         disabled={loadingId === invite.id}
-                                        onClick={() => handleRespond(invite.id, "decline")}>
+                                        onClick={() => handleRespond(invite, "decline")}>
                                         <FontAwesomeIcon icon={faXmark} />
                                     </button>
                                 </div>

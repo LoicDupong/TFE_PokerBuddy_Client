@@ -2,7 +2,7 @@
 
 import gameService from "@/services/game.service.js";
 import { shortDateTime } from "@/utils/date.utils.js";
-import { currencySymbol, getPayoutAmount, getPrizePool } from "@/utils/game.utils.js";
+import { currencySymbol, getPayouts, getPrizePool } from "@/utils/game.utils.js";
 import { faComment, faCrown, faDollarSign, faFlagCheckered, faHourglassEnd, faHourglassStart, faMoneyCheckDollar, faRankingStar, faSackDollar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
@@ -32,6 +32,7 @@ export default function PreviousGameDetails({ actions = null }) {
   const winner = game.results?.find(r => r.rank === 1)?.player;
   // Gains réellement distribués (ou estimation si les résultats ne sont pas encore saisis)
   const prizePool = getPrizePool(game);
+  const payouts = getPayouts(game, prizePool);
   const cur = currencySymbol(game.currency);
 
   return (
@@ -60,11 +61,11 @@ export default function PreviousGameDetails({ actions = null }) {
             <div className="divider"></div>
             <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}{cur}</p>
             <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {prizePool}{cur}</p>
-            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
+            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {payouts.length || game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
             <ul>
-              {(game.payoutDistribution || []).map((p) => (
-                <li key={p.place}>{p.place}. {getPayoutAmount(prizePool, p.percent)}{cur}</li>
+              {payouts.map((p) => (
+                <li key={p.place}>{p.place}. {p.amount}{cur}</li>
               ))}
             </ul>
           </div>

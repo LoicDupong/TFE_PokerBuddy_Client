@@ -1,8 +1,10 @@
 "use client";
 
 import useNotificationStore from "@/stores/useNotificationStore";
+import useToastStore from "@/stores/useToastStore";
 import friendService from "@/services/friend.service";
 import gameInviteService from "@/services/gameInvite.service";
+import { inviteResponseToast } from "@/utils/game.utils";
 import { faBell, faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -13,6 +15,7 @@ export default function NotificationsPage() {
     const [friendInvites, setFriendInvites] = useState([]);
     const [gameInvites, setGameInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
+    const { showToast } = useToastStore();
 
     // Fetch notifications and mark all read on mount
     useEffect(() => {
@@ -32,23 +35,29 @@ export default function NotificationsPage() {
         }
     }, [notifications]);
 
-    const handleFriendRespond = async (inviteId, action) => {
+    const handleFriendRespond = async (invite, action) => {
         if (actingId) return;
-        setActingId(inviteId);
-        const res = await friendService.respond(inviteId, action);
+        setActingId(invite.id);
+        const res = await friendService.respond(invite.id, action);
         setActingId(null);
         if (res.success) {
-            setFriendInvites((prev) => prev.filter((i) => i.id !== inviteId));
+            setFriendInvites((prev) => prev.filter((i) => i.id !== invite.id));
+            if (action === "accept") showToast(`✅ You are now friends with ${invite.User.username}!`, "success", 5000);
+        } else {
+            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 
-    const handleGameRespond = async (inviteId, action) => {
+    const handleGameRespond = async (invite, action) => {
         if (actingId) return;
-        setActingId(inviteId);
-        const res = await gameInviteService.respond(inviteId, action);
+        setActingId(invite.inviteId);
+        const res = await gameInviteService.respond(invite.inviteId, action);
         setActingId(null);
         if (res.success) {
-            setGameInvites((prev) => prev.filter((i) => i.inviteId !== inviteId));
+            setGameInvites((prev) => prev.filter((i) => i.inviteId !== invite.inviteId));
+            showToast(...inviteResponseToast(action, invite.gameName));
+        } else {
+            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
         }
     };
 
@@ -65,14 +74,14 @@ export default function NotificationsPage() {
                     <button
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
-                        onClick={() => handleFriendRespond(invite.id, "accept")}
+                        onClick={() => handleFriendRespond(invite, "accept")}
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
                     <button
                         className="btn btn--small"
                         disabled={!!actingId}
-                        onClick={() => handleFriendRespond(invite.id, "decline")}
+                        onClick={() => handleFriendRespond(invite, "decline")}
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>
@@ -92,14 +101,14 @@ export default function NotificationsPage() {
                     <button
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
-                        onClick={() => handleGameRespond(invite.inviteId, "accepted")}
+                        onClick={() => handleGameRespond(invite, "accepted")}
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
                     <button
                         className="btn btn--small"
                         disabled={!!actingId}
-                        onClick={() => handleGameRespond(invite.inviteId, "refused")}
+                        onClick={() => handleGameRespond(invite, "refused")}
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>

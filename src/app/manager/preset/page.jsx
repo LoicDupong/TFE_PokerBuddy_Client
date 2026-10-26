@@ -280,6 +280,13 @@ export default function PresetForm() {
                                 handlePlayerChange(player.id, e.target.value)
                             }
                         />
+                        <button
+                            type="button"
+                            className="btn btn--small btn-add"
+                            onClick={() => handleRemovePlayer(player.id)}
+                        >
+                            <FontAwesomeIcon icon={faTrash} />
+                        </button>
                         {player.status === "pending" && (
                             <span
                                 className="player__status player__status--pending"
@@ -288,13 +295,6 @@ export default function PresetForm() {
                                 pending
                             </span>
                         )}
-                        <button
-                            type="button"
-                            className="btn btn--small btn-add"
-                            onClick={() => handleRemovePlayer(player.id)}
-                        >
-                            <FontAwesomeIcon icon={faTrash} />
-                        </button>
                     </div>
                 ))}
                 <button

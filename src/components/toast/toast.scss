@@ -9,7 +9,10 @@
   font-weight: 500;
   z-index: 9999;
   cursor: pointer;
-  white-space: nowrap;
+  // Largeur du texte, mais retour à la ligne sur mobile (nom de partie long)
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
   animation: toast-in 0.2s ease;
 
   &--error {
@@ -22,6 +25,12 @@
     background-color: #0d2e1a;
     border: 1px solid #22c55e;
     color: #22c55e;
+  }
+
+  &--info {
+    background-color: var(--primary-color);
+    border: 1px solid var(--secondary-text);
+    color: var(--primary-text);
   }
 }
 

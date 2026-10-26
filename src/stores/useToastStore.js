@@ -4,11 +4,12 @@ let hideTimer = null;
 
 const useToastStore = create((set) => ({
   toast: null,
-  showToast: (message, type = "error") => {
+  // type : "error" | "success" | "info" ; duration en ms
+  showToast: (message, type = "error", duration = 3500) => {
     // Un nouveau toast relance le délai (sinon le timer du précédent l'effaçait trop tôt)
     clearTimeout(hideTimer);
     set({ toast: { message, type } });
-    hideTimer = setTimeout(() => set({ toast: null }), 3500);
+    hideTimer = setTimeout(() => set({ toast: null }), duration);
   },
   clearToast: () => {
     clearTimeout(hideTimer);

@@ -17,7 +17,6 @@ export default function ProfileByIdPage() {
   const [user, setUser] = useState(null);
   const [notFound, setNotFound] = useState(false);
 
-  const [message, setMessage] = useState("");
   const [friendStatus, setFriendStatus] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -35,7 +34,6 @@ export default function ProfileByIdPage() {
     setUser(null);
     setNotFound(false);
     setFriendStatus(null);
-    setMessage("");
 
     (async () => {
       const data = await userService.getUserById(id);
@@ -59,27 +57,23 @@ export default function ProfileByIdPage() {
   if (!user) return <p>Loading...</p>;
 
 
+  // Retour en popup : une ligne sous le bouton passait inaperçue
   async function handleAddFriend() {
-    try {
-      const res = await friendService.sendRequest(id);
-      if (res.success) {
-        // S'il m'avait déjà envoyé une demande, le serveur l'accepte directement
-        if (res.data.invite?.status === "accepted") {
-          setMessage("✅ You are now friends!");
-          setFriendStatus("friends");
-        } else {
-          setMessage("✅ Friend request sent !");
-          setFriendStatus("sent");
-        }
-      } else if (/already exists/i.test(res.errorMessage?.[0] ?? "")) {
-        setMessage("Friend request already sent.");
-        setFriendStatus("sent");
+    const res = await friendService.sendRequest(id);
+    if (res.success) {
+      // S'il m'avait déjà envoyé une demande, le serveur l'accepte directement
+      if (res.data.invite?.status === "accepted") {
+        showToast(`✅ You are now friends with ${user.username}!`, "success", 5000);
+        setFriendStatus("friends");
       } else {
-        setMessage(`❌ ${res.errorMessage?.[0] || "Friend request failed"}`);
+        showToast("✅ Friend request sent!", "success", 5000);
+        setFriendStatus("sent");
       }
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Error sending friend request");
+    } else if (/already exists/i.test(res.errorMessage?.[0] ?? "")) {
+      showToast("Friend request already sent.", "info", 5000);
+      setFriendStatus("sent");
+    } else {
+      showToast(res.errorMessage?.[0] || "Friend request failed");
     }
   }
 
@@ -137,7 +131,7 @@ export default function ProfileByIdPage() {
                 <FontAwesomeIcon icon={faUserPlus} /> Add Friend
               </div>
             )}
-            {message && <p>{message}</p>}
+            {friendStatus === "sent" && <p className="gray user__request">Friend request sent</p>}
           </div>
         </div>
       </section>

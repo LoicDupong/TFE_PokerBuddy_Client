@@ -186,6 +186,11 @@ input[readonly] {
         .btn{
             margin: 0;
         }
+
+        // Centré sur la ligne au lieu d'être étiré à la hauteur de l'input
+        .player__status {
+            align-self: center;
+        }
     }
 
 
