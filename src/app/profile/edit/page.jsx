@@ -3,6 +3,7 @@
 import userService from "@/services/user.service.js";
 import { serverUrl } from "@/utils/media.js";
 import useToastStore from "@/stores/useToastStore.js";
+import useAuthStore from "@/stores/useAuthStore.js";
 import { faCheck, faUser, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ export default function EditProfilePage() {
     const [success, setSuccess] = useState(false);
     const [fileError, setFileError] = useState(null);
     const { showToast } = useToastStore();
+    const setAuth = useAuthStore((state) => state.setAuth);
     const router = useRouter();
 
     useEffect(() => {
@@ -54,6 +56,8 @@ export default function EditProfilePage() {
         e.preventDefault();
         const res = await userService.updateMe(formData);
         if (res.success) {
+            // Nouveau pseudo : le token renvoyé le contient, l'accueil et les notifs l'utilisent
+            if (res.data.token) setAuth(res.data.user, res.data.token);
             setSuccess(true);
 
             setTimeout(() => {

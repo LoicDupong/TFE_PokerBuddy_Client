@@ -5,8 +5,8 @@ const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-// 👉 Debug : affiche la baseURL en console quand ton app démarre
-console.log("📡 API baseURL:", api.defaults.baseURL);
+// Pages réservées aux membres : une session expirée y renvoie vers le login
+const PROTECTED_PATHS = ["/games", "/profile", "/notifications", "/leaderboard"];
 
 // Ajout du JWT si dispo
 api.interceptors.request.use((config) => {
@@ -28,6 +28,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !isAuthEndpoint) {
       useAuthStore.getState().logout();
+
+      // Sinon la page reste bloquée sur "Loading..." ; on revient ici après la reconnexion
+      const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+      if (PROTECTED_PATHS.some((path) => pathname.startsWith(path))) {
+        window.location.assign(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+      }
     }
 
     return Promise.reject(error);

@@ -1,11 +1,13 @@
 "use client";
 
 import userService from "@/services/user.service.js";
-import { faXmark, faUser, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { serverUrl } from "@/utils/media.js";
+import { faXmark, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
-export default function GameInvite({ invites, setInvites, onClose, onConfirm }) {
+// invitedIds : amis déjà dans la partie (affichés "Invited", non sélectionnables)
+export default function GameInvite({ invites, setInvites, onClose, onConfirm, invitedIds = [] }) {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -75,25 +77,30 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm }) 
                 <div className="section section__friends">
                     <h3>Your friends</h3>
                     <div className="cards cards--friends">
-                        {user.friends.map((f) => (
-                            <div
-                                key={f.id}
-                                className={`card user user--friend ${invites.friends.some((sf) => sf.id === f.id) ? "user--selected" : ""
-                                    }`}
-                                onClick={() => toggleFriend(f)}
-                            >
-                                <div className="user__avatar user--friend__avatar">
-                                    {f.avatar ? (
-                                        <img src={f.avatar} alt={f.username} />
-                                    ) : (
-                                        <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
-                                    )}
+                        {user.friends.map((f) => {
+                            const alreadyInvited = invitedIds.includes(f.id);
+                            return (
+                                <div
+                                    key={f.id}
+                                    className={`card user user--friend ${invites.friends.some((sf) => sf.id === f.id) ? "user--selected" : ""
+                                        }`}
+                                    style={alreadyInvited ? { opacity: 0.5, cursor: "default" } : undefined}
+                                    onClick={alreadyInvited ? undefined : () => toggleFriend(f)}
+                                >
+                                    <div className="user__avatar user--friend__avatar">
+                                        {f.avatar ? (
+                                            <img src={serverUrl(f.avatar)} alt={f.username} />
+                                        ) : (
+                                            <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
+                                        )}
+                                    </div>
+                                    <div className="user__infos">
+                                        <h2 className="title title--friend">{f.username}</h2>
+                                        {alreadyInvited && <small className="gray">Invited</small>}
+                                    </div>
                                 </div>
-                                <div className="user__infos">
-                                    <h2 className="title title--friend">{f.username}</h2>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 

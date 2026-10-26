@@ -12,6 +12,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import GameInvite from "@/features/invite/game-invite.jsx";
 import gameInviteService from "@/services/gameInvite.service.js";
+import useToastStore from "@/stores/useToastStore.js";
 
 export default function GameDetailsPage() {
   const { id } = useParams();
@@ -21,6 +22,9 @@ export default function GameDetailsPage() {
   const [inviteCode, setInviteCode] = useState(null);
   const [copied, setCopied] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  // Incrémenté après des invitations : recharge le détail (liste des joueurs)
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { showToast } = useToastStore();
   const user = useAuthStore((state) => state.user);
   const isReady = useAuthStore((state) => state.isReady);
   const router = useRouter();
@@ -54,14 +58,25 @@ export default function GameDetailsPage() {
   if (!user) return null;
 
   const handleInviteConfirm = async () => {
+    const failed = [];
     for (const f of invites.friends) {
-      await gameInviteService.invite(id, { userId: f.id });
+      const res = await gameInviteService.invite(id, { userId: f.id });
+      if (!res.success) failed.push(`${f.name}: ${res.errorMessage[0]}`);
     }
     for (const g of invites.guests) {
-      await gameInviteService.invite(id, { guestName: g });
+      const res = await gameInviteService.invite(id, { guestName: g });
+      if (!res.success) failed.push(`${g}: ${res.errorMessage[0]}`);
     }
     setShowInviteModal(false);
     setInvites({ friends: [], guests: [] });
+
+    if (failed.length) showToast(failed.length === 1 ? failed[0] : `${failed.length} invites failed (${failed[0]})`);
+    else showToast("Invitations sent", "success");
+
+    // Recharge la partie : les nouveaux invités apparaissent dans la liste
+    const data = await gameService.getById(id);
+    if (data?.game) setGame(data.game);
+    setRefreshKey((k) => k + 1);
   };
 
   const handleGenerateCode = async () => {
@@ -148,13 +163,14 @@ export default function GameDetailsPage() {
             </div>
           </div>
           <ShareLink />
-          <UpcomingGamesDetails />
+          <UpcomingGamesDetails key={refreshKey} />
           {showInviteModal && (
             <GameInvite
               invites={invites}
               setInvites={setInvites}
               onClose={() => setShowInviteModal(false)}
               onConfirm={handleInviteConfirm}
+              invitedIds={game.playerLinks.map((p) => p.userId).filter(Boolean)}
             />
           )}
         </>

@@ -15,6 +15,7 @@ export default function ProfileByIdPage() {
   const { id } = useParams();
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
   const [message, setMessage] = useState("");
   const [friendStatus, setFriendStatus] = useState(null);
@@ -30,9 +31,19 @@ export default function ProfileByIdPage() {
   }, [id, currentUserId, router]);
 
   useEffect(() => {
+    // Nouveau profil : rien ne doit rester du profil précédent (navigation entre profils)
+    setUser(null);
+    setNotFound(false);
+    setFriendStatus(null);
+    setMessage("");
+
     (async () => {
       const data = await userService.getUserById(id);
-      if (data) setUser(data.user);
+      if (!data?.user) {
+        setNotFound(true);
+        return;
+      }
+      setUser(data.user);
 
       const friendData = await friendService.getFriends();
       if (friendData?.friends) {
@@ -44,6 +55,7 @@ export default function ProfileByIdPage() {
     })();
   }, [id]);
 
+  if (notFound) return <p>User not found.</p>;
   if (!user) return <p>Loading...</p>;
 
 
@@ -51,7 +63,16 @@ export default function ProfileByIdPage() {
     try {
       const res = await friendService.sendRequest(id);
       if (res.success) {
-        setMessage("✅ Friend request sent !");
+        // S'il m'avait déjà envoyé une demande, le serveur l'accepte directement
+        if (res.data.invite?.status === "accepted") {
+          setMessage("✅ You are now friends!");
+          setFriendStatus("friends");
+        } else {
+          setMessage("✅ Friend request sent !");
+          setFriendStatus("sent");
+        }
+      } else if (/already exists/i.test(res.errorMessage?.[0] ?? "")) {
+        setMessage("Friend request already sent.");
         setFriendStatus("sent");
       } else {
         setMessage(`❌ ${res.errorMessage?.[0] || "Friend request failed"}`);
@@ -90,7 +111,6 @@ export default function ProfileByIdPage() {
             </div>
             <div className="user__infos">
               <h2 className="title title--user red">{user.username}</h2>
-              <p className="subtitle subtitle--email">{user.email}</p>
             </div>
             <div className="user__description">
               <p>{user.description || "No description provided."}</p>

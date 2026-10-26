@@ -29,7 +29,8 @@ const userService = {
     try {
       const form = new FormData();
       if (formData.username) form.append("username", formData.username);
-      if (formData.description) form.append("description", formData.description);
+      // Toujours envoyée : une bio vide efface l'ancienne
+      if (formData.description !== undefined) form.append("description", formData.description);
       if (formData.avatar) form.append("avatar", formData.avatar); // File object
 
       const res = await api.patch(`/user/me`, form, {
