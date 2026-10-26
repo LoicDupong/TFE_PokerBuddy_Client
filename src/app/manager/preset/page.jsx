@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { goToLevel } from "@/utils/timer.utils.js";
+import { currencySymbol } from "@/utils/game.utils.js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
@@ -43,6 +44,7 @@ export default function PresetForm() {
                         gameId: g.id, // ⚡ stocke l'ID de la game dans le preset
                         title: g.name,
                         buyIn: g.buyIn,
+                        currency: g.currency || "EUR",
                         chipsPerPlayer: g.chipsPerPlayer || 0,
                         smallBlind: g.smallBlind,
                         bigBlind: g.bigBlind,
@@ -153,6 +155,12 @@ export default function PresetForm() {
         const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i);
         if (hasDuplicates) {
             setPlayerError("Two or more players have the same name. Please use unique names.");
+            return;
+        }
+
+        // Ex : 3 places → 33/33/33 = 99 % ; les gains ne correspondraient pas au prize pool
+        if ((preset.payoutDistribution || []).length > 0 && totalPercent !== 100) {
+            setPlayerError(`Prize distribution must total 100% (currently ${totalPercent}%).`);
             return;
         }
 
@@ -341,7 +349,7 @@ export default function PresetForm() {
                                         ((preset.prizePool || 0) * p.percent) /
                                         100
                                     ).toFixed(1)}{" "}
-                                    €)
+                                    {currencySymbol(preset.currency)})
                                 </small>
                             </label>
 

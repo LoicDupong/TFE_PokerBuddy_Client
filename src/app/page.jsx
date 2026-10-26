@@ -1,13 +1,11 @@
 "use client";
 
-import styles from "./page.module.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faBook, faUser, faUserPlus, faDice } from '@fortawesome/free-solid-svg-icons';
 import Link from "next/link.js";
 import PreviousGamesDisplay from "@/components/previous-games-display/previous-games-display.jsx";
 import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-games-display.jsx";
 import LeaderboardDisplay from "@/components/leaderboard-display/leaderboard-display.jsx";
-import PushNotificationManager from "@/components/pwa/pushNotificationManager.jsx";
 import InstallPrompt from "@/components/pwa/installPrompt.jsx";
 import useAuthStore from "@/stores/useAuthStore.js";
 import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";

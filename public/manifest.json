@@ -1,6 +1,9 @@
 {
   "name": "PokerBuddy",
   "short_name": "PkBuddy",
+  "description": "Organize, run and track your home poker nights",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

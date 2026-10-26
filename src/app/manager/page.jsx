@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { NEW_TIMER, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
+import { currencySymbol } from "@/utils/game.utils.js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link.js";
@@ -121,7 +122,7 @@ export default function GameManager() {
                     <strong>Avg Stack:</strong> {avgStack}
                 </p>
                 <p>
-                    <strong>Buy-in:</strong> {preset.buyIn}€
+                    <strong>Buy-in:</strong> {preset.buyIn}{currencySymbol(preset.currency)}
                 </p>
                 {preset.allowRebuys && <p><strong>Rebuys Allowed</strong></p>}
             </div>
@@ -199,6 +200,7 @@ export default function GameManager() {
                     players={preset.players ?? NO_PLAYERS}
                     payoutDistribution={preset.payoutDistribution ?? NO_PAYOUT}
                     buyIn={preset.buyIn || 0}
+                    currency={preset.currency}
                     onClose={() => setShowEndModal(false)}
                 />
             )}

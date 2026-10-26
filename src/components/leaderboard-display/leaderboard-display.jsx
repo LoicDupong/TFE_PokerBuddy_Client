@@ -9,6 +9,7 @@ export default function LeaderboardDisplay({ compact = false }) {
     const [players, setPlayers] = useState([]);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         leaderboardService.getLeaderboard(page, limit).then((data) => {
@@ -16,9 +17,12 @@ export default function LeaderboardDisplay({ compact = false }) {
                 setPlayers(data.players);
                 setPages(data.pages);
             }
+            setLoading(false);
         });
-    }, [page]);
+    }, [page, limit]);
 
+    // "No friends" s'affichait pendant le chargement
+    if (loading) return <p>Loading leaderboard...</p>;
     if (players.length === 0) return <p>No friends with stats yet.</p>;
 
     return (

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faHourglassStart, faLocationDot, faClock, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link.js';
 import gameService from '@/services/game.service.js';
+import { currencySymbol } from '@/utils/game.utils.js';
 import { useEffect, useState } from 'react';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
 
@@ -49,7 +50,7 @@ export default function ActiveGameDisplay() {
                                 <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {g.realStart
                                     ? new Date(g.realStart).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
                                     : "—"}</p>
-                                <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
+                                <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
                                 <Link href={"games/" + g.id}>
                                     <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
                                 </Link>

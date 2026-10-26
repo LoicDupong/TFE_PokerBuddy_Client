@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.scss";
 import "./styles/base/base.scss";
 import "./styles/base/typography.scss";
@@ -24,19 +24,17 @@ import Toast from "@/components/toast/toast.jsx";
 import "../components/toast/toast.scss";
 import AuthInit from "@/components/auth/auth-init.jsx";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Police servie par Next (plus d'@import Google Fonts bloquant dans le SCSS)
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
 });
 
 export const metadata = {
   title: "PokerBuddy | Home Poker Games Manager",
   description: "PokerBuddy your bestfriend to manage home poker games with your bestfriends !",
+  // public/manifest.json n'est pas lié automatiquement par Next : sans ça, pas d'installation PWA sur Android
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }) {
@@ -46,7 +44,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="PokerBuddy" />
       </head>
 
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={roboto.variable}>
         <AuthInit />
         <Header />
         <main>{children}</main>

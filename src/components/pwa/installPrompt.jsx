@@ -15,6 +15,8 @@ export default function InstallPrompt() {
   const [isOpen, setIsOpen] = useState(false)
   const [closing, setClosing] = useState(false)
   const [alreadySeen, setAlreadySeen] = useState(false)
+  // Chrome / Edge (Android, desktop) : installation native proposée par le navigateur
+  const [installEvent, setInstallEvent] = useState(null)
 
   useEffect(() => {
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent))
@@ -28,6 +30,13 @@ export default function InstallPrompt() {
     } else {
       setAlreadySeen(true)
     }
+
+    const onBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setInstallEvent(e)
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
   }, [])
 
   if (isStandalone) return null
@@ -44,6 +53,13 @@ export default function InstallPrompt() {
     setIsOpen(true)
   }
 
+  const handleInstall = async () => {
+    installEvent.prompt()
+    await installEvent.userChoice
+    setInstallEvent(null)
+    handleClose()
+  }
+
   return (
     <>
       {isOpen && (
@@ -58,10 +74,24 @@ export default function InstallPrompt() {
           </div>
 
           <div className="install-popup__content">
+            {/* Instructions selon l'appareil (les instructions iOS s'affichaient pour tout le monde) */}
+            {installEvent ? (
+              <>
+                <p>Install PokerBuddy on your device for quick access.</p>
+                <button className="btn btn--small" onClick={handleInstall}>
+                  <FontAwesomeIcon icon={faPlus} /> Install
+                </button>
+              </>
+            ) : isIOS ? (
               <p>
                 To install this app on your mobile device, tap the share button <FontAwesomeIcon icon={faShareFromSquare} /> and then{' '}
                 <FontAwesomeIcon icon={faPlus} /> Add to Home Screen
               </p>
+            ) : (
+              <p>
+                To install this app, open your browser menu and choose &quot;Install app&quot; or &quot;Add to Home screen&quot;.
+              </p>
+            )}
           </div>
         </div>
       )}

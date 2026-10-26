@@ -2,7 +2,7 @@
 
 import gameService from "@/services/game.service.js";
 import { shortDateTime } from "@/utils/date.utils.js";
-import { getPayoutAmount, getPrizePool } from "@/utils/game.utils.js";
+import { currencySymbol, getPayoutAmount, getPrizePool } from "@/utils/game.utils.js";
 import { faComment, faCrown, faDollarSign, faFlagCheckered, faHourglassEnd, faHourglassStart, faMoneyCheckDollar, faRankingStar, faSackDollar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
@@ -32,6 +32,7 @@ export default function PreviousGameDetails({ actions = null }) {
   const winner = game.results?.find(r => r.rank === 1)?.player;
   // Gains réellement distribués (ou estimation si les résultats ne sont pas encore saisis)
   const prizePool = getPrizePool(game);
+  const cur = currencySymbol(game.currency);
 
   return (
     <>
@@ -57,13 +58,13 @@ export default function PreviousGameDetails({ actions = null }) {
             <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {game.results?.length || game.playerLinks.length}</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
-            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}€</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {prizePool}€</p>
+            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}{cur}</p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {prizePool}{cur}</p>
             <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
             <ul>
               {(game.payoutDistribution || []).map((p) => (
-                <li key={p.place}>{p.place}. {getPayoutAmount(prizePool, p.percent)}€</li>
+                <li key={p.place}>{p.place}. {getPayoutAmount(prizePool, p.percent)}{cur}</li>
               ))}
             </ul>
           </div>
@@ -81,7 +82,7 @@ export default function PreviousGameDetails({ actions = null }) {
                     <li key={r.id}>
                       {r.rank}. {r.player.user?.username || r.player.guestName}
                       {r.rank === 1 && <FontAwesomeIcon icon={faCrown} className="fa-icon" />}
-                      {r.prize > 0 && <span className="gray"> — {r.prize}€</span>}
+                      {r.prize > 0 && <span className="gray"> — {r.prize}{cur}</span>}
                     </li>
                   ))}
               </ul>

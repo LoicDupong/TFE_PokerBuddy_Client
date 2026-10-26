@@ -42,7 +42,8 @@ export default function Navbar() {
     const pathname = usePathname();
     const mobile = 950;
 
-    const [isMobile, setIsMobile] = useState(true);
+    // null tant que la largeur n'est pas connue : évite d'afficher la nav mobile un instant sur desktop
+    const [isMobile, setIsMobile] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
     const [learnOpen, setLearnOpen] = useState(false);
 
@@ -73,6 +74,8 @@ export default function Navbar() {
 
         return () => document.body.classList.remove("no-scroll"); // cleanup
     }, [isOpen]);
+
+    if (isMobile === null) return <nav className="nav" />;
 
     // Desktop
     if (!isMobile) {

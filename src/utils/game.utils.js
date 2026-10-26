@@ -15,6 +15,10 @@ export function getPrizePool(game) {
     return game.buyIn * getConfirmedCount(game);
 }
 
+// Symbole de la devise choisie à la création (tout était affiché en € quelle que soit la devise)
+const CURRENCY_SYMBOLS = { EUR: "€", USD: "$", GBP: "£" };
+export const currencySymbol = (code) => CURRENCY_SYMBOLS[code] ?? "€";
+
 // Part d'une place payée, arrondie au centime
 export function getPayoutAmount(prizePool, percent) {
     return Math.round(prizePool * percent) / 100;

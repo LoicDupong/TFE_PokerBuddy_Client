@@ -55,7 +55,7 @@ const gameService = {
                 data: res.data,
             };
         } catch (error) {
-            console.log(error);
+            console.error("GameService update error:", error.response?.data || error.message);
 
             return {
                 success: false,

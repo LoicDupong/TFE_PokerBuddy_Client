@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
 import usePresetStore from "@/stores/usePresetStore";
 import { toDatetimeLocalValue } from "@/utils/date.utils.js";
+import { currencySymbol } from "@/utils/game.utils.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faGripLines } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -18,6 +19,7 @@ export default function EndGameModal({
     players,
     payoutDistribution = [{ place: 1, percent: 100 }], // ex: [{place:1,percent:70},{place:2,percent:20},{place:3,percent:10}]
     buyIn = 0,
+    currency = "EUR",
     onClose,
 }) {
     const router = useRouter();
@@ -153,13 +155,13 @@ export default function EndGameModal({
                     </label>
 
                     <p style={{ margin: "1rem 0", fontWeight: "bold" }}>
-                        Prize Pool: {prizePool} € — Distributed:{" "}
+                        Prize Pool: {prizePool} {currencySymbol(currency)} — Distributed:{" "}
                         <span
                             style={{
                                 color: totalPrizes === prizePool ? "green" : "red",
                             }}
                         >
-                            {totalPrizes} €
+                            {totalPrizes} {currencySymbol(currency)}
                         </span>
                     </p>
 

@@ -19,8 +19,6 @@ export default function GamesPage() {
     })();
   }, []);
 
-  console.log(stats);
-
 
   if (!stats) {
     return <p>Loading stats...</p>;

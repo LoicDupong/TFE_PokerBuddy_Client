@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
 import { apiUrl } from '@/utils/media.js';
+import { currencySymbol } from '@/utils/game.utils.js';
 
 export default function UpcomingGamesDisplay() {
   const [games, setGames] = useState(null);
@@ -44,7 +45,7 @@ export default function UpcomingGamesDisplay() {
               hour: "2-digit",
               minute: "2-digit",
             })}</p>
-            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}€</p>
+            <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}{currencySymbol(games[0].currency)}</p>
             <div className="card__actions">
               <Link href={"games/" + games[0].id}>
                 <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
@@ -85,7 +86,7 @@ export default function UpcomingGamesDisplay() {
                   })}
                 </p>
                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" />
-                  <span className="gray"> Entry price:</span> {g.buyIn}€
+                  <span className="gray"> Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}
                 </p>
                 <div className="card__actions">
                   <Link href={"games/" + g.id}>
@@ -143,7 +144,7 @@ export default function UpcomingGamesDisplay() {
                 hour: "2-digit",
                 minute: "2-digit",
               })}</p>
-              <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
+              <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
               <div className="card__actions">
                 <Link href={"games/" + g.id}>
                   <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
@@ -161,14 +162,6 @@ export default function UpcomingGamesDisplay() {
           </div>
         )
       })}
-
-
-      {/* // Si + d'une game, affiche le bouton "more" */}
-      {games.length > 1 && (
-        <div className="card card--plus">
-          <p><FontAwesomeIcon icon={faPlus} /> {games.length - 1} more...</p>
-        </div>
-      )}
 
     </div>
   )

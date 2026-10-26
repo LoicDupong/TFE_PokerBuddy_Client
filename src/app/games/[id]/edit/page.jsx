@@ -6,6 +6,7 @@ import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useToastStore from "@/stores/useToastStore.js";
 import { combineDateAndTime, toDatetimeLocalValue } from "@/utils/date.utils.js";
+import { currencySymbol } from "@/utils/game.utils.js";
 import {
     faCalendar,
     faClock,
@@ -277,7 +278,7 @@ export default function EditGamePage() {
                                 }}
                             />
                             {prizePoolValue > 0 && (
-                                <p className="gray">≈ {(prizePoolValue * p.percent / 100).toFixed(2)} €</p>
+                                <p className="gray">≈ {(prizePoolValue * p.percent / 100).toFixed(2)} {currencySymbol(formData.currency)}</p>
                             )}
                         </div>
                     ))}

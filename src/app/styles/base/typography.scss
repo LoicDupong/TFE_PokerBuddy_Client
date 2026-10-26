@@ -1,8 +1,8 @@
 //*  Typography
-@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+// Roboto est chargée par next/font dans layout.jsx (variable --font-roboto)
 
 * {
-  font-family: "Roboto", sans-serif;
+  font-family: var(--font-roboto), "Roboto", sans-serif;
 }
 
 h1 {

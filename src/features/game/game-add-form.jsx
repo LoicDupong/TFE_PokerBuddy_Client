@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { validateSession } from "@/schemas/sessionSchema.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
 import { combineDateAndTime } from "@/utils/date.utils.js";
+import { currencySymbol } from "@/utils/game.utils.js";
 import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -29,6 +30,7 @@ export default function GameAddForm() {
 
     // States pour tes champs
     const [buyIn, setBuyIn] = useState(0);
+    const [currency, setCurrency] = useState("EUR");
     const [maxPlayers, setMaxPlayers] = useState(0);
     const [placesPaid, setPlacesPaid] = useState(2);
     const [payouts, setPayouts] = useState([
@@ -241,7 +243,7 @@ export default function GameAddForm() {
 
                         <div className="form__row">
                             <label>Currency</label>
-                            <select name="currency" defaultValue="EUR">
+                            <select name="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
                                 <option value="EUR">EUR</option>
                                 <option value="USD">USD</option>
                                 <option value="GBP">GBP</option>
@@ -285,7 +287,7 @@ export default function GameAddForm() {
                                 </div>
                                 {prizePoolValue > 0 && (
                                     <p className="gray">
-                                        ≈ {((prizePoolValue * p.percent) / 100).toFixed(2)} €
+                                        ≈ {((prizePoolValue * p.percent) / 100).toFixed(2)} {currencySymbol(currency)}
                                     </p>
                                 )}
                             </div>

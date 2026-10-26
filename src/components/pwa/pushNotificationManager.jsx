@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { subscribeUser, unsubscribeUser, sendNotification } from '@/services/pwa/pwa.service'
+import { subscribeUser, unsubscribeUser } from '@/services/pwa/pwa.service'
 import urlBase64ToUint8Array from '@/utils/urlBase64ToUint8Array.js'
 
 export default function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState(null)
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -38,16 +37,10 @@ export default function PushNotificationManager() {
   }
 
   async function unsubscribeFromPush() {
+    const endpoint = subscription?.endpoint
     await subscription?.unsubscribe()
     setSubscription(null)
-    await unsubscribeUser()
-  }
-
-  async function sendTestNotification() {
-    if (subscription) {
-      await sendNotification(message)
-      setMessage('')
-    }
+    await unsubscribeUser(endpoint)
   }
 
   if (!isSupported) return <p>Push notifications not supported.</p>
@@ -59,13 +52,6 @@ export default function PushNotificationManager() {
         <>
           <p>You are subscribed.</p>
           <button onClick={unsubscribeFromPush}>Unsubscribe</button>
-          <input
-            type="text"
-            placeholder="Enter notification message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <button onClick={sendTestNotification}>Send Test</button>
         </>
       ) : (
         <button onClick={subscribeToPush}>Subscribe</button>
