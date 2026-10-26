@@ -18,6 +18,11 @@ import {
     faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 
+const toLocalDatetimeString = (date) => {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
 export default function EditGamePage() {
     const { id } = useParams();
     const router = useRouter();
@@ -62,10 +67,10 @@ export default function EditGamePage() {
                 setFormData({
                     name: data.game.name || "",
                     dateStart: data.game.dateStart
-                        ? new Date(data.game.dateStart).toISOString().slice(0, 16)
+                        ? toLocalDatetimeString(new Date(data.game.dateStart))
                         : "",
                     realStart: data.game.realStart
-                        ? new Date(data.game.realStart).toISOString().slice(11, 16) // → "20:05"
+                        ? (() => { const d = new Date(data.game.realStart); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; })()
                         : "",
 
                     location: data.game.location || "",
@@ -117,6 +122,7 @@ export default function EditGamePage() {
         e.preventDefault();
         const res = await gameService.update(game.id, {
             ...formData,
+            dateStart: formData.dateStart ? new Date(formData.dateStart).toISOString() : formData.dateStart,
             payoutDistribution: payouts,
             prizePool: prizePoolValue,
         });

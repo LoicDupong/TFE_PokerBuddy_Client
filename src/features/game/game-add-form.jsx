@@ -78,6 +78,10 @@ export default function GameAddForm() {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
+        if (data.dateStart) {
+            data.dateStart = new Date(data.dateStart).toISOString();
+        }
+
         // ✅ Validation avec Zod
         const validation = validateSession(data);
         if (!validation.ok) {
