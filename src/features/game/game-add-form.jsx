@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { validateSession } from "@/schemas/sessionSchema.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
+import { combineDateAndTime } from "@/utils/date.utils.js";
 import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -71,6 +72,12 @@ export default function GameAddForm() {
     );
     const payoutError = totalPercent !== 100;
 
+    // Message d'erreur zod sous le champ concerné
+    const fieldError = (field) => {
+        const message = getFieldError(errorMessage, field);
+        return message && <p className="form__error">{message}</p>;
+    };
+
     async function handleCreateGame(e) {
         e.preventDefault();
         setIsPending(true);
@@ -78,14 +85,21 @@ export default function GameAddForm() {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
+        // Dates converties en ISO ici, dans le fuseau de l'utilisateur (le serveur tourne en UTC)
         if (data.dateStart) {
-            data.dateStart = new Date(data.dateStart).toISOString();
+            const start = new Date(data.dateStart);
+            data.dateStart = start.toISOString();
+            data.realStart = data.realStart ? combineDateAndTime(start, data.realStart) : "";
         }
 
         // ✅ Validation avec Zod
         const validation = validateSession(data);
         if (!validation.ok) {
-            setErrorMessage(validation.errors);
+            // Rappel près du bouton : sur mobile, le champ fautif est souvent hors écran
+            setErrorMessage([
+                ...validation.errors,
+                { field: "form", message: "Some fields are invalid: check the messages above." },
+            ]);
             setIsPending(false);
             return;
         }
@@ -116,11 +130,7 @@ export default function GameAddForm() {
                         <span className="red">*</span>
                     </label>
                     <input name="name" placeholder="Friday Night Poker" defaultValue="" />
-                    {getFieldError(errorMessage, "name") && (
-                        <p className="form__error">
-                            {getFieldError(errorMessage, "name")}
-                        </p>
-                    )}
+                    {fieldError("name")}
                 </div>
 
                 {/* Dates */}
@@ -136,6 +146,7 @@ export default function GameAddForm() {
                             onClick={() => document.getElementById("dateStart").showPicker()}
                         />
                     </div>
+                    {fieldError("dateStart")}
                 </div>
 
                 <div className="form__row input--icon left clickable">
@@ -148,6 +159,7 @@ export default function GameAddForm() {
                             onClick={() => document.getElementById("realStart").showPicker()}
                         />
                     </div>
+                    {fieldError("realStart")}
                 </div>
 
                 {/* Location */}
@@ -161,11 +173,7 @@ export default function GameAddForm() {
                         placeholder="Brussels, at John's place"
                         defaultValue=""
                     />
-                    {getFieldError(errorMessage, "location") && (
-                        <p className="form__error">
-                            {getFieldError(errorMessage, "location")}
-                        </p>
-                    )}
+                    {fieldError("location")}
                 </div>
 
                 {/* Money */}
@@ -188,6 +196,7 @@ export default function GameAddForm() {
                                 value={buyIn}
                                 onChange={(e) => setBuyIn(Number(e.target.value || 0))}
                             />
+                            {fieldError("buyIn")}
                         </div>
 
                         <div className="form__row">
@@ -200,6 +209,7 @@ export default function GameAddForm() {
                                 value={maxPlayers || ""}
                                 onChange={(e) => setMaxPlayers(Number(e.target.value || 0))}
                             />
+                            {fieldError("maxPlayers")}
                         </div>
 
                         <div className="form__row">
@@ -214,6 +224,7 @@ export default function GameAddForm() {
                                 value={placesPaid}
                                 onChange={(e) => setPlacesPaid(Number(e.target.value))}
                             />
+                            {fieldError("placesPaid")}
                         </div>
 
                         <div className="form__row">
@@ -235,6 +246,7 @@ export default function GameAddForm() {
                                 <option value="USD">USD</option>
                                 <option value="GBP">GBP</option>
                             </select>
+                            {fieldError("currency")}
                         </div>
                     </div>
 
@@ -283,6 +295,7 @@ export default function GameAddForm() {
                     <p className={payoutError ? "form__error" : "gray"}>
                         Total: {totalPercent}% {payoutError && " → must be exactly 100%"}
                     </p>
+                    {fieldError("payoutDistribution")}
 
                     <input
                         type="hidden"
@@ -303,12 +316,14 @@ export default function GameAddForm() {
                                 Small Blind <span className="red">*</span>
                             </label>
                             <input type="number" min={1} step="1" name="smallBlind" />
+                            {fieldError("smallBlind")}
                         </div>
                         <div className="form__row">
                             <label>
                                 Big Blind <span className="red">*</span>
                             </label>
                             <input type="number" min={1} step="1" name="bigBlind" />
+                            {fieldError("bigBlind")}
                         </div>
                         <div className="form__row">
                             <label>
@@ -322,6 +337,7 @@ export default function GameAddForm() {
                                 name="levelDuration"
                                 defaultValue="15"
                             />
+                            {fieldError("levelDuration")}
                         </div>
                     </div>
 
@@ -342,6 +358,7 @@ export default function GameAddForm() {
                         placeholder="House rules, snacks, parking, etc."
                         defaultValue=""
                     />
+                    {fieldError("description")}
                 </div>
 
                 {/* Bouton Invite Friends */}
@@ -363,7 +380,6 @@ export default function GameAddForm() {
                     value={JSON.stringify(invites)}
                     readOnly
                 />
-                {console.log(JSON.stringify(invites))}
 
                 <button
                     className="btn btn--full"
@@ -375,11 +391,7 @@ export default function GameAddForm() {
                 </button>
 
                 {/* Erreur globale */}
-                {getFieldError(errorMessage, "form") && (
-                    <p className="form__error">
-                        {getFieldError(errorMessage, "form")}
-                    </p>
-                )}
+                {fieldError("form")}
             </form>
 
             {/* Modal d’invitation */}

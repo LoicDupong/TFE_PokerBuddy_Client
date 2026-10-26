@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import gameService from "@/services/game.service.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useToastStore from "@/stores/useToastStore.js";
-import { toDatetimeLocalValue } from "@/utils/date.utils.js";
+import { combineDateAndTime, toDatetimeLocalValue } from "@/utils/date.utils.js";
 import {
     faCalendar,
     faClock,
@@ -116,9 +116,12 @@ export default function EditGamePage() {
     // confirm save
     const handleConfirm = async (e) => {
         e.preventDefault();
+        const start = formData.dateStart ? new Date(formData.dateStart) : null;
         const res = await gameService.update(game.id, {
             ...formData,
-            dateStart: formData.dateStart ? new Date(formData.dateStart).toISOString() : formData.dateStart,
+            dateStart: start ? start.toISOString() : formData.dateStart,
+            // Heure de table convertie ici, dans le fuseau de l'utilisateur ; vide → null pour l'effacer
+            realStart: start && formData.realStart ? combineDateAndTime(start, formData.realStart) : null,
             payoutDistribution: payouts,
             prizePool: prizePoolValue,
         });

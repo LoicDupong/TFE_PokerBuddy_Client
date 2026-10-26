@@ -1,5 +1,6 @@
 
 import api from "@/utils/api.js";
+import { getLocalDayBounds } from "@/utils/date.utils.js";
 
 const gameService = {
     // 🔹 POST /games
@@ -23,8 +24,10 @@ const gameService = {
     // 🔹 GET /games (toutes les games liées au user connecté)
     getAll: async (filter) => {
         try {
-            const url = filter ? `/games?filter=${filter}` : "/games";
-            const res = await api.get(url);
+            // Bornes du jour local : "today" / "upcoming" / "finished" suivent le fuseau de l'utilisateur
+            const res = await api.get("/games", {
+                params: filter ? { filter, ...getLocalDayBounds() } : {},
+            });
             return res.data;
         } catch (error) {
             console.error("getAllGames error:", error);

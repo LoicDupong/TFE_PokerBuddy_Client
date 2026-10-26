@@ -32,7 +32,8 @@ export default function ActiveGameDetails() {
 
   // Dates
   const timeStart = shortDateTime(game.dateStart);
-  const realStart = shortTime(game.realStart);
+  // shortTime(null) afficherait 01:00 (1er janvier 1970)
+  const realStart = game.realStart ? shortTime(game.realStart) : "—";
 
   return (
     <>

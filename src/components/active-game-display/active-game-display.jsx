@@ -46,10 +46,9 @@ export default function ActiveGameDisplay() {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                 })}</p>
-                                <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {dateStart.toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                })}</p>
+                                <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {g.realStart
+                                    ? new Date(g.realStart).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+                                    : "—"}</p>
                                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}€</p>
                                 <Link href={"games/" + g.id}>
                                     <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
