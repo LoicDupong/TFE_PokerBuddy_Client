@@ -68,7 +68,7 @@ export default function InstallPrompt() {
             <h2>
               <span className="red">Install</span> App
             </h2>
-            <button className="install-popup__close" onClick={handleClose}>
+            <button type="button" className="install-popup__close" onClick={handleClose} aria-label="Close install help">
               <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
@@ -78,7 +78,7 @@ export default function InstallPrompt() {
             {installEvent ? (
               <>
                 <p>Install PokerBuddy on your device for quick access.</p>
-                <button className="btn btn--small" onClick={handleInstall}>
+                <button type="button" className="btn btn--small" onClick={handleInstall}>
                   <FontAwesomeIcon icon={faPlus} /> Install
                 </button>
               </>
@@ -98,8 +98,10 @@ export default function InstallPrompt() {
 
       {/* Bouton flottant toujours présent */}
       <button
+        type="button"
         className="install-help-btn visible"
         onClick={handleOpen}
+        aria-label="How to install the app"
       >
         <FontAwesomeIcon icon={faMobileScreenButton} />
       </button>

@@ -43,6 +43,26 @@ input[type=checkbox] {
 .input__container{
     position: relative;
     width: 100%;
+
+    .input--with-toggle {
+        width: 100%;
+        padding-right: 3rem; // place pour le bouton oeil
+    }
+}
+
+// Bouton afficher/masquer le mot de passe (cible tactile 44px)
+.input__toggle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--secondary-text);
+    cursor: pointer;
 }
 
 .input--icon {
@@ -181,7 +201,15 @@ input[readonly] {
 
     &__addPlayer{
         flex-direction: row;
+        // le badge "pending" passe à la ligne au lieu de déborder du fieldset
+        flex-wrap: wrap;
+        align-items: center;
         margin-bottom: 0.5rem;
+
+        input {
+            flex: 1 1 140px;
+            min-width: 0;
+        }
 
         .btn{
             margin: 0;

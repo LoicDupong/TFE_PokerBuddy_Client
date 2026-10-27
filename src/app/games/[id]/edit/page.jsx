@@ -148,19 +148,19 @@ export default function EditGamePage() {
 
             {/* Name */}
             <div className="form__row">
-                <label>
+                <label htmlFor="name">
                     <FontAwesomeIcon icon={faDiamond} /> Title
                 </label>
-                <input name="name" value={formData.name} onChange={handleChange} />
+                <input id="name" name="name" value={formData.name} onChange={handleChange} />
             </div>
 
             {/* Dates */}
             <div className="form__grid">
                 <div className="form__row">
-                    <label>
+                    <label htmlFor="dateStart">
                         <FontAwesomeIcon icon={faCalendar} /> Date & Time
                     </label>
-                    <input
+                    <input id="dateStart"
                         type="datetime-local"
                         name="dateStart"
                         value={formData.dateStart}
@@ -168,10 +168,10 @@ export default function EditGamePage() {
                     />
                 </div>
                 <div className="form__row">
-                    <label>
+                    <label htmlFor="realStart">
                         <FontAwesomeIcon icon={faClock} /> Table start
                     </label>
-                    <input
+                    <input id="realStart"
                         type="time"
                         name="realStart"
                         value={formData.realStart}
@@ -182,10 +182,10 @@ export default function EditGamePage() {
 
             {/* Location */}
             <div className="form__row">
-                <label>
+                <label htmlFor="location">
                     <FontAwesomeIcon icon={faLocationDot} /> Location
                 </label>
-                <input name="location" value={formData.location} onChange={handleChange} />
+                <input id="location" name="location" value={formData.location} onChange={handleChange} />
             </div>
 
             {/* Money */}
@@ -196,10 +196,10 @@ export default function EditGamePage() {
 
                 <div className="form__grid">
                     <div className="form__row">
-                        <label>
+                        <label htmlFor="buyIn">
                             <FontAwesomeIcon icon={faDollarSign} /> Buy-in
                         </label>
-                        <input
+                        <input id="buyIn"
                             type="number"
                             name="buyIn"
                             value={formData.buyIn}
@@ -208,8 +208,8 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label>Max Players</label>
-                        <input
+                        <label htmlFor="maxPlayers">Max Players</label>
+                        <input id="maxPlayers"
                             type="number"
                             name="maxPlayers"
                             value={formData.maxPlayers}
@@ -218,8 +218,8 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label>Places Paid</label>
-                        <input
+                        <label htmlFor="placesPaid">Places Paid</label>
+                        <input id="placesPaid"
                             type="number"
                             name="placesPaid"
                             value={formData.placesPaid}
@@ -228,15 +228,15 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label>
+                        <label htmlFor="prizePoolMin">
                             <FontAwesomeIcon icon={faDollarSign} /> Prize pool (min)
                         </label>
-                        <input type="number" value={prizePoolValue} readOnly />
+                        <input id="prizePoolMin" type="number" value={prizePoolValue} readOnly />
                     </div>
 
                     <div className="form__row">
-                        <label>Currency</label>
-                        <select name="currency" value={formData.currency} onChange={handleChange}>
+                        <label htmlFor="currency">Currency</label>
+                        <select id="currency" name="currency" value={formData.currency} onChange={handleChange}>
                             <option value="EUR">EUR</option>
                             <option value="USD">USD</option>
                             <option value="GBP">GBP</option>
@@ -262,8 +262,9 @@ export default function EditGamePage() {
                 <div className="form__grid">
                     {payouts.map((p, idx) => (
                         <div className="form__row" key={idx}>
-                            <label>Place #{p.place}</label>
+                            <label htmlFor={`payout-${idx}`}>Place #{p.place}</label>
                             <input
+                                id={`payout-${idx}`}
                                 type="number"
                                 min={0}
                                 max={100}
@@ -295,8 +296,8 @@ export default function EditGamePage() {
                 </legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label>Small Blind</label>
-                        <input
+                        <label htmlFor="smallBlind">Small Blind</label>
+                        <input id="smallBlind"
                             type="number"
                             name="smallBlind"
                             value={formData.smallBlind}
@@ -304,8 +305,8 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label>Big Blind</label>
-                        <input
+                        <label htmlFor="bigBlind">Big Blind</label>
+                        <input id="bigBlind"
                             type="number"
                             name="bigBlind"
                             value={formData.bigBlind}
@@ -313,8 +314,8 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label>Level Duration (min)</label>
-                        <input
+                        <label htmlFor="levelDuration">Level Duration (min)</label>
+                        <input id="levelDuration"
                             type="number"
                             name="levelDuration"
                             value={formData.levelDuration}
@@ -336,10 +337,10 @@ export default function EditGamePage() {
 
             {/* Description */}
             <div className="form__row">
-                <label>
+                <label htmlFor="description">
                     <FontAwesomeIcon icon={faPenToSquare} /> Description
                 </label>
-                <textarea
+                <textarea id="description"
                     name="description"
                     rows={4}
                     value={formData.description}

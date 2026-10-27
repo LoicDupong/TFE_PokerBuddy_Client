@@ -60,10 +60,8 @@ export default function ProfilePage() {
                         <div className="user__description">
                             <p>{user.description || "No description set."}</p>
                         </div>
-                        <Link href={"/profile/edit"}>
-                            <div className="btn btn--user">
-                                <FontAwesomeIcon icon={faPenToSquare} /> Edit Profile
-                            </div>
+                        <Link href={"/profile/edit"} className="btn btn--user">
+                            <FontAwesomeIcon icon={faPenToSquare} /> Edit Profile
                         </Link>
                     </div>
                 </div>
@@ -93,9 +91,9 @@ export default function ProfilePage() {
 
                 <FriendInviteDisplay onAccept={refreshFriends} />
 
-                <div className="btn btn--full" onClick={async () => { await refreshFriends(); setShowInviteModal(true); }}>
+                <button type="button" className="btn btn--full" onClick={async () => { await refreshFriends(); setShowInviteModal(true); }}>
                     <FontAwesomeIcon icon={faUserPlus} /> Add friends
-                </div>
+                </button>
             </section>
 
             {showInviteModal && (

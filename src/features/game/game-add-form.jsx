@@ -127,17 +127,17 @@ export default function GameAddForm() {
 
                 {/* Name */}
                 <div className="form__row">
-                    <label>
+                    <label htmlFor="name">
                         <FontAwesomeIcon icon={faDiamond} /> Title{" "}
                         <span className="red">*</span>
                     </label>
-                    <input name="name" placeholder="Friday Night Poker" defaultValue="" />
+                    <input id="name" name="name" placeholder="Friday Night Poker" defaultValue="" />
                     {fieldError("name")}
                 </div>
 
                 {/* Dates */}
                 <div className="form__row input--icon left clickable">
-                    <label>
+                    <label htmlFor="dateStart">
                         Date & Time (planned) <span className="red">*</span>
                     </label>
                     <div className="input__container">
@@ -152,7 +152,7 @@ export default function GameAddForm() {
                 </div>
 
                 <div className="form__row input--icon left clickable">
-                    <label>Table start (optional)</label>
+                    <label htmlFor="realStart">Table start (optional)</label>
                     <div className="input__container">
                         <input id="realStart" type="time" name="realStart" />
                         <FontAwesomeIcon
@@ -166,11 +166,11 @@ export default function GameAddForm() {
 
                 {/* Location */}
                 <div className="form__row">
-                    <label>
+                    <label htmlFor="location">
                         <FontAwesomeIcon icon={faLocationDot} /> Location{" "}
                         <span className="red">*</span>
                     </label>
-                    <input
+                    <input id="location"
                         name="location"
                         placeholder="Brussels, at John's place"
                         defaultValue=""
@@ -186,11 +186,11 @@ export default function GameAddForm() {
 
                     <div className="form__grid">
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="buyIn">
                                 <FontAwesomeIcon icon={faDollarSign} /> Buy-in{" "}
                                 <span className="red">*</span>
                             </label>
-                            <input
+                            <input id="buyIn"
                                 type="number"
                                 min={0}
                                 step="1"
@@ -202,8 +202,8 @@ export default function GameAddForm() {
                         </div>
 
                         <div className="form__row">
-                            <label>Max Players</label>
-                            <input
+                            <label htmlFor="maxPlayers">Max Players</label>
+                            <input id="maxPlayers"
                                 type="number"
                                 min={2}
                                 max={200}
@@ -215,10 +215,10 @@ export default function GameAddForm() {
                         </div>
 
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="placesPaid">
                                 Places Paid <span className="red">*</span>
                             </label>
-                            <input
+                            <input id="placesPaid"
                                 type="number"
                                 min={1}
                                 max={50}
@@ -230,10 +230,10 @@ export default function GameAddForm() {
                         </div>
 
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="prizePool">
                                 <FontAwesomeIcon icon={faDollarSign} /> Prize pool (minimum)
                             </label>
-                            <input
+                            <input id="prizePool"
                                 type="number"
                                 name="prizePool"
                                 value={prizePoolValue}
@@ -242,8 +242,8 @@ export default function GameAddForm() {
                         </div>
 
                         <div className="form__row">
-                            <label>Currency</label>
-                            <select name="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                            <label htmlFor="currency">Currency</label>
+                            <select id="currency" name="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
                                 <option value="EUR">EUR</option>
                                 <option value="USD">USD</option>
                                 <option value="GBP">GBP</option>
@@ -267,9 +267,10 @@ export default function GameAddForm() {
                     <div className="form__grid">
                         {payouts.map((p, idx) => (
                             <div className="form__row" key={idx}>
-                                <label>Place #{p.place}</label>
+                                <label htmlFor={`payout-${idx}`}>Place #{p.place}</label>
                                 <div className="input--payout">
                                     <input
+                                        id={`payout-${idx}`}
                                         type="number"
                                         min={0}
                                         max={100}
@@ -314,24 +315,24 @@ export default function GameAddForm() {
                     </legend>
                     <div className="form__grid">
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="smallBlind">
                                 Small Blind <span className="red">*</span>
                             </label>
-                            <input type="number" min={1} step="1" name="smallBlind" />
+                            <input id="smallBlind" type="number" min={1} step="1" name="smallBlind" />
                             {fieldError("smallBlind")}
                         </div>
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="bigBlind">
                                 Big Blind <span className="red">*</span>
                             </label>
-                            <input type="number" min={1} step="1" name="bigBlind" />
+                            <input id="bigBlind" type="number" min={1} step="1" name="bigBlind" />
                             {fieldError("bigBlind")}
                         </div>
                         <div className="form__row">
-                            <label>
+                            <label htmlFor="levelDuration">
                                 Level Duration (min) <span className="red">*</span>
                             </label>
-                            <input
+                            <input id="levelDuration"
                                 type="number"
                                 min={1}
                                 max={120}
@@ -351,10 +352,10 @@ export default function GameAddForm() {
 
                 {/* Description */}
                 <div className="form__row">
-                    <label>
+                    <label htmlFor="description">
                         <FontAwesomeIcon icon={faPenToSquare} /> Description
                     </label>
-                    <textarea
+                    <textarea id="description"
                         name="description"
                         rows={4}
                         placeholder="House rules, snacks, parking, etc."

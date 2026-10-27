@@ -26,6 +26,27 @@
         >* {
             margin-bottom: 2.5rem;
         }
+
+        // Menu fermé : hors écran ET hors ordre de tabulation
+        &:not(.open) {
+            visibility: hidden;
+            transition: transform 0.4s ease-in-out, visibility 0s linear 0.4s;
+        }
+
+        .nav__item {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+        }
+    }
+
+    &__toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        cursor: pointer;
     }
 
     .open {
@@ -33,6 +54,11 @@
     }
 
     &__close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
         position: absolute;
         right: 10%;
         top: 5%;
@@ -47,6 +73,12 @@
     &__item {
         transition: 0.3s all ease-in-out;
 
+        &--logout {
+            color: var(--secondary-text);
+            font-weight: normal;
+            font-size: 0.85em;
+        }
+
         &--dropdown {
             cursor: pointer;
             display: flex;
@@ -55,7 +87,7 @@
         }
 
         &:hover {
-            color: var(--secondary-color);
+            color: var(--secondary-color-text);
         }
     }
 
@@ -102,7 +134,7 @@
                 transition: 0.3s all ease-in-out;
 
                 &:hover {
-                    color: var(--secondary-color);
+                    color: var(--secondary-color-text);
                 }
 
                 &--dropdown {
@@ -112,7 +144,7 @@
 
 
             .active {
-                color: var(--secondary-color);
+                color: var(--secondary-color-text);
             }
 
             // Dropdown Desktop
@@ -152,13 +184,22 @@
                     border-radius: 4px;
 
                     &:hover {
-                        color: var(--secondary-color);
+                        color: var(--secondary-color-text);
                         background: var(--secondary-color-trans);
                     }
                 }
             }
         }
     }
+}
+
+// Cloche : zone tactile 44x44
+.notification {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
 }
 
 .has-notification{

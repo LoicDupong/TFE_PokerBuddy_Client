@@ -23,7 +23,7 @@
         font-size: 18px;
         font-weight: 700;
         letter-spacing: 1px;
-        color: var(--secondary-color);
+        color: var(--secondary-color-text);
     }
 
     &__tagline {
@@ -39,6 +39,9 @@
         flex-wrap: wrap;
 
         a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
             font-size: 13px;
             color: var(--secondary-text);
             letter-spacing: 0.5px;
@@ -73,7 +76,7 @@
     }
 
     &__copy {
-        opacity: 0.6;
+        color: var(--secondary-text); // plutôt qu'une opacité (contraste)
     }
 }
 

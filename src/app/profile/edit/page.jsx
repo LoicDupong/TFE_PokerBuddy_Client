@@ -107,6 +107,7 @@ export default function EditProfilePage() {
                                 <label htmlFor="username">Username</label>
                                 <input
                                     type="text"
+                                    id="username"
                                     name="username"
                                     value={formData.username}
                                     onChange={handleChange}
@@ -118,6 +119,7 @@ export default function EditProfilePage() {
                             <div className="user__description">
                                 <label htmlFor="description">Your short bio</label>
                                 <textarea
+                                    id="description"
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
@@ -129,9 +131,9 @@ export default function EditProfilePage() {
                                 <button type="submit" className="btn btn--user btn--confirm">
                                     <FontAwesomeIcon icon={faCheck} /> Confirm
                                 </button>
-                                <div className="btn btn--user" onClick={handleCancel}>
+                                <button type="button" className="btn btn--user" onClick={handleCancel}>
                                     <FontAwesomeIcon icon={faXmark} /> Cancel
-                                </div>
+                                </button>
                             </div>
                             {success && <p className="success">✅ Profile updated! Redirecting...</p>}
                         </form>

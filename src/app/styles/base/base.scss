@@ -13,6 +13,7 @@ main {
 }
 
 .btn {
+    display: inline-block; // fonctionne aussi pour <a className="btn">
     margin-top: 1.5rem;
     border-radius: 8px;
     background-color: var(--secondary-color);
@@ -35,6 +36,13 @@ main {
         margin: 0;
         padding: .3rem .6rem;
         font-size: 15px;
+        // cible tactile minimale 44px
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .4rem;
     }
 
     &--addPlayer {
@@ -117,7 +125,7 @@ main {
     &--danger {
         background-color: transparent;
         border: 1px solid var(--secondary-color);
-        color: var(--secondary-color);
+        color: var(--secondary-color-text);
     }
 }
 
@@ -152,6 +160,16 @@ main {
     }
 }
 
+// Bouton de dépliage (ex. invitations d'amis)
+.expand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    cursor: pointer;
+}
+
 .cards {
     padding: 1rem 0 2rem;
     display: grid;
@@ -163,8 +181,11 @@ main {
     }
 
     &--friends {
-        grid-template-columns: repeat(3, 1fr);
+        // auto-fit : plus de 3 colonnes fixes qui débordent sur mobile
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         .card{
+            min-width: 0;
+            overflow-wrap: anywhere;
             min-height: stretch;
                 display: flex;
             flex-direction: column;
@@ -191,19 +212,6 @@ main {
     }
 }
 
-/* tablette */
-@media (min-width: 768px) {
-    .cards.cards--friends {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* desktop */
-@media (min-width: 1024px) {
-    .cards.cards--friends {
-        grid-template-columns: repeat(5, 1fr);
-    }
-}
 
 .card {
     padding: 1.5rem;

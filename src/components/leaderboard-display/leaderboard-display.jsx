@@ -3,9 +3,11 @@
 import leaderboardService from "@/services/leaderboard.service.js";
 import Link from "next/link.js";
 import { useEffect, useState } from "react";
+import useAuthStore from "@/stores/useAuthStore";
 
 export default function LeaderboardDisplay({ compact = false }) {
     const limit = compact ? 3 : 10;
+    const currentUser = useAuthStore((state) => state.user);
     const [players, setPlayers] = useState([]);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
@@ -33,26 +35,27 @@ export default function LeaderboardDisplay({ compact = false }) {
                         <tr>
                             <th>#</th>
                             <th>Player</th>
-                            <th>Wins</th>
+                            <th className="col--secondary">Wins</th>
                             <th>Winrate</th>
-                            {!compact && <th>Games</th>}
-                            {!compact && <th>Avg Place</th>}
+                            {!compact && <th className="col--secondary">Games</th>}
+                            {!compact && <th className="col--secondary">Avg Place</th>}
                             <th>Net</th>
                         </tr>
                     </thead>
                     <tbody>
                         {players.map((p) => (
-                            <tr key={p.id}>
+                            <tr key={p.id} className={p.id === currentUser?.id ? "leaderboard__row--me" : undefined}>
                                 <td>{p.rank}</td>
                                 <td>
                                     <Link href={`/profile/${p.id}`} className={`leaderboard__player-link${p.rank === 1 ? " red" : ""}`}>
                                         {p.username}
                                     </Link>
+                                    {p.id === currentUser?.id && <span className="leaderboard__you">You</span>}
                                 </td>
-                                <td>{p.wins}</td>
+                                <td className="col--secondary">{p.wins}</td>
                                 <td>{p.winRate}%</td>
-                                {!compact && <td>{p.totalGames}</td>}
-                                {!compact && <td>{p.avgPlacement ?? "—"}</td>}
+                                {!compact && <td className="col--secondary">{p.totalGames}</td>}
+                                {!compact && <td className="col--secondary">{p.avgPlacement ?? "—"}</td>}
                                 <td>{p.netResult >= 0 ? `+${p.netResult}` : p.netResult}€</td>
                             </tr>
                         ))}
@@ -60,8 +63,8 @@ export default function LeaderboardDisplay({ compact = false }) {
                 </table>
             </div>
             {compact && (
-                <Link href="/leaderboard">
-                    <div className="btn btn--full">View full leaderboard</div>
+                <Link href="/leaderboard" className="btn btn--full">
+                    View full leaderboard
                 </Link>
             )}
             {!compact && pages > 1 && (

@@ -1,9 +1,11 @@
 "use client";
 import { usePathname } from "next/navigation.js";
 import Link from "next/link.js";
+import useAuthStore from "@/stores/useAuthStore";
 
 export default function Footer() {
     const pathname = usePathname();
+    const user = useAuthStore((state) => state.user);
     if (pathname === "/manager") return null;
 
     return (
@@ -14,11 +16,12 @@ export default function Footer() {
                     <p className="footer__tagline">Home poker nights, made simple.</p>
                 </div>
 
-                <nav className="footer__nav">
-                    <Link href="/games">My Games</Link>
-                    <Link href="/leaderboard">Leaderboard</Link>
+                <nav className="footer__nav" aria-label="Footer">
+                    {/* Pages privées : visibles seulement une fois connecté */}
+                    {user && <Link href="/games">My Games</Link>}
+                    {user && <Link href="/leaderboard">Leaderboard</Link>}
                     <Link href="/learn">Learn</Link>
-                    <Link href="/profile">Profile</Link>
+                    {user && <Link href="/profile">Profile</Link>}
                 </nav>
 
                 <div className="footer__credit">

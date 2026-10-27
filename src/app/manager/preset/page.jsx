@@ -191,8 +191,8 @@ export default function PresetForm() {
 
             {/* Title */}
             <div className="form__row">
-                <label>Title</label>
-                <input
+                <label htmlFor="title">Title</label>
+                <input id="title"
                     name="title"
                     value={preset.title}
                     onChange={handleChange}
@@ -203,8 +203,8 @@ export default function PresetForm() {
             {/* Buy-in & Chips */}
             <div className="form__grid">
                 <div className="form__row">
-                    <label>Buy-in</label>
-                    <input
+                    <label htmlFor="buyIn">Buy-in</label>
+                    <input id="buyIn"
                         type="number"
                         name="buyIn"
                         value={preset.buyIn}
@@ -212,8 +212,8 @@ export default function PresetForm() {
                     />
                 </div>
                 <div className="form__row">
-                    <label>Chips / Player</label>
-                    <input
+                    <label htmlFor="chipsPerPlayer">Chips / Player</label>
+                    <input id="chipsPerPlayer"
                         type="number"
                         name="chipsPerPlayer"
                         value={preset.chipsPerPlayer || ""}
@@ -227,8 +227,8 @@ export default function PresetForm() {
                 <legend>Blinds</legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label>Small Blind</label>
-                        <input
+                        <label htmlFor="smallBlind">Small Blind</label>
+                        <input id="smallBlind"
                             type="number"
                             name="smallBlind"
                             value={preset.smallBlind}
@@ -236,8 +236,8 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label>Big Blind</label>
-                        <input
+                        <label htmlFor="bigBlind">Big Blind</label>
+                        <input id="bigBlind"
                             type="number"
                             name="bigBlind"
                             value={preset.bigBlind}
@@ -245,8 +245,8 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label>Level Duration (min)</label>
-                        <input
+                        <label htmlFor="levelDurationMin">Level Duration (min)</label>
+                        <input id="levelDurationMin"
                             type="number"
                             name="levelDurationMin"
                             value={preset.levelDurationMin}
@@ -274,6 +274,7 @@ export default function PresetForm() {
                     <div key={player.id} className="form__row form__addPlayer">
                         <input
                             type="text"
+                            aria-label="Player name"
                             placeholder="Player name"
                             value={player.name}
                             onChange={(e) =>
@@ -283,6 +284,7 @@ export default function PresetForm() {
                         <button
                             type="button"
                             className="btn btn--small btn-add"
+                            aria-label={`Remove ${player.name || "player"}`}
                             onClick={() => handleRemovePlayer(player.id)}
                         >
                             <FontAwesomeIcon icon={faTrash} />
@@ -305,8 +307,9 @@ export default function PresetForm() {
                     <FontAwesomeIcon icon={faPlus} /> Add Player
                 </button>
                 <div className="form__row">
-                    <label>Players Number</label>
+                    <label htmlFor="playersNumber">Players Number</label>
                     <input
+                        id="playersNumber"
                         type="number"
                         value={preset.players?.length || 0}
                         readOnly
@@ -328,8 +331,8 @@ export default function PresetForm() {
             <fieldset className="form__fieldset">
                 <legend>Prize Distribution</legend>
                 <div className="form__row" style={{ marginBottom: "2rem" }}>
-                    <label>Places Paid</label>
-                    <input
+                    <label htmlFor="placesPaid">Places Paid</label>
+                    <input id="placesPaid"
                         type="number"
                         name="placesPaid"
                         value={preset.placesPaid || ""}
@@ -340,7 +343,7 @@ export default function PresetForm() {
                 {(preset.payoutDistribution || []).map((p, i) => (
                     <div key={i} className="form__grid">
                         <div className="form__row">
-                            <label>
+                            <label htmlFor={`payout-${i}`}>
                                 {p.place}ᵉ place{" "}
                                 <small>
                                     {" "}
@@ -354,6 +357,7 @@ export default function PresetForm() {
                             </label>
 
                             <input
+                                id={`payout-${i}`}
                                 type="number"
                                 value={p.percent}
                                 onChange={(e) =>
@@ -366,7 +370,7 @@ export default function PresetForm() {
 
                 <p
                     style={{
-                        color: totalPercent === 100 ? "green" : "red",
+                        color: totalPercent === 100 ? "#22c55e" : "var(--secondary-color-text)",
                         fontWeight: "bold",
                     }}
                 >
@@ -375,8 +379,8 @@ export default function PresetForm() {
 
                 {/* Prize Pool (auto) */}
                 <div className="form__row">
-                    <label>Prize Pool</label>
-                    <input type="number" value={preset.prizePool || 0} readOnly />
+                    <label htmlFor="prizePool">Prize Pool</label>
+                    <input id="prizePool" type="number" value={preset.prizePool || 0} readOnly />
                 </div>
             </fieldset>
 

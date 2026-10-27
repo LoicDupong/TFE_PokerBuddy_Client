@@ -55,9 +55,9 @@ export default function FriendInviteDisplay({ onAccept }) {
             <section className="section section__invites">
                 <h2>
                     Friend <span className="red">Invites</span> ({invites.length})
-                    <span className="expand" onClick={() => setIsExpanded(!isExpanded)}>
+                    <button type="button" className="expand" onClick={() => setIsExpanded(!isExpanded)} aria-expanded={isExpanded} aria-label="Show friend invites">
                         <FontAwesomeIcon icon={isExpanded ? faCaretUp : faCaretDown} />
-                    </span>
+                    </button>
                 </h2>
 
                 <div className={`cards cards--invites ${isExpanded ? "expanded" : "collapsed"}`}>
@@ -79,6 +79,7 @@ export default function FriendInviteDisplay({ onAccept }) {
                                 <div className="btn__invites">
                                     <button
                                         className="btn btn--accept"
+                                        aria-label={`Accept ${invite.User.username}`}
                                         disabled={loadingId === invite.id}
                                         onClick={() => handleRespond(invite, "accept")}>
                                         <FontAwesomeIcon icon={faCheck} />
@@ -86,6 +87,7 @@ export default function FriendInviteDisplay({ onAccept }) {
 
                                     <button
                                         className="btn btn--decline"
+                                        aria-label={`Decline ${invite.User.username}`}
                                         disabled={loadingId === invite.id}
                                         onClick={() => handleRespond(invite, "decline")}>
                                         <FontAwesomeIcon icon={faXmark} />

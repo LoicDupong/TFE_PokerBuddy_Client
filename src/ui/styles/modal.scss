@@ -51,6 +51,11 @@
         font-size: 1.2rem;
         cursor: pointer;
         color: var(--secondary-text);
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
 
         &:hover {
             color: var(--accent);
@@ -133,7 +138,6 @@
     font-size: 0.9rem;
 
     &:focus {
-        outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 5px var(--accent);
     }

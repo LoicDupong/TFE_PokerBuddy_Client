@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faLock, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faEye, faEyeSlash, faLock, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { validateLogin } from "@/schemas/authSchema.js";
@@ -22,6 +22,7 @@ export default function LoginForm() {
 
     const [errorMessage, setErrorMessage] = useState([]);
     const [isPending, setIsPending] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -56,7 +57,7 @@ export default function LoginForm() {
         <section className="auth auth--login">
             <h1 className="title title--auth">Login</h1>
 
-            <form onSubmit={handleLogin} className="form form--auth" id="login-form">
+            <form onSubmit={handleLogin} className="form form--auth" id="login-form" noValidate>
                 <div className="form__row">
                     <label htmlFor={inputId + "email"}>
                         <FontAwesomeIcon icon={faEnvelope} /> Email
@@ -66,10 +67,12 @@ export default function LoginForm() {
                         id={inputId + "email"}
                         name="email"
                         placeholder="Enter your email"
-                        required
+                        autoComplete="email"
+                        aria-invalid={!!getFieldError(errorMessage, "email")}
+                        aria-describedby={getFieldError(errorMessage, "email") ? inputId + "email-error" : undefined}
                     />
                     {getFieldError(errorMessage, "email") && (
-                        <p className="form__error">{getFieldError(errorMessage, "email")}</p>
+                        <p className="form__error" id={inputId + "email-error"} role="alert">{getFieldError(errorMessage, "email")}</p>
                     )}
                 </div>
 
@@ -77,15 +80,29 @@ export default function LoginForm() {
                     <label htmlFor={inputId + "password"}>
                         <FontAwesomeIcon icon={faLock} /> Password
                     </label>
-                    <input
-                        type="password"
-                        id={inputId + "password"}
-                        name="password"
-                        placeholder="Enter your password"
-                        required
-                    />
+                    <div className="input__container">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id={inputId + "password"}
+                            name="password"
+                            placeholder="Enter your password"
+                            autoComplete="current-password"
+                            aria-invalid={!!getFieldError(errorMessage, "password")}
+                            aria-describedby={getFieldError(errorMessage, "password") ? inputId + "password-error" : undefined}
+                            className="input--with-toggle"
+                        />
+                        <button
+                            type="button"
+                            className="input__toggle"
+                            onClick={() => setShowPassword((v) => !v)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-pressed={showPassword}
+                        >
+                            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
+                        </button>
+                    </div>
                     {getFieldError(errorMessage, "password") && (
-                        <p className="form__error">{getFieldError(errorMessage, "password")}</p>
+                        <p className="form__error" id={inputId + "password-error"} role="alert">{getFieldError(errorMessage, "password")}</p>
                     )}
                 </div>
 
@@ -95,7 +112,7 @@ export default function LoginForm() {
 
                 {/* Erreur globale */}
                 {getFieldError(errorMessage, "form") && (
-                    <p className="form__error">{getFieldError(errorMessage, "form")}</p>
+                    <p className="form__error" role="alert">{getFieldError(errorMessage, "form")}</p>
                 )}
             </form>
 

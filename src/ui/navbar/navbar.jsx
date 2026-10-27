@@ -23,14 +23,13 @@ export default function Navbar() {
     const logout = useAuthStore((state) => state.logout);
     const { unreadCount, fetchNotifications } = useNotificationStore();
 
-
+    // Logout est rendu à part : toujours en dernier et visuellement secondaire
     const links = [
-        { href: "/games", name: "Dashboard" },
+        { href: "/games", name: "My Games" },
         { href: "/games/create", name: "Create Game" },
         { href: "/manager", name: "Game Manager" },
         { href: "/leaderboard", name: "Leaderboard" },
         { href: "/profile", name: "Profile" },
-        { href: "/", name: "Logout", action: logout }
     ];
 
     const baseLinks = [
@@ -38,6 +37,9 @@ export default function Navbar() {
         { href: "/auth/login", name: "Login" },
         { href: "/manager", name: "Game Manager" },
     ];
+
+    const bellLabel = unreadCount > 0 ? `Notifications (${unreadCount} unread)` : "Notifications";
+    const bellClass = `notification${unreadCount > 0 ? " has-notification" : ""}`;
 
     const pathname = usePathname();
     const mobile = 950;
@@ -77,41 +79,21 @@ export default function Navbar() {
 
     if (isMobile === null) return <nav className="nav" />;
 
+    const navLinks = user ? links : baseLinks;
+
     // Desktop
     if (!isMobile) {
         return (
-            <nav className="nav nav--desktop">
-                {user ?
-                    links.map(({ href, name, action }) =>
-                        action ? (
-                            <Link key={name} href={href} onClick={action} className="nav__item">
-                                {name}
-                            </Link>
-                        ) : (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={pathname === href ? "active nav__item" : "nav__item"}
-                            >
-                                {name}
-                            </Link>
-                        )
-                    ) : baseLinks.map(({ href, name, action }) =>
-                        action ? (
-                            <Link key={name} href={href} onClick={action} className="nav__item">
-                                {name}
-                            </Link>
-                        ) : (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={pathname === href ? "active nav__item" : "nav__item"}
-                            >
-                                {name}
-                            </Link>
-                        )
-                    )}
-
+            <nav className="nav nav--desktop" aria-label="Main">
+                {navLinks.map(({ href, name }) => (
+                    <Link
+                        key={href}
+                        href={href}
+                        className={pathname === href ? "active nav__item" : "nav__item"}
+                    >
+                        {name}
+                    </Link>
+                ))}
 
                 {/* Learn dropdown desktop */}
                 <div className="nav__dropdown">
@@ -126,8 +108,14 @@ export default function Navbar() {
                         ))}
                     </div>
                 </div>
-                <Link href={'/notifications'} className={`notification${unreadCount > 0 ? ' has-notification' : ''}`}>
-                    <FontAwesomeIcon icon={faBell} className={`nav__icon--notification${unreadCount > 0 ? ' has-notification' : ''}`} size="xl" />
+                {user && (
+                    <Link href="/" onClick={logout} className="nav__item nav__item--logout">
+                        Logout
+                    </Link>
+                )}
+                {/* Pas de has-notification sur l'icône : le point est déjà sur le lien */}
+                <Link href={'/notifications'} aria-label={bellLabel} className={bellClass}>
+                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" aria-hidden="true" />
                 </Link>
             </nav>
         );
@@ -135,21 +123,15 @@ export default function Navbar() {
 
     // Mobile
     return (
-        <nav className="nav">
-            {user ?
-                (<>
-                    <Link href={'/notifications'} className={`notification${unreadCount > 0 ? ' has-notification' : ''}`}>
-                        <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" />
-                    </Link>
-                    <div className="nav__toggle" onClick={() => setIsOpen(true)}>
-                        <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
-                    </div>
-                </>) : (
-                    <div className="nav__toggle" onClick={() => setIsOpen(true)}>
-                        <FontAwesomeIcon icon={faBars} className="nav__toggle" size="xl" />
-                    </div>
-                )
-            }
+        <nav className="nav" aria-label="Main">
+            {user && (
+                <Link href={'/notifications'} aria-label={bellLabel} className={bellClass}>
+                    <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" aria-hidden="true" />
+                </Link>
+            )}
+            <button type="button" className="nav__toggle" onClick={() => setIsOpen(true)} aria-label="Open menu" aria-expanded={isOpen}>
+                <FontAwesomeIcon icon={faBars} size="xl" aria-hidden="true" />
+            </button>
 
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
                 <Link href={"/"} onClick={() => setIsOpen(false)}>
@@ -162,72 +144,33 @@ export default function Navbar() {
                         priority
                     />
                 </Link>
-                <div
-                    className={isOpen ? "nav__close" : "nav__toggle"}
-                    onClick={() => setIsOpen(false)}
-                >
-                    <FontAwesomeIcon icon={faXmark} />
-                </div>
-                {user ? links.map(({ href, name, action }) =>
-                    action ? (
-                        <Link
-                            key={name}
-                            href={href}
-                            onClick={() => {
-                                action();
-                                setIsOpen(false);
-                            }}
-                            className="nav__item"
-                        >
-                            {name}
-                        </Link>
-                    ) : (
-                        <Link
-                            key={href}
-                            href={href}
-                            className={pathname === href ? "active nav__item" : "nav__item"}
-                            onClick={() => setIsOpen(false)}
-                        >
-                            {name}
-                        </Link>
-                    )
-                ) :
-                    baseLinks.map(({ href, name, action }) =>
-                        action ? (
-                            <Link
-                                key={name}
-                                href={href}
-                                onClick={() => {
-                                    action();
-                                    setIsOpen(false);
-                                }}
-                                className="nav__item"
-                            >
-                                {name}
-                            </Link>
-                        ) : (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={pathname === href ? "active nav__item" : "nav__item"}
-                                onClick={() => setIsOpen(false)}
-                            >
-                                {name}
-                            </Link>
-                        )
-                    )}
+                <button type="button" className="nav__close" onClick={() => setIsOpen(false)} aria-label="Close menu">
+                    <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
+                </button>
+                {navLinks.map(({ href, name }) => (
+                    <Link
+                        key={href}
+                        href={href}
+                        className={pathname === href ? "active nav__item" : "nav__item"}
+                        onClick={() => setIsOpen(false)}
+                    >
+                        {name}
+                    </Link>
+                ))}
 
                 {/* Learn dropdown mobile */}
-                <div
+                <button
+                    type="button"
                     className="nav__item nav__item--dropdown"
                     onClick={() => setLearnOpen(!learnOpen)}
+                    aria-expanded={learnOpen}
                 >
                     Learn{" "}
                     <FontAwesomeIcon
                         icon={learnOpen ? faChevronUp : faChevronDown}
                         className="nav__icon"
                     />
-                </div>
+                </button>
                 <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
                     {learnLinks.map(({ href, name }) => (
                         <Link
@@ -240,6 +183,19 @@ export default function Navbar() {
                         </Link>
                     ))}
                 </div>
+
+                {user && (
+                    <Link
+                        href="/"
+                        onClick={() => {
+                            logout();
+                            setIsOpen(false);
+                        }}
+                        className="nav__item nav__item--logout"
+                    >
+                        Logout
+                    </Link>
+                )}
             </div>
         </nav>
     );

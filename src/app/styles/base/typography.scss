@@ -27,7 +27,7 @@ p {
   margin-bottom: 0.3rem;
 
   &--winner {
-    color: var(--secondary-color);
+    color: var(--secondary-color-text);
     letter-spacing: 1px;
     text-decoration: underline;
   }
@@ -69,12 +69,12 @@ p {
 
 .form__error {
   font-size: 13px;
-  color: var(--secondary-color);
+  color: var(--secondary-color-text);
   margin-top: 0.3rem;
 }
 
 .red {
-  color: var(--secondary-color)
+  color: var(--secondary-color-text)
 }
 
 article {

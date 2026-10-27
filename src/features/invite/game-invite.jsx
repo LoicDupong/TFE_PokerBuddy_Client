@@ -56,7 +56,7 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
         <div className="modal">
             <div className="modal__overlay" onClick={onClose}></div>
             <div className="modal__content">
-                <button className="modal__close" onClick={onClose}>
+                <button type="button" className="modal__close" onClick={onClose} aria-label="Close">
                     <FontAwesomeIcon icon={faXmark} />
                 </button>
 
@@ -86,6 +86,16 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
                                         }`}
                                     style={alreadyInvited ? { opacity: 0.5, cursor: "default" } : undefined}
                                     onClick={alreadyInvited ? undefined : () => toggleFriend(f)}
+                                    role="button"
+                                    tabIndex={alreadyInvited ? -1 : 0}
+                                    aria-pressed={invites.friends.some((sf) => sf.id === f.id)}
+                                    aria-disabled={alreadyInvited}
+                                    onKeyDown={(e) => {
+                                        if (!alreadyInvited && (e.key === "Enter" || e.key === " ")) {
+                                            e.preventDefault();
+                                            toggleFriend(f);
+                                        }
+                                    }}
                                 >
                                     <div className="user__avatar user--friend__avatar">
                                         {f.avatar ? (

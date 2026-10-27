@@ -75,6 +75,7 @@ export default function NotificationsPage() {
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
                         onClick={() => handleFriendRespond(invite, "accept")}
+                        aria-label="Accept friend request"
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
@@ -82,6 +83,7 @@ export default function NotificationsPage() {
                         className="btn btn--small"
                         disabled={!!actingId}
                         onClick={() => handleFriendRespond(invite, "decline")}
+                        aria-label="Decline friend request"
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>
@@ -102,6 +104,7 @@ export default function NotificationsPage() {
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
                         onClick={() => handleGameRespond(invite, "accepted")}
+                        aria-label="Accept game invitation"
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
@@ -109,6 +112,7 @@ export default function NotificationsPage() {
                         className="btn btn--small"
                         disabled={!!actingId}
                         onClick={() => handleGameRespond(invite, "refused")}
+                        aria-label="Decline game invitation"
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>

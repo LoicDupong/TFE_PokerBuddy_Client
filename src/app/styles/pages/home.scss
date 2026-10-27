@@ -31,6 +31,40 @@
             overflow-y: auto;
         }
     }
+
+    // Ligne de l'utilisateur connecté
+    &__row--me {
+        background: var(--primary-text-trans);
+        box-shadow: inset 3px 0 0 var(--primary-color-light);
+        font-weight: bold;
+    }
+
+    &__you {
+        margin-left: 0.5rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        background: var(--primary-color-light);
+        color: var(--primary-color);
+        font-size: 12px;
+        font-weight: bold;
+    }
+}
+
+// Mobile : plus de scroll horizontal, colonnes secondaires masquées
+@media (max-width: 600px) {
+    .col--secondary {
+        display: none;
+    }
+
+    .leaderboard__table table {
+        min-width: 0;
+
+        th,
+        td {
+            padding: 0.6rem 0.5rem;
+            white-space: normal;
+        }
+    }
 }
 
 .pagination {

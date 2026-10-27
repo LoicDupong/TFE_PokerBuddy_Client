@@ -122,14 +122,14 @@ export default function ProfileByIdPage() {
               </div>
             </div>
             {friendStatus === "friends" && (
-              <div className="btn btn--user" onClick={() => setShowConfirmModal(true)}>
+              <button type="button" className="btn btn--user" onClick={() => setShowConfirmModal(true)}>
                 <FontAwesomeIcon icon={faUserMinus} /> Remove Friend
-              </div>
+              </button>
             )}
             {friendStatus !== "sent" && friendStatus !== "friends" && (
-              <div className="btn btn--user" onClick={handleAddFriend}>
+              <button type="button" className="btn btn--user" onClick={handleAddFriend}>
                 <FontAwesomeIcon icon={faUserPlus} /> Add Friend
-              </div>
+              </button>
             )}
             {friendStatus === "sent" && <p className="gray user__request">Friend request sent</p>}
           </div>

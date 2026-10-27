@@ -41,7 +41,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
         <div className="modal">
             <div className="modal__overlay" onClick={onClose}></div>
             <div className="modal__content">
-                <button className="modal__close" onClick={onClose}>
+                <button type="button" className="modal__close" onClick={onClose} aria-label="Close">
                     <FontAwesomeIcon icon={faXmark} />
                 </button>
 
