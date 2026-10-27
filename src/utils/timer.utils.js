@@ -21,3 +21,9 @@ export function pauseTimer(timer, levelSeconds, now) {
 export function goToLevel(level) {
     return { level, endsAt: null, remaining: null };
 }
+
+export function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+}

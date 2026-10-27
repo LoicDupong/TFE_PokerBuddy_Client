@@ -6,13 +6,19 @@ import {
     faPlay,
     faForwardStep,
     faBackwardStep,
-    faRotateRight,
     faRightFromBracket,
     faPenToSquare,
     faCircleXmark,
+    faExpand,
+    faCompress,
+    faVolumeHigh,
+    faVolumeXmark,
+    faForward,
+    faUserMinus,
+    faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
-import { NEW_TIMER, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
+import { NEW_TIMER, formatTime, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
 import { currencySymbol } from "@/utils/game.utils.js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,10 +26,25 @@ import Link from "next/link.js";
 import Image from "next/image";
 
 import EndGameModal from "@/features/game/end-game-modal.jsx";
+import {
+    playBeeps,
+    unlockAudio,
+    useFullscreen,
+    useHotkeys,
+    useIdle,
+    useMediaQuery,
+    useWakeLock,
+} from "@/features/game/manager-effects.js";
 
 // Références stables : un nouveau [] à chaque tick du timer réinitialisait le classement de la modale
 const NO_PLAYERS = [];
 const NO_PAYOUT = [];
+
+// Dernière minute d'un niveau : le timer passe au rouge
+const WARNING_SECONDS = 60;
+
+// Taille des blinds selon la longueur du texte, pour que "10000 / 20000" tienne à l'écran
+const blindsSize = (text) => (text.length <= 9 ? "m" : text.length <= 12 ? "l" : "xl");
 
 export default function GameManager() {
     const hydrated = usePresetHydrated();
@@ -32,6 +53,7 @@ export default function GameManager() {
 
     const [showEndModal, setShowEndModal] = useState(false);
     const [now, setNow] = useState(() => Date.now());
+    const [flash, setFlash] = useState(0);
 
     // Timer sauvegardé dans le preset : survit à un rechargement de la page
     const timer = preset.timer ?? NEW_TIMER;
@@ -39,14 +61,23 @@ export default function GameManager() {
     const levelSeconds = (Number(preset.levelDurationMin) || 0) * 60;
     const isRunning = timer.endsAt !== null;
     const timeLeft = getTimeLeft(timer, levelSeconds, now); // en secondes
-    const playersLeft = preset.maxPlayers || 0;
+    const totalPlayers = Number(preset.maxPlayers) || preset.players?.length || 0;
+    const playersLeft = Math.min(Math.max(preset.playersLeft ?? totalPlayers, 1), Math.max(totalPlayers, 1));
+
+    const { supported: fullscreenOk, active: isFullscreen, toggle: toggleFullscreen } = useFullscreen();
+    const isWide = useMediaQuery("(min-width: 1024px)");
+    // Jamais masqué en pause : l'hôte doit voir ses boutons
+    const idle = useIdle(isWide && isRunning && !showEndModal);
+    useWakeLock(isRunning);
 
     // redirect si pas de preset (une fois la sauvegarde relue)
     useEffect(() => {
-        if (hydrated && !preset.title) {
+        // Pas de redirection tant que la modale de fin est ouverte : après la sauvegarde
+        // le preset est vidé, mais la modale doit encore afficher les résultats
+        if (hydrated && !preset.title && !showEndModal) {
             router.push("/manager/preset");
         }
-    }, [hydrated, preset.title, router]);
+    }, [hydrated, preset.title, showEndModal, router]);
 
     // Rafraîchit l'affichage ; le temps restant est recalculé depuis l'heure de fin à chaque tick
     useEffect(() => {
@@ -56,16 +87,43 @@ export default function GameManager() {
         return () => clearInterval(interval);
     }, [isRunning]);
 
-    // Fin du niveau : le timer s'arrête à 00:00
+    // Fin du niveau : flash + son, puis niveau suivant (auto-advance) ou arrêt à 00:00
     useEffect(() => {
-        if (isRunning && timeLeft === 0) {
-            setPreset({ timer: pauseTimer(timer, levelSeconds, Date.now()) });
+        if (!isRunning || timeLeft !== 0) return;
+        const current = Date.now();
+        const advance = preset.autoAdvance && levelSeconds > 0;
+        setNow(current);
+        setPreset({
+            timer: advance
+                ? startTimer(goToLevel(level + 1), levelSeconds, current)
+                : pauseTimer(timer, levelSeconds, current),
+        });
+        if (levelSeconds > 0) {
+            setFlash((n) => n + 1);
+            if (preset.soundOn) playBeeps(3);
         }
-    }, [isRunning, timeLeft, timer, levelSeconds, setPreset]);
+    }, [isRunning, timeLeft, timer, level, levelSeconds, preset.autoAdvance, preset.soundOn, setPreset]);
+
+    // Le son n'est autorisé qu'après un geste : après un rechargement, le premier clic/touche le débloque
+    useEffect(() => {
+        if (!preset.soundOn) return;
+        const unlock = () => unlockAudio();
+        window.addEventListener("pointerdown", unlock, { once: true });
+        window.addEventListener("keydown", unlock, { once: true });
+        return () => {
+            window.removeEventListener("pointerdown", unlock);
+            window.removeEventListener("keydown", unlock);
+        };
+    }, [preset.soundOn]);
 
     const toggleTimer = () => {
         const current = Date.now();
         setNow(current);
+        if (!isRunning && timeLeft === 0) {
+            // Niveau terminé : Start lance directement le niveau suivant
+            setPreset({ timer: startTimer(goToLevel(level + 1), levelSeconds, current) });
+            return;
+        }
         setPreset({
             timer: isRunning
                 ? pauseTimer(timer, levelSeconds, current)
@@ -75,105 +133,206 @@ export default function GameManager() {
 
     const changeLevel = (newLevel) => setPreset({ timer: goToLevel(newLevel) });
 
-    const formatTime = (seconds) => {
-        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-        const s = (seconds % 60).toString().padStart(2, "0");
-        return `${m}:${s}`;
+    const toggleSound = () => {
+        if (!preset.soundOn) {
+            // Ce clic débloque l'audio ; un bip court confirme que le son fonctionne
+            unlockAudio();
+            playBeeps(1);
+        }
+        setPreset({ soundOn: !preset.soundOn });
     };
 
-    if (!hydrated || !preset.title) return null;
+    const setPlayersLeft = (n) => setPreset({ playersLeft: Math.min(Math.max(n, 1), totalPlayers) });
+
+    // Raccourcis clavier, coupés pendant que la modale de fin est ouverte
+    useHotkeys(
+        {
+            toggle: toggleTimer,
+            prev: () => changeLevel(Math.max(1, level - 1)),
+            next: () => changeLevel(level + 1),
+            fullscreen: toggleFullscreen,
+        },
+        showEndModal
+    );
+
+    if (!hydrated || (!preset.title && !showEndModal)) return null;
 
     // calculs utiles
-    const prizePool = preset.buyIn * (preset.maxPlayers || 0); // simplifié (sans rebuys)
+    const symbol = currencySymbol(preset.currency);
+    const buyIn = Number(preset.buyIn) || 0;
+    const prizePool = buyIn * totalPlayers; // simplifié (sans rebuys)
+    // Stack moyen : masqué sans jetons de départ (sinon "0" n'aurait aucun sens)
     const avgStack =
-        preset.chipsPerPlayer && playersLeft
-            ? Math.floor(
-                (preset.chipsPerPlayer * (preset.maxPlayers || 0)) / playersLeft
-            )
+        preset.chipsPerPlayer && totalPlayers
+            ? Math.floor((preset.chipsPerPlayer * totalPlayers) / playersLeft)
             : 0;
 
-    return (
-        <div className="manager">
-            {/* HEADER */}
-            <div className="manager__header">
-                <h1>{preset.title}</h1>
-            </div>
+    const blinds = `${preset.smallBlind * level} / ${preset.bigBlind * level}`;
+    const nextBlinds = `${preset.smallBlind * (level + 1)} / ${preset.bigBlind * (level + 1)}`;
+    const progress = levelSeconds > 0 ? Math.min(1, Math.max(0, 1 - timeLeft / levelSeconds)) : 0;
+    const warning = timeLeft <= WARNING_SECONDS;
 
-            {/* INFOS LEFT */}
-            <div className="manager__sidebar left">
-                <Link href={"/"} className="logo">
+    return (
+        <div className={`manager${idle ? " manager--idle" : ""}`}>
+            {preset.title && (<>
+            {flash > 0 && (
+                <div
+                    key={flash}
+                    className="manager__flash"
+                    aria-hidden="true"
+                    onAnimationEnd={() => setFlash(0)}
+                />
+            )}
+
+            {/* HEADER */}
+            <header className="manager__header">
+                <Link href={"/"} className="logo" aria-label="PokerBuddy home">
                     <Image
                         src="/pokerbuddy_logo_light.png"
                         className="logo logo--header"
-                        alt="PokerBuddy logo"
+                        alt=""
                         width={72}
                         height={35}
                         priority
                     />
                 </Link>
-                <p>
-                    <strong>Prize Pool:</strong> {prizePool}
-                </p>
-                <p>
-                    <strong>Players:</strong> {playersLeft} / {preset.maxPlayers}
-                </p>
-                <div className="divider"></div>
-                <p>
-                    <strong>Avg Stack:</strong> {avgStack}
-                </p>
-                <p>
-                    <strong>Buy-in:</strong> {preset.buyIn}{currencySymbol(preset.currency)}
-                </p>
-                {preset.allowRebuys && <p><strong>Rebuys Allowed</strong></p>}
-            </div>
+                <h1>{preset.title}</h1>
 
-            {/* TIMER + BLINDS */}
-            <div className="manager__main">
-                <p>Level {level}</p>
-                <h2>{formatTime(timeLeft)}</h2>
-                <h1>
-                    {preset.smallBlind * level} / {preset.bigBlind * level}
-                </h1>
-                <small>
-                    Next: {preset.smallBlind * (level + 1)} / {preset.bigBlind * (level + 1)}
-                </small>
-            </div>
-
-            {/* INFOS RIGHT */}
-            <div className="manager__sidebar right">
-                <div className="manager__item">
-                    <p>
-                        <strong>Level Duration:</strong> <br />
-                        {preset.levelDurationMin} min
-                    </p>
-                    <Link href={"/manager/preset"}>
-                        <div className="btn btn--control">
-                            <FontAwesomeIcon icon={faPenToSquare} /> Edit
-                        </div>
+                <div className="manager__host">
+                    <button
+                        type="button"
+                        className="btn btn--control"
+                        aria-pressed={!!preset.soundOn}
+                        onClick={toggleSound}
+                    >
+                        <FontAwesomeIcon icon={preset.soundOn ? faVolumeHigh : faVolumeXmark} />{" "}
+                        Sound {preset.soundOn ? "on" : "off"}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn--control"
+                        aria-pressed={!!preset.autoAdvance}
+                        onClick={() => setPreset({ autoAdvance: !preset.autoAdvance })}
+                    >
+                        <FontAwesomeIcon icon={faForward} /> Auto-advance {preset.autoAdvance ? "on" : "off"}
+                    </button>
+                    {fullscreenOk && (
+                        <button
+                            type="button"
+                            className="btn btn--control"
+                            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                            onClick={toggleFullscreen}
+                        >
+                            <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} />
+                        </button>
+                    )}
+                    <Link href={"/manager/preset"} className="btn btn--control">
+                        <FontAwesomeIcon icon={faPenToSquare} /> Edit
                     </Link>
-
                     {/* Bouton END → ouvre la modal */}
-                    <div
+                    <button
+                        type="button"
                         className="btn btn--control"
                         onClick={() => setShowEndModal(true)}
                     >
                         <FontAwesomeIcon icon={faCircleXmark} /> End
-                    </div>
+                    </button>
+                    <Link
+                        href={"/manager/preset"}
+                        className="manager__exit"
+                        aria-label="Leave the Game Manager"
+                    >
+                        <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
+                    </Link>
                 </div>
-                <Link href={"/manager/preset"}>
-                    <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
-                </Link>
-            </div>
+            </header>
+
+            {/* TIMER + BLINDS */}
+            <main className="manager__main">
+                <p className="manager__level">Level {level}</p>
+                <div className={`manager__timer${warning ? " manager__timer--warning" : ""}`}>
+                    {formatTime(timeLeft)}
+                </div>
+                <div
+                    className="manager__progress"
+                    role="progressbar"
+                    aria-label="Level progress"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(progress * 100)}
+                >
+                    <div className="manager__progress-bar" style={{ transform: `scaleX(${progress})` }} />
+                </div>
+                <div className={`manager__blinds manager__blinds--${blindsSize(blinds)}`}>{blinds}</div>
+                <p className="manager__next">
+                    Next level <strong>{nextBlinds}</strong>
+                </p>
+            </main>
+
+            {/* INFOS */}
+            <section className="manager__stats" aria-label="Game information">
+                {buyIn > 0 && totalPlayers > 0 && (
+                    <div className="manager__stat">
+                        <span>Prize pool</span>
+                        <strong>{prizePool}{symbol}</strong>
+                    </div>
+                )}
+                {totalPlayers > 0 && (
+                    <div className="manager__stat">
+                        <span>Players left</span>
+                        <strong>{playersLeft} / {totalPlayers}</strong>
+                        <div className="manager__stat-actions">
+                            <button
+                                type="button"
+                                className="btn btn--small btn--control"
+                                disabled={playersLeft <= 1}
+                                onClick={() => setPlayersLeft(playersLeft - 1)}
+                            >
+                                <FontAwesomeIcon icon={faUserMinus} /> Player out
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn--small btn--control"
+                                aria-label="Undo: put a player back in"
+                                disabled={playersLeft >= totalPlayers}
+                                onClick={() => setPlayersLeft(playersLeft + 1)}
+                            >
+                                <FontAwesomeIcon icon={faUserPlus} /> +1
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {avgStack > 0 && (
+                    <div className="manager__stat">
+                        <span>Avg stack</span>
+                        <strong>{avgStack}</strong>
+                    </div>
+                )}
+                {buyIn > 0 && (
+                    <div className="manager__stat">
+                        <span>Buy-in</span>
+                        <strong>{buyIn}{symbol}{preset.allowRebuys ? " + rebuys" : ""}</strong>
+                    </div>
+                )}
+                {levelSeconds > 0 && (
+                    <div className="manager__stat">
+                        <span>Level duration</span>
+                        <strong>{preset.levelDurationMin} min</strong>
+                    </div>
+                )}
+            </section>
 
             {/* CONTROLS */}
             <div className="manager__controls">
                 <button
+                    type="button"
                     className="btn btn--control"
                     onClick={() => changeLevel(Math.max(1, level - 1))}
                 >
                     <FontAwesomeIcon icon={faBackwardStep} /> Prev
                 </button>
                 <button
+                    type="button"
                     className="btn btn--control"
                     onClick={toggleTimer}
                 >
@@ -181,6 +340,7 @@ export default function GameManager() {
                     {isRunning ? "Pause" : "Start"}
                 </button>
                 <button
+                    type="button"
                     className="btn btn--control"
                     onClick={() => changeLevel(level + 1)}
                 >
@@ -188,10 +348,7 @@ export default function GameManager() {
                 </button>
             </div>
 
-            <div className="manager__message">
-                <FontAwesomeIcon icon={faRotateRight} />{" "}
-                <small>Rotate your device for the best experience</small>
-            </div>
+            </>)}
 
             {/* Modal affichée si showEndModal = true */}
             {showEndModal && (

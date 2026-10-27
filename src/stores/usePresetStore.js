@@ -21,6 +21,11 @@ const initialPreset = {
     players: [],
     // Niveau et temps restant du Game Manager (voir utils/timer.utils.js)
     timer: null,
+    // Réglages du Game Manager : son de fin de niveau, niveau suivant automatique,
+    // joueurs encore en jeu (null = tous)
+    soundOn: false,
+    autoAdvance: false,
+    playersLeft: null,
 };
 
 // Persisté dans le localStorage : un rechargement en pleine partie ne fait plus perdre
