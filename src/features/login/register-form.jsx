@@ -18,7 +18,10 @@ export default function RegisterForm() {
     const inputId = useId();
     const router = useRouter();
     // Page d'origine (ex: lien d'invitation /join/…) où revenir après l'inscription
-    const redirect = getSafeRedirect(useSearchParams().get("redirect"));
+    const searchParams = useSearchParams();
+    const redirect = getSafeRedirect(searchParams.get("redirect"));
+    // Jeton invité : rattache sa réponse à la partie au nouveau compte
+    const claim = searchParams.get("claim");
 
     const [errorMessage, setErrorMessage] = useState([]);
     const [isPending, setIsPending] = useState(false);
@@ -42,7 +45,8 @@ export default function RegisterForm() {
         const res = await register(
             validation.data.username,
             validation.data.email,
-            validation.data.password
+            validation.data.password,
+            claim
         );
 
         if (res.success) {

@@ -8,7 +8,10 @@ import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import gameService from '@/services/game.service.js';
 import { shortDateTime, shortTime } from '@/utils/date.utils.js';
 import { apiUrl } from '@/utils/media.js';
-import { currencySymbol, getConfirmedCount, getPayoutAmount, getPrizePool } from '@/utils/game.utils.js';
+import { currencySymbol, getConfirmedCount, getPayoutAmount, getPrizePool, inviteResponseToast } from '@/utils/game.utils.js';
+import gameInviteService from '@/services/gameInvite.service.js';
+import useAuthStore from '@/stores/useAuthStore.js';
+import useToastStore from '@/stores/useToastStore.js';
 import { useParams } from 'next/navigation.js';
 
 export default function UpcomingGamesDetails() {
@@ -17,6 +20,9 @@ export default function UpcomingGamesDetails() {
 
 
   const [game, setGame] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const userId = useAuthStore((state) => state.user?.id);
+  const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
       (async () => {
@@ -26,6 +32,22 @@ export default function UpcomingGamesDetails() {
     }, [id]);
 
   if (!game || game.length === 0) return <UpcomingGamesSkeleton />;
+
+  // Ma ligne de joueur (l'hôte n'a pas à répondre à sa propre partie)
+  const me = game.host?.id === userId ? null : game.playerLinks.find((p) => p.userId === userId);
+
+  const respond = async (action) => {
+    if (saving || !me) return;
+    setSaving(true);
+    const res = await gameInviteService.respond(me.id, action);
+    setSaving(false);
+    if (res.success) {
+      setGame((g) => ({ ...g, playerLinks: g.playerLinks.map((p) => (p.id === me.id ? { ...p, status: action } : p)) }));
+      showToast(...inviteResponseToast(action, game.name));
+    } else {
+      showToast(res.errorMessage?.[0] || 'Something went wrong, please try again.');
+    }
+  };
 
 
   // Dates
@@ -93,6 +115,23 @@ export default function UpcomingGamesDetails() {
           </div>
         </div>
       </div>
+
+      {me?.status === 'pending' && (
+        <div className="answer-bar" role="group" aria-label="Answer the invitation">
+          <span className="answer-bar__label">Are you in?</span>
+          <button type="button" className="btn btn--primary btn--small" disabled={saving} onClick={() => respond('accepted')}>I&apos;m in</button>
+          <button type="button" className="btn btn--card btn--small" disabled={saving} onClick={() => respond('refused')}>Can&apos;t make it</button>
+        </div>
+      )}
+
+      {me && me.status !== 'pending' && (
+        <p className="answer-change">
+          You answered: {me.status === 'accepted' ? "I'm in" : "Can't make it"}.{' '}
+          <button type="button" className="answer-change__btn" disabled={saving} onClick={() => respond(me.status === 'accepted' ? 'refused' : 'accepted')}>
+            Change my answer
+          </button>
+        </p>
+      )}
     </>
   );
 }

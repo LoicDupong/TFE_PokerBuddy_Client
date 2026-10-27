@@ -5,7 +5,7 @@ import PreviousGameDetails from "@/components/previous-games-display/previous-ga
 import UpcomingGamesDetails from "@/components/upcoming-games-display/upcoming-games-details.jsx";
 import gameService from "@/services/game.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
-import { faPenToSquare, faUserPlus, faGears, faDice, faLink, faCopy, faRotateRight, faLinkSlash } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faUserPlus, faGears, faDice, faLink, faCopy, faRotateRight, faLinkSlash, faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
 import { useRouter, useParams } from "next/navigation";
@@ -21,6 +21,8 @@ export default function GameDetailsPage() {
   const [invites, setInvites] = useState({ friends: [], guests: [] });
   const [inviteCode, setInviteCode] = useState(null);
   const [copied, setCopied] = useState(false);
+  // Action en attente de confirmation dans le bloc lien : "regenerate" | "disable" | null
+  const [confirming, setConfirming] = useState(null);
   const [notFound, setNotFound] = useState(false);
   // Incrémenté après des invitations : recharge le détail (liste des joueurs)
   const [refreshKey, setRefreshKey] = useState(0);
@@ -89,6 +91,25 @@ export default function GameDetailsPage() {
     setInviteCode(null);
   };
 
+  const handleConfirm = async () => {
+    const action = confirming;
+    setConfirming(null);
+    if (action === "regenerate") await handleGenerateCode();
+    else await handleDisableCode();
+  };
+
+  // Partage natif (WhatsApp, etc.) quand dispo, sinon copie du lien
+  const handleShare = async () => {
+    const url = `${window.location.origin}/join/${inviteCode}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: `Join my poker night "${game.name}" on PokerBuddy: ${url}` });
+      } catch { /* partage annulé par l'utilisateur */ }
+      return;
+    }
+    handleCopyLink();
+  };
+
   const handleCopyLink = () => {
     const url = `${window.location.origin}/join/${inviteCode}`;
     navigator.clipboard.writeText(url);
@@ -107,22 +128,41 @@ export default function GameDetailsPage() {
             className="invite-link__url"
             onClick={(e) => e.target.select()}
           />
-          <div className="btn__container" style={{ marginTop: "0.5rem" }}>
-            <div className="btn btn--small" onClick={handleCopyLink}>
-              <FontAwesomeIcon icon={faCopy} /> {copied ? "Copied!" : "Copy"}
+          {confirming ? (
+            <div className="invite-link__confirm" role="alert">
+              <p>
+                {confirming === "regenerate"
+                  ? "Regenerate the link? The current link will stop working."
+                  : "Disable the link? Nobody will be able to join with it."}
+              </p>
+              <div className="invite-link__actions">
+                <button type="button" className="btn btn--small btn--danger" onClick={handleConfirm}>
+                  {confirming === "regenerate" ? "Yes, regenerate" : "Yes, disable"}
+                </button>
+                <button type="button" className="btn btn--small" onClick={() => setConfirming(null)}>Cancel</button>
+              </div>
             </div>
-            <div className="btn btn--small" onClick={handleGenerateCode}>
-              <FontAwesomeIcon icon={faRotateRight} /> Regenerate
+          ) : (
+            <div className="invite-link__actions">
+              <button type="button" className="btn btn--small btn--primary" onClick={handleShare}>
+                <FontAwesomeIcon icon={faShareNodes} /> Share
+              </button>
+              <button type="button" className="btn btn--small" onClick={handleCopyLink}>
+                <FontAwesomeIcon icon={faCopy} /> {copied ? "Copied!" : "Copy"}
+              </button>
+              <button type="button" className="btn btn--small" onClick={() => setConfirming("regenerate")}>
+                <FontAwesomeIcon icon={faRotateRight} /> Regenerate
+              </button>
+              <button type="button" className="btn btn--small btn--danger" onClick={() => setConfirming("disable")}>
+                <FontAwesomeIcon icon={faLinkSlash} /> Disable
+              </button>
             </div>
-            <div className="btn btn--small btn--danger" onClick={handleDisableCode}>
-              <FontAwesomeIcon icon={faLinkSlash} /> Disable
-            </div>
-          </div>
+          )}
         </>
       ) : (
-        <div className="btn btn--small" onClick={handleGenerateCode}>
+        <button type="button" className="btn btn--small" onClick={handleGenerateCode}>
           <FontAwesomeIcon icon={faLink} /> Generate join link
-        </div>
+        </button>
       )}
     </div>
   );
@@ -162,8 +202,8 @@ export default function GameDetailsPage() {
               <FontAwesomeIcon icon={faDice} /> Manager
             </div>
           </div>
-          <ShareLink />
           <UpcomingGamesDetails key={refreshKey} />
+          <ShareLink />
           {showInviteModal && (
             <GameInvite
               invites={invites}

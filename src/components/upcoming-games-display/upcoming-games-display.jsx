@@ -9,21 +9,27 @@ import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
 import { apiUrl } from '@/utils/media.js';
 import { currencySymbol } from '@/utils/game.utils.js';
+import gameInviteService from "@/services/gameInvite.service.js";
 
 export default function UpcomingGamesDisplay() {
   const [games, setGames] = useState(null);
   const [isExpand, setIsExpand] = useState(false);
+  // Invitations en attente : on n'affiche pas "No upcoming games" tant qu'il y en a
+  const [hasInvites, setHasInvites] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     (async () => {
       const data = await gameService.getAll("upcoming");
       const gamesArray = data?.games || data || [];
+      const invites = await gameInviteService.getMyInvites();
+      setHasInvites(!!invites?.length);
       setGames(gamesArray);
     })();
   }, []);
 
-  if (!games || games.length === 0) return <UpcomingGamesSkeleton />;
+  if (!games) return null;
+  if (games.length === 0) return hasInvites ? null : <UpcomingGamesSkeleton />;
 
   if (pathname !== "/games") {
     const dateStart = new Date(games[0].dateStart);

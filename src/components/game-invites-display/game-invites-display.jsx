@@ -59,18 +59,18 @@ export default function GameInvitesDisplay({ onAccept }) {
                             </p>
                             <div className="card__actions">
                                 <button
-                                    className="btn btn--accept"
+                                    className="btn btn--card btn--primary"
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "accepted")}
                                 >
-                                    <FontAwesomeIcon icon={faCheck} />
+                                    <FontAwesomeIcon icon={faCheck} /> Accept
                                 </button>
                                 <button
-                                    className="btn btn--decline"
+                                    className="btn btn--card"
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "refused")}
                                 >
-                                    <FontAwesomeIcon icon={faXmark} />
+                                    <FontAwesomeIcon icon={faXmark} /> Refuse
                                 </button>
                                 <Link href={`/games/${invite.gameId}`}>
                                     <div className="btn btn--card">

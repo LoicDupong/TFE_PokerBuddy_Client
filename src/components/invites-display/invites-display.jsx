@@ -17,7 +17,7 @@ import InvitesSkeleton from './invites-skeleton.jsx';
 
 export default function InvitesDisplay() {
     const [invites, setInvites] = useState([]);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
     const [loadingId, setLoadingId] = useState(null);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToastStore();

@@ -6,6 +6,7 @@ import "./styles/pages/home.scss";
 import "./styles/pages/learn.scss";
 import "./styles/pages/profile.scss";
 import "./styles/pages/manager.scss";
+import "./styles/pages/invite.scss";
 
 
 import Header from "@/ui/header/header.jsx";
