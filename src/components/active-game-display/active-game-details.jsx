@@ -5,9 +5,9 @@ import { faCalendarPlus, faComment, faDollarSign, faFlagCheckered, faHourglassSt
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import gameService from '@/services/game.service.js';
-import { shortDateTime, shortTime } from '@/utils/date.utils.js';
+import { relativeDateTime, shortDateTime, shortTime } from '@/utils/date.utils.js';
 import { apiUrl } from '@/utils/media.js';
-import { currencySymbol, getConfirmedCount, getPayoutAmount, getPrizePool } from '@/utils/game.utils.js';
+import { gameStatusLabel, currencySymbol, getConfirmedCount, getPayoutAmount, getPrizePool } from '@/utils/game.utils.js';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
 import { useParams } from 'next/navigation.js';
 
@@ -39,11 +39,12 @@ export default function ActiveGameDetails() {
       <div className="card">
         <div className="card__header">
           <h3 className="title title--card">{game.name}</h3>
+          <p className="card__when">{relativeDateTime(game.dateStart)}</p>
           <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + game.host.id}>{game.host.username}</Link></h4>
         </div>
         <div className="card__body">
           <div className="card__infos">
-            <p className="card__status">{game.status}</p>              
+            <p><span className={`chip chip--${game.status}`}>{gameStatusLabel(game.status)}</span></p>
             <div className="card__calendar">
                 <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Meet up:</span> {timeStart} </p>
                 <a
@@ -55,14 +56,14 @@ export default function ActiveGameDetails() {
                   <FontAwesomeIcon icon={faCalendarPlus} />
                 </a>
             </div>
-            <p><FontAwesomeIcon icon={faPlayCircle} className="fa-icon" /> <span className="gray">Table start:</span> {realStart}</p>
-            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {getConfirmedCount(game)} confirmed / {game.playerLinks.length} invited</p>
+            {game.realStart && <p><FontAwesomeIcon icon={faPlayCircle} className="fa-icon" /> <span className="gray">Table start:</span> {realStart}</p>}
+            <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Players:</span> {getConfirmedCount(game)} confirmed · {game.playerLinks.length} invited</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
             <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}{cur}</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize Pool:</span> {prizePool}{cur}</p>
-            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places Paid:</span> {game.placesPaid}</p>
-            <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize Distribution:</span></p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize pool:</span> {prizePool}{cur}</p>
+            <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places paid:</span> {game.placesPaid}</p>
+            <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize distribution:</span></p>
             <ul>
               {(game.payoutDistribution || []).map((p) => (
                 <li key={p.place}>{p.place}. {getPayoutAmount(prizePool, p.percent)}{cur}</li>
@@ -83,12 +84,15 @@ export default function ActiveGameDetails() {
             </div>
           </div>
 
-          <div className="divider"></div>
-
-          <div className="card__note">
-            <h3><FontAwesomeIcon icon={faComment} size="sm" /> Note:</h3>
-            <p>{game.description}</p>
-          </div>
+          {game.description?.trim() && (
+            <>
+              <div className="divider"></div>
+              <div className="card__note">
+                <h3><FontAwesomeIcon icon={faComment} size="sm" /> Note:</h3>
+                <p>{game.description}</p>
+              </div>
+            </>
+          )}
 
         </div>
       </div>

@@ -127,6 +127,81 @@ main {
         border: 1px solid var(--secondary-color);
         color: var(--secondary-color-text);
     }
+
+    // Action secondaire : contour clair, pas de remplissage (un seul bouton rouge plein par carte)
+    &--secondary {
+        background-color: transparent;
+        border: 1px solid var(--primary-color-light);
+        color: var(--primary-text);
+
+        &:hover {
+            background-color: var(--primary-text-trans);
+        }
+    }
+
+    // Action discrète : lien souligné, sans cadre
+    &--link {
+        background: none;
+        border: 0;
+        padding: .3rem .2rem;
+        min-height: 44px;
+        color: var(--primary-color-light);
+        text-decoration: underline;
+        letter-spacing: 0;
+    }
+
+    &:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+}
+
+// Pastille de statut d'une partie (Upcoming / Live / Finished)
+.chip {
+    display: inline-block;
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    border: 1px solid var(--primary-color-light);
+    color: var(--primary-color-light);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1;
+
+    &--active {
+        border-color: var(--secondary-color);
+        background-color: var(--secondary-color-trans);
+        color: var(--secondary-color-text);
+    }
+
+    &--finished {
+        border-color: rgba(156, 163, 175, 0.5);
+        color: var(--secondary-text);
+    }
+}
+
+// Squelette de chargement neutre (remplace les faux états vides)
+.skeleton {
+    min-height: 7rem;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--primary-text-trans) 25%, rgba(247, 248, 255, 0.12) 50%, var(--primary-text-trans) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+@keyframes skeleton-shimmer {
+    to { background-position: -200% 0; }
+}
+
+// État vide : discret, sans cadre de carte
+.empty-state {
+    color: var(--secondary-text);
+    padding: .5rem 0;
 }
 
 .invite-link {
@@ -194,6 +269,13 @@ main {
         }
     }
 
+    // Plusieurs colonnes dès qu'il y a la place (au lieu d'une seule colonne étroite)
+    &--active, &--planned, &--previous, &--invites {
+        @media (min-width: 900px) {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+    }
+
     &--invites {
         overflow: hidden;
         transition: max-height 0.4s ease, opacity 0.3s ease;
@@ -226,6 +308,13 @@ main {
 
     &__body {
         line-height: 1.8rem;
+    }
+
+    // Date relative sous le nom de la partie
+    &__when {
+        margin: .25rem 0 0;
+        color: var(--primary-color-light);
+        font-weight: 600;
     }
 
     &--plus {

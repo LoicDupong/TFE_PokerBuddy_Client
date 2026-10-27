@@ -19,61 +19,11 @@ export default function GamesPage() {
     })();
   }, []);
 
-
-  if (!stats) {
-    return <p>Loading stats...</p>;
-  }
-
   return (
     <>
-      <h1>
-        Dashboard <br />
-        <span className="red">My Games</span>
-      </h1>
-      <div className="divider"></div>
-
-      <section className="section section--games-stats">
-        <div className="cards cards--stat">
-          <div className="card card--stat">
-            <div className="card__header">
-              <h3 className="title title--card">Total Games</h3>
-            </div>
-            <div className="card__body">
-              <p>{stats.totalGames}</p>
-            </div>
-          </div>
-          <div className="card card--stat">
-            <div className="card__header">
-              <h3 className="title title--card">Total Win</h3>
-            </div>
-            <div className="card__body">
-              <p>{stats.wins}</p>
-            </div>
-          </div>
-          <div className="card card--stat">
-            <div className="card__header">
-              <h3 className="title title--card">Win Rate</h3>
-            </div>
-            <div className="card__body">
-              <p>{stats.winRate}%</p>
-            </div>
-          </div>
-          <div className="card card--stat">
-            <div className="card__header">
-              <h3 className="title title--card">Games Hosted</h3>
-            </div>
-            <div className="card__body">
-              <p>{stats.gamesHosted}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="divider"></div>
+      <h1>My <span className="red">games</span></h1>
 
       <InvitesDisplay />
-      
-      <div className="divider"></div>
 
       <section className="section section--current-games">
         <ActiveGameDisplay />
@@ -83,7 +33,7 @@ export default function GamesPage() {
 
       <section className="section section--current-games">
         <h3 className="title--section">
-          <span className="red">Upcoming</span> Games
+          <span className="red">Upcoming</span> games
         </h3>
         <UpcomingGamesDisplay />
       </section>
@@ -92,9 +42,25 @@ export default function GamesPage() {
 
       <section className="section section--previous-games">
         <h3 className="title--section">
-          <span className="red">Previous</span> Games
+          <span className="red">Recent</span> games
         </h3>
         <PreviousGamesDisplay />
+      </section>
+
+      <div className="divider"></div>
+
+      {/* Les statistiques viennent après les parties : on ne bloque plus la page pendant leur chargement */}
+      <section className="section section--games-stats" aria-label="My stats">
+        {stats ? (
+          <dl className="stat-grid">
+            <div className="stat-grid__item"><dt>Games</dt><dd>{stats.totalGames}</dd></div>
+            <div className="stat-grid__item"><dt>Wins</dt><dd>{stats.wins}</dd></div>
+            <div className="stat-grid__item"><dt>Win rate</dt><dd>{stats.winRate}%</dd></div>
+            <div className="stat-grid__item"><dt>Hosted</dt><dd>{stats.gamesHosted}</dd></div>
+          </dl>
+        ) : (
+          <div className="skeleton" role="status" aria-busy="true" aria-label="Loading stats"></div>
+        )}
       </section>
     </>
   );

@@ -6,9 +6,49 @@ import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import gameService from '@/services/game.service.js';
 import { currencySymbol, getPrizePool } from '@/utils/game.utils.js';
+import { relativeDateTime } from '@/utils/date.utils.js';
 import PreviousGamesSkeleton from './previous-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
 
+function PreviousCard({ g }) {
+    const winner = g.results?.find(r => r.rank === 1)?.player;
+    return (
+        <div className="card card--previous">
+            <div className="card__header">
+                <h3 className="title title--card">{g.name}</h3>
+                <p className="card__when">{relativeDateTime(g.dateEnd || g.dateStart)}</p>
+                <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
+            </div>
+            <div className="card__body">
+                {g.status === "finished" ? (
+                    <>
+                        <p>
+                            <FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
+                            {winner ? (
+                                winner.user
+                                    ? <Link href={`/profile/${winner.user.id}`}><span className="title--winner">{winner.user.username}</span></Link>
+                                    : <span className="title--winner">{winner.guestName || "Guest"}</span>
+                            ) : "N/A"}
+                        </p>
+                        <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Players:</span> {g.results?.length || 0}</p>
+                        <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
+                        <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize pool:</span> {getPrizePool(g)}{currencySymbol(g.currency)}</p>
+                        <div className="card__actions">
+                            <Link href={`/games/${g.id}`} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faChartBar} /> More stats</Link>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <p className="text--pending">Details update in progress...</p>
+                        <div className="card__actions">
+                            <Link href={`/games/${g.id}`} className="btn btn--card btn--secondary">View game</Link>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
 
 export default function PreviousGamesDisplay() {
     const [games, setGames] = useState(null);
@@ -22,114 +62,19 @@ export default function PreviousGamesDisplay() {
         })();
     }, []);
 
-    if (!games || games.length === 0) return <PreviousGamesSkeleton />;
+    if (!games) return <PreviousGamesSkeleton />;
+    if (games.length === 0) return <p className="empty-state">No finished games yet.</p>;
 
-    if (pathname !== "/games/history") {
-        const displayDate = new Date(games[0].dateEnd || games[0].dateStart);
-        const winner = games[0].results?.find(r => r.rank === 1)?.player;
-
-        return (
-            <div className="cards cards--previous">
-
-                <div className="card card--previous">
-                    <div className="card__header">
-                        <h3 className="title title--card">{games[0].name} -{" "}
-                            {displayDate.toLocaleDateString("fr-FR", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                            })}
-                        </h3>
-                        <h4 className="subtitle subtitle--card">Host: {games[0].host.username}</h4>
-                    </div>
-                    <div className="card__body">
-                        {games[0].status === "finished" ? (
-                            <>
-                                <p>
-                                    <FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
-                                    {winner ? (
-                                        winner.user
-                                            ? <Link href={`/profile/${winner.user.id}`}><span className="title--winner">{winner.user.username}</span></Link>
-                                            : <span className="title--winner">{winner.guestName || "Guest"}</span>
-                                    ) : "N/A"}
-                                </p>
-                                <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {games[0].results?.length || 0}</p>
-                                <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {games[0].buyIn}{currencySymbol(games[0].currency)}</p>
-                                <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {getPrizePool(games[0])}{currencySymbol(games[0].currency)}</p>
-                                <div className="card__actions">
-                                    <Link href={`/games/${games[0].id}`}>
-                                        <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
-                                    </Link>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className="text--pending">Details update in progress...</p>
-                                <Link href={`/games/${games[0].id}`}>
-                                    <div className="btn btn--card">View game</div>
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
-                <Link href={"/games/history"}>
-                    <div className="card card--plus">
-                        <p>View Game History</p>
-                    </div>
-                </Link>
-            </div>
-        )
-    }
-
+    // Accueil : la dernière partie + lien vers l'historique ; historique : toutes
+    const onHistory = pathname === "/games/history";
+    const visible = onHistory ? games : games.slice(0, 1);
 
     return (
         <div className="cards cards--previous">
-            {games.map((g) => {
-                const displayDate = new Date(g.dateEnd || g.dateStart);
-                const winner = g.results?.find(r => r.rank === 1)?.player;
-
-                return (
-                    <div key={g.id} className="card card--previous">
-                        <div className="card__header">
-                            <h3 className="title title--card">{g.name} -{" "}
-                                {displayDate.toLocaleDateString("fr-FR", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                })}
-                            </h3>
-                            <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
-                        </div>
-                        <div className="card__body">
-                            {g.status === "finished" ? (
-                                <>
-                                    <p>
-                                        <FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
-                                        {winner ? (
-                                            winner.user
-                                                ? <Link href={`/profile/${winner.user.id}`}><span className="title--winner">{winner.user.username}</span></Link>
-                                                : <span className="title--winner">{winner.guestName || "Guest"}</span>
-                                        ) : "N/A"}
-                                    </p>
-                                    <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Player numbers:</span> {g.results?.length || 0}</p>
-                                    <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
-                                    <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Total Cash Prize:</span> {getPrizePool(g)}{currencySymbol(g.currency)}</p>
-                                    <Link href={`/games/${g.id}`}>
-                                        <div className="btn btn--card"><FontAwesomeIcon icon={faChartBar} /> More stats</div>
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="text--pending">Details update in progress...</p>
-                                    <Link href={`/games/${g.id}`}>
-                                        <div className="btn btn--card">View game</div>
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )
-            })}
+            {visible.map((g) => <PreviousCard key={g.id} g={g} />)}
+            {!onHistory && (
+                <Link href="/games/history" className="btn btn--secondary btn--card" style={{ gridColumn: "1 / -1" }}>View Game History</Link>
+            )}
         </div>
-    )
+    );
 }

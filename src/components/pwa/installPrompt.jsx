@@ -22,10 +22,13 @@ export default function InstallPrompt() {
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent))
     setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
 
-    // Vérifie si déjà vu
+    // Ouverture automatique une seule fois, à la 3e visite : à la première, la popup cachait
+    // la prochaine partie et ses boutons. Avant ça, l'onglet discret suffit.
     const seen = localStorage.getItem('installPromptSeen')
-    if (!seen) {
-      setIsOpen(true) // première visite → affiche popup
+    const visits = Number(localStorage.getItem('installPromptVisits') || 0) + 1
+    localStorage.setItem('installPromptVisits', String(visits))
+    if (!seen && visits >= 3) {
+      setIsOpen(true)
       localStorage.setItem('installPromptSeen', 'true')
     } else {
       setAlreadySeen(true)

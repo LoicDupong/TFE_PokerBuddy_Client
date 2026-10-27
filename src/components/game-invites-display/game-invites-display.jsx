@@ -1,11 +1,11 @@
 "use client";
 
-import { faCheck, faClock, faEye, faLocationDot, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faEye, faLocationDot, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import gameInviteService from "@/services/gameInvite.service.js";
 import useToastStore from "@/stores/useToastStore.js";
-import { getLocalDayBounds } from "@/utils/date.utils.js";
+import { getLocalDayBounds, relativeDateTime } from "@/utils/date.utils.js";
 import { inviteResponseToast } from "@/utils/game.utils.js";
 import Link from "next/link.js";
 
@@ -40,42 +40,36 @@ export default function GameInvitesDisplay({ onAccept }) {
     return (
         <div className="cards cards--invites">
             {invites.map((invite) => {
-                const dateStart = new Date(invite.dateStart);
                 return (
                     <div key={invite.inviteId} className="card card--invite-game">
                         <div className="card__header">
                             <h3 className="title title--card">{invite.gameName}</h3>
+                            <p className="card__when">{relativeDateTime(invite.dateStart)}</p>
                             <h4 className="subtitle subtitle--card">by {invite.host}</h4>
                         </div>
                         <div className="card__body">
                             {invite.location && (
                                 <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {invite.location}</p>
                             )}
-                            <p>
-                                <FontAwesomeIcon icon={faClock} className="fa-icon" />
-                                <span className="gray"> Meet up:</span>{" "}
-                                {dateStart.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}{" "}
-                                {dateStart.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                            </p>
                             <div className="card__actions">
                                 <button
-                                    className="btn btn--card btn--primary"
+                                    type="button"
+                                    className="btn btn--card"
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "accepted")}
                                 >
                                     <FontAwesomeIcon icon={faCheck} /> Accept
                                 </button>
                                 <button
-                                    className="btn btn--card"
+                                    type="button"
+                                    className="btn btn--card btn--secondary"
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "refused")}
                                 >
                                     <FontAwesomeIcon icon={faXmark} /> Refuse
                                 </button>
-                                <Link href={`/games/${invite.gameId}`}>
-                                    <div className="btn btn--card">
-                                        <FontAwesomeIcon icon={faEye} /> View
-                                    </div>
+                                <Link href={`/games/${invite.gameId}`} className="btn btn--card btn--link">
+                                    <FontAwesomeIcon icon={faEye} /> View
                                 </Link>
                             </div>
                         </div>

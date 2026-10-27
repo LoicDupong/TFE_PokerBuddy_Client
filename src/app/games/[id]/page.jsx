@@ -5,7 +5,7 @@ import PreviousGameDetails from "@/components/previous-games-display/previous-ga
 import UpcomingGamesDetails from "@/components/upcoming-games-display/upcoming-games-details.jsx";
 import gameService from "@/services/game.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
-import { faPenToSquare, faUserPlus, faGears, faDice, faLink, faCopy, faRotateRight, faLinkSlash, faShareNodes } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faUserPlus, faGears, faDice, faLink, faCopy, faRotateRight, faLinkSlash, faShareNodes, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
 import { useRouter, useParams } from "next/navigation";
@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import GameInvite from "@/features/invite/game-invite.jsx";
 import gameInviteService from "@/services/gameInvite.service.js";
 import useToastStore from "@/stores/useToastStore.js";
+import { isSameLocalDay } from "@/utils/date.utils.js";
 
 export default function GameDetailsPage() {
   const { id } = useParams();
@@ -24,6 +25,9 @@ export default function GameDetailsPage() {
   // Action en attente de confirmation dans le bloc lien : "regenerate" | "disable" | null
   const [confirming, setConfirming] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  // Annulation de la partie : confirmation en ligne (pas de window.confirm)
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   // Incrémenté après des invitations : recharge le détail (liste des joueurs)
   const [refreshKey, setRefreshKey] = useState(0);
   const { showToast } = useToastStore();
@@ -52,7 +56,7 @@ export default function GameDetailsPage() {
       <>
         <h1>Game not found</h1>
         <p>This game doesn&apos;t exist anymore or couldn&apos;t be loaded.</p>
-        <Link href="/games" className="btn">Back to my games</Link>
+        <Link href="/games" className="btn btn--secondary">Back to my games</Link>
       </>
     );
   }
@@ -144,7 +148,7 @@ export default function GameDetailsPage() {
             </div>
           ) : (
             <div className="invite-link__actions">
-              <button type="button" className="btn btn--small btn--primary" onClick={handleShare}>
+              <button type="button" className="btn btn--small" onClick={handleShare}>
                 <FontAwesomeIcon icon={faShareNodes} /> Share
               </button>
               <button type="button" className="btn btn--small" onClick={handleCopyLink}>
@@ -167,82 +171,89 @@ export default function GameDetailsPage() {
     </div>
   );
 
-  if (game.status === "finished") {
-    // Partie close sans résultats (ancien passage auto après 24 h) : l'hôte peut encore les saisir
-    const canSubmitResults = user.id === game.host.id && (game.results?.length ?? 0) === 0;
-    return (
-      <PreviousGameDetails
-        actions={canSubmitResults && (
-          <div className="btn__container">
-            <div className="btn btn--edit" onClick={() => router.push(`/manager/preset?gameId=${game.id}`)}>
-              <FontAwesomeIcon icon={faDice} /> Submit results
+  const isHost = user.id === game.host.id;
+  // Jour de partie (ou déjà démarrée) : le Game Manager devient l'action principale de l'hôte
+  const gameDay = game.status === "active" || isSameLocalDay(game.dateStart) || new Date(game.dateStart) <= new Date();
+
+  const handleCancelGame = async () => {
+    if (cancelling) return;
+    setCancelling(true);
+    const res = await gameService.delete(id);
+    setCancelling(false);
+    if (!res.success) {
+      showToast(res.errorMessage?.[0] || "Could not cancel the game, please try again.");
+      return;
+    }
+    showToast(`Game "${game.name}" cancelled`, "success", 5000);
+    router.push("/games");
+  };
+
+  // Actions de l'hôte sous les informations : une seule action pleine (rouge), le reste en secondaire
+  const HostActions = () => (
+    <>
+      <div className="game-actions">
+        {gameDay ? (
+          <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faGears} /> Start Game Manager</Link>
+        ) : (
+          <button type="button" className="btn" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> Invite friends</button>
+        )}
+        <Link href={`/games/${id}/edit`} className="btn btn--secondary"><FontAwesomeIcon icon={faPenToSquare} /> Edit</Link>
+        {gameDay && game.status === "pending" && (
+          <button type="button" className="btn btn--secondary" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> Invite friends</button>
+        )}
+      </div>
+      {game.status === "pending" && ShareLink()}
+      <div className="game-actions game-actions__danger">
+        {confirmCancel ? (
+          <div className="game-actions__confirm" role="alert">
+            <p>Cancel this game? It will be deleted for all invited players. This cannot be undone.</p>
+            <div className="game-actions">
+              <button type="button" className="btn btn--danger" disabled={cancelling} onClick={handleCancelGame}>Yes, cancel game</button>
+              <button type="button" className="btn btn--secondary" onClick={() => setConfirmCancel(false)}>Keep game</button>
             </div>
           </div>
+        ) : (
+          <button type="button" className="btn btn--danger" onClick={() => setConfirmCancel(true)}><FontAwesomeIcon icon={faTrash} /> Cancel game</button>
         )}
-      />
+      </div>
+      {showInviteModal && (
+        <GameInvite
+          invites={invites}
+          setInvites={setInvites}
+          onClose={() => setShowInviteModal(false)}
+          onConfirm={handleInviteConfirm}
+          invitedIds={game.playerLinks.map((p) => p.userId).filter(Boolean)}
+        />
+      )}
+    </>
+  );
+
+  // Même en-tête pour l'hôte et les invités ; les informations d'abord, les actions ensuite
+  if (game.status === "finished") {
+    // Partie close sans résultats (ancien passage auto après 24 h) : l'hôte peut encore les saisir
+    const canSubmitResults = isHost && (game.results?.length ?? 0) === 0;
+    return (
+      <>
+        <h1>Game details</h1>
+        <PreviousGameDetails
+          actions={canSubmitResults && (
+            <div className="game-actions">
+              <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faDice} /> Submit results</Link>
+            </div>
+          )}
+        />
+      </>
     );
   }
 
-  if (game.status === "pending") {
-    if (user.id === game.host.id) {
-      return (
-        <>
-          <h1>Game Details</h1>
-          <div className="divider"></div>
-          <div className="btn__container">
-            <Link href={`/games/${id}/edit`}>
-              <div className="btn btn--edit">
-                <FontAwesomeIcon icon={faPenToSquare} /> Edit
-              </div>
-            </Link>
-            <div className="btn btn--edit btn--invite" onClick={() => setShowInviteModal(true)}>
-              <FontAwesomeIcon icon={faUserPlus} /> Invite
-            </div>
-            <div className="btn btn--edit" onClick={() => router.push(`/manager/preset?gameId=${game.id}`)}>
-              <FontAwesomeIcon icon={faDice} /> Manager
-            </div>
-          </div>
-          <UpcomingGamesDetails key={refreshKey} />
-          <ShareLink />
-          {showInviteModal && (
-            <GameInvite
-              invites={invites}
-              setInvites={setInvites}
-              onClose={() => setShowInviteModal(false)}
-              onConfirm={handleInviteConfirm}
-              invitedIds={game.playerLinks.map((p) => p.userId).filter(Boolean)}
-            />
-          )}
-        </>
-      );
-    }
-    return <UpcomingGamesDetails />;
-  }
-
-  if (game.status === "active") {
-    if (user.id === game.host.id) {
-      const handleGameManager = () => {
-        router.push(`/manager/preset?gameId=${game.id}`);
-      };
-
-      return (
-        <>
-          <h1>Game Details</h1>
-          <div className="divider"></div>
-          <div className="btn__container">
-            <div className="btn btn--edit" onClick={handleGameManager}>
-              <FontAwesomeIcon icon={faGears} /> Game Manager
-            </div>
-            <Link href={`/games/${id}/edit`}>
-              <div className="btn btn--edit">
-                <FontAwesomeIcon icon={faPenToSquare} /> Edit Game
-              </div>
-            </Link>
-          </div>
-          <ActiveGameDetails />
-        </>
-      );
-    }
-    return <ActiveGameDetails />;
+  if (game.status === "pending" || game.status === "active") {
+    const Details = game.status === "active" ? ActiveGameDetails : UpcomingGamesDetails;
+    return (
+      <>
+        <h1>Game details</h1>
+        <Details key={refreshKey} />
+        {isHost && HostActions()}
+      </>
+    );
   }
 }

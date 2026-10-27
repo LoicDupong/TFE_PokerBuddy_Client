@@ -1,17 +1,18 @@
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign, faHourglassStart, faLocationDot, faClock, faCircleInfo, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faHourglassStart, faLocationDot, faCircleInfo, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link.js';
 import gameService from '@/services/game.service.js';
 import gameInviteService from '@/services/gameInvite.service.js';
 import useAuthStore from '@/stores/useAuthStore.js';
 import useToastStore from '@/stores/useToastStore.js';
 import { currencySymbol, inviteResponseToast } from '@/utils/game.utils.js';
+import { relativeDateTime } from '@/utils/date.utils.js';
 import { useEffect, useState } from 'react';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
 
-export default function ActiveGameDisplay() {
+export default function ActiveGameDisplay({ onResponded }) {
     const [games, setGames] = useState(null);
     const [actingId, setActingId] = useState(null);
     const userId = useAuthStore((state) => state.user?.id);
@@ -36,6 +37,7 @@ export default function ActiveGameDisplay() {
             return;
         }
         showToast(...inviteResponseToast(action, game.name));
+        onResponded?.();
         // Refusée : la partie quitte la liste ; acceptée : les boutons disparaissent
         setGames((prev) => action === "refused"
             ? prev.filter((g) => g.id !== game.id)
@@ -45,38 +47,32 @@ export default function ActiveGameDisplay() {
             }));
     };
 
-    if (!games || games.length === 0) return <ActiveGameSkeleton />
+    if (!games) return <ActiveGameSkeleton />
+    // Aucune partie aujourd'hui : on ne montre ni titre ni cadre vide (la prochaine partie est en haut de l'accueil)
+    if (games.length === 0) return null
 
     return (
         <>
+            <div className="divider"></div>
             <h3 className="title--section">
-                <span className="red">Today's</span> Games
+                <span className="red">Today's</span> games
             </h3>
             <div className="cards cards--active">
 
                 {games.map((g) => {
-                    const dateStart = new Date(g.dateStart);
-                    const myInvite = g.playerLinks?.find((p) => p.userId === userId && p.status === "pending");
+                                        const myInvite = g.playerLinks?.find((p) => p.userId === userId && p.status === "pending");
                     return (
                         <div key={g.id} className="card card--active">
                             <div className="card__header">
-                                <h3 className="title title--card">{g.name} <br /> -{" "}
-                                    {dateStart.toLocaleDateString("fr-FR", {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        year: "numeric",
-                                    })}</h3>
+                                <h3 className="title title--card">{g.name}</h3>
+                                <p className="card__when">{relativeDateTime(g.dateStart)}</p>
                                 <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
                             </div>
                             <div className="card__body">
                                 <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {g.location}</p>
-                                <p><FontAwesomeIcon icon={faClock} className="fa-icon" /> <span className="gray">Meet up:</span> {dateStart.toLocaleTimeString("fr-FR", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                })}</p>
-                                <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {g.realStart
-                                    ? new Date(g.realStart).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
-                                    : "—"}</p>
+                                {g.realStart && (
+                                    <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {new Date(g.realStart).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
+                                )}
                                 <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
                                 {myInvite && (
                                     <p className="card__answer">
@@ -88,14 +84,16 @@ export default function ActiveGameDisplay() {
                                     {myInvite && (
                                         <>
                                             <button
-                                                className="btn btn--card btn--primary"
+                                                type="button"
+                                                className="btn btn--card"
                                                 disabled={!!actingId}
                                                 onClick={() => handleRespond(g, myInvite, "accepted")}
                                             >
                                                 <FontAwesomeIcon icon={faCheck} /> Accept
                                             </button>
                                             <button
-                                                className="btn btn--card"
+                                                type="button"
+                                                className="btn btn--card btn--secondary"
                                                 disabled={!!actingId}
                                                 onClick={() => handleRespond(g, myInvite, "refused")}
                                             >
@@ -103,9 +101,7 @@ export default function ActiveGameDisplay() {
                                             </button>
                                         </>
                                     )}
-                                    <Link href={"games/" + g.id}>
-                                        <div className="btn btn--card"><FontAwesomeIcon icon={faCircleInfo} /> More infos</div>
-                                    </Link>
+                                    <Link href={"/games/" + g.id} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faCircleInfo} /> More infos</Link>
                                 </div>
                             </div>
                         </div>

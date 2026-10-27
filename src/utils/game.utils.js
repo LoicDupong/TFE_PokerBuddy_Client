@@ -45,3 +45,7 @@ export function getPayouts(game, prizePool) {
 export function getPayoutAmount(prizePool, percent) {
     return Math.round(prizePool * percent) / 100;
 }
+
+// Libellés affichés pour le statut technique d'une partie
+const STATUS_LABELS = { pending: "Upcoming", active: "Live", finished: "Finished" };
+export const gameStatusLabel = (status) => STATUS_LABELS[status] ?? status;

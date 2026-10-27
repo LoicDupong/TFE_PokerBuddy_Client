@@ -1,7 +1,7 @@
 "use client";
 
 import gameInviteService from '@/services/gameInvite.service.js';
-import { shortDateTime } from '@/utils/date.utils.js';
+import { relativeDateTime } from '@/utils/date.utils.js';
 import {
     faCaretUp,
     faCaretDown,
@@ -50,7 +50,8 @@ export default function InvitesDisplay() {
 
 
     if (loading) return <InvitesSkeleton />;
-    if (invites.length === 0) return <p>No game invites at the moment.</p>;
+    // Pas d'invitation : rien à montrer (pas de bloc vide en tête de page)
+    if (invites.length === 0) return null;
 
     return (
         <>
@@ -58,9 +59,9 @@ export default function InvitesDisplay() {
             <section className="section section__invites">
                 <h2>
                     Game <span className="red">Invites</span> ({invites.length})
-                    <span className="expand" onClick={() => setIsExpanded(!isExpanded)}>
+                    <button type="button" className="expand" aria-expanded={isExpanded} aria-label="Toggle invitations" onClick={() => setIsExpanded(!isExpanded)}>
                         <FontAwesomeIcon icon={isExpanded ? faCaretUp : faCaretDown} />
-                    </span>
+                    </button>
                 </h2>
 
                 <div className={`cards cards--invites ${isExpanded ? "expanded" : "collapsed"}`}>
@@ -72,30 +73,27 @@ export default function InvitesDisplay() {
                                     <p className="subtitle subtitle--card">Invited by {invite.host}</p>
                                 </div>
                                 <div className="card__body">
-                                    {/* 🔹 status de la game */}
-                                    <div className="card__status">{invite.status}</div>
-                                    <p className="subtitle">@{invite.location}</p>
-                                    <p>{shortDateTime(invite.dateStart)}</p>
+                                    <p className="card__when">{relativeDateTime(invite.dateStart)}</p>
+                                    <p><span className="chip">Upcoming</span></p>
+                                    {invite.location && <p className="subtitle">@{invite.location}</p>}
 
-                                    <div className="btn__invites">
+                                    <div className="card__actions">
                                         <button
-                                            className="btn btn--accept"
+                                            type="button"
+                                            className="btn btn--card"
                                             disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "accepted")}>
-                                            <FontAwesomeIcon icon={faCheck} />
+                                            <FontAwesomeIcon icon={faCheck} /> Accept
                                         </button>
-
                                         <button
-                                            className="btn btn--decline"
+                                            type="button"
+                                            className="btn btn--card btn--secondary"
                                             disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "refused")}>
-                                            <FontAwesomeIcon icon={faXmark} />
+                                            <FontAwesomeIcon icon={faXmark} /> Refuse
                                         </button>
-
-                                        <Link href={`/games/${invite.gameId}`}>
-                                            <button className="btn btn--info">
-                                                <FontAwesomeIcon icon={faEye} /> View
-                                            </button>
+                                        <Link href={`/games/${invite.gameId}`} className="btn btn--card btn--link">
+                                            <FontAwesomeIcon icon={faEye} /> View
                                         </Link>
                                     </div>
                                 </div>

@@ -38,3 +38,28 @@ export function toDatetimeLocalValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+const pad2 = (n) => String(n).padStart(2, "0");
+const hhmm = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+// Même jour calendaire en heure locale (comparer les ISO donnerait le jour UTC)
+export function isSameLocalDay(a, b = new Date()) {
+  const x = new Date(a);
+  const y = new Date(b);
+  return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth() && x.getDate() === y.getDate();
+}
+
+// Date lisible d'un coup d'oeil : "Tonight 21:30", "Tomorrow 20:00", "Fri 30/10 20:00"
+// (l'année n'apparaît que si ce n'est pas l'année en cours)
+export function relativeDateTime(date) {
+  const d = new Date(date);
+  const now = new Date();
+  const time = hhmm(d);
+  if (isSameLocalDay(d, now)) return `${d.getHours() >= 18 ? "Tonight" : "Today"} ${time}`;
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (isSameLocalDay(d, tomorrow)) return `Tomorrow ${time}`;
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+  const year = d.getFullYear() !== now.getFullYear() ? `/${d.getFullYear()}` : "";
+  return `${weekday} ${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}${year} ${time}`;
+}
