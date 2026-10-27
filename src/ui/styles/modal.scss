@@ -37,7 +37,7 @@
 
     &__title {
         margin-bottom: 1rem;
-        font-size: 1.4rem;
+        font-size: var(--text-lg);
         font-weight: 700;
         text-align: center;
     }
@@ -48,7 +48,7 @@
         right: 1rem;
         background: none;
         border: none;
-        font-size: 1.2rem;
+        font-size: var(--text-lg);
         cursor: pointer;
         color: var(--secondary-text);
         min-width: 44px;
@@ -135,7 +135,7 @@
     border: 1px solid var(--primary-text);
     background: var(--primary-color);
     color: var(--primary-text);
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
 
     &:focus {
         border-color: var(--accent);
@@ -147,7 +147,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 1rem;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
     color: var(--secondary-text);
 
     input[type="datetime-local"] {

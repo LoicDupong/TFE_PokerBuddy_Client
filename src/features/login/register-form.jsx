@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faLock, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faEye, faEyeSlash, faLock, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { validateRegister } from "@/schemas/authSchema.js";
@@ -25,6 +25,7 @@ export default function RegisterForm() {
 
     const [errorMessage, setErrorMessage] = useState([]);
     const [isPending, setIsPending] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleRegister(e) {
         e.preventDefault();
@@ -61,13 +62,27 @@ export default function RegisterForm() {
         setIsPending(false);
     }
 
+    // Message d'erreur + attributs a11y d'un champ (comme login-form)
+    const errorId = (field) => inputId + field + "-error";
+    const errProps = (field) => {
+        const invalid = !!getFieldError(errorMessage, field);
+        return {
+            "aria-invalid": invalid,
+            "aria-describedby": invalid ? errorId(field) : undefined,
+        };
+    };
+    const fieldError = (field) => {
+        const message = getFieldError(errorMessage, field);
+        return message && <p className="form__error" id={errorId(field)} role="alert">{message}</p>;
+    };
+
     return (
         <section className="auth auth--register">
             <h1 className="title title--auth">
                 Create <br /><span className="red">new account</span>
             </h1>
 
-            <form onSubmit={handleRegister} className="form form--auth" id="register-form">
+            <form onSubmit={handleRegister} className="form form--auth" id="register-form" noValidate>
                 <div className="form__row">
                     <label htmlFor={inputId + "username"}>
                         <FontAwesomeIcon icon={faUser} /> Username
@@ -77,11 +92,10 @@ export default function RegisterForm() {
                         id={inputId + "username"}
                         name="username"
                         placeholder="Choose a username"
-                        required
+                        autoComplete="username"
+                        {...errProps("username")}
                     />
-                    {getFieldError(errorMessage, "username") && (
-                        <p className="form__error">{getFieldError(errorMessage, "username")}</p>
-                    )}
+                    {fieldError("username")}
                 </div>
 
                 <div className="form__row">
@@ -93,43 +107,52 @@ export default function RegisterForm() {
                         id={inputId + "email"}
                         name="email"
                         placeholder="Enter your email"
-                        required
+                        autoComplete="email"
+                        {...errProps("email")}
                     />
-                    {getFieldError(errorMessage, "email") && (
-                        <p className="form__error">{getFieldError(errorMessage, "email")}</p>
-                    )}
+                    {fieldError("email")}
                 </div>
 
                 <div className="form__row">
                     <label htmlFor={inputId + "password"}>
                         <FontAwesomeIcon icon={faLock} /> Password
                     </label>
-                    <input
-                        type="password"
-                        id={inputId + "password"}
-                        name="password"
-                        placeholder="Enter your password"
-                        required
-                    />
-                    {getFieldError(errorMessage, "password") && (
-                        <p className="form__error">{getFieldError(errorMessage, "password")}</p>
-                    )}
+                    <div className="input__container">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id={inputId + "password"}
+                            name="password"
+                            placeholder="Enter your password"
+                            autoComplete="new-password"
+                            className="input--with-toggle"
+                            {...errProps("password")}
+                        />
+                        <button
+                            type="button"
+                            className="input__toggle"
+                            onClick={() => setShowPassword((v) => !v)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-pressed={showPassword}
+                        >
+                            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
+                        </button>
+                    </div>
+                    {fieldError("password")}
                 </div>
 
                 <div className="form__row">
                     <label htmlFor={inputId + "confirmPassword"}>
-                        <FontAwesomeIcon icon={faLock} /> Confirm Password
+                        <FontAwesomeIcon icon={faLock} /> Confirm password
                     </label>
                     <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         id={inputId + "confirmPassword"}
                         name="confirmPassword"
                         placeholder="Confirm your password"
-                        required
+                        autoComplete="new-password"
+                        {...errProps("confirmPassword")}
                     />
-                    {getFieldError(errorMessage, "confirmPassword") && (
-                        <p className="form__error">{getFieldError(errorMessage, "confirmPassword")}</p>
-                    )}
+                    {fieldError("confirmPassword")}
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending}>
@@ -138,7 +161,7 @@ export default function RegisterForm() {
 
                 {/* Erreur globale */}
                 {getFieldError(errorMessage, "form") && (
-                    <p className="form__error">{getFieldError(errorMessage, "form")}</p>
+                    <p className="form__error" role="alert">{getFieldError(errorMessage, "form")}</p>
                 )}
             </form>
 
@@ -148,7 +171,7 @@ export default function RegisterForm() {
                     href={redirect ? `/auth/login?redirect=${encodeURIComponent(redirect)}` : "/auth/login"}
                     className="link"
                 >
-                    Login here
+                    Log in
                 </Link>
             </p>
         </section>

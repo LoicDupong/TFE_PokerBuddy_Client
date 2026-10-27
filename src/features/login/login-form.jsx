@@ -55,7 +55,7 @@ export default function LoginForm() {
 
     return (
         <section className="auth auth--login">
-            <h1 className="title title--auth">Login</h1>
+            <h1 className="title title--auth">Log in</h1>
 
             <form onSubmit={handleLogin} className="form form--auth" id="login-form" noValidate>
                 <div className="form__row">
@@ -107,7 +107,7 @@ export default function LoginForm() {
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending}>
-                    <FontAwesomeIcon icon={faSignInAlt} /> {isPending ? "Logging in…" : "Login"}
+                    <FontAwesomeIcon icon={faSignInAlt} /> {isPending ? "Logging in…" : "Log in"}
                 </button>
 
                 {/* Erreur globale */}
@@ -122,7 +122,7 @@ export default function LoginForm() {
                     href={redirect ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : "/auth/register"}
                     className="link"
                 >
-                    Register here
+                    Register
                 </Link>
             </p>
         </section>

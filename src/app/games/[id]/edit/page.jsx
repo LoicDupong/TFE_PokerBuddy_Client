@@ -102,7 +102,7 @@ export default function EditGamePage() {
         });
     }, [formData.placesPaid]);
 
-    if (!game) return <p>Loading...</p>;
+    if (!game) return <p>Loading…</p>;
 
     // handle inputs
     const handleChange = (e) => {
@@ -143,7 +143,7 @@ export default function EditGamePage() {
     return (
         <form onSubmit={handleConfirm} className="form form--session">
             <h2>
-                Edit <span className="red">Game</span>
+                Edit <span className="red">game</span>
             </h2>
 
             {/* Name */}
@@ -208,7 +208,7 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="maxPlayers">Max Players</label>
+                        <label htmlFor="maxPlayers">Max players</label>
                         <input id="maxPlayers"
                             type="number"
                             name="maxPlayers"
@@ -218,7 +218,7 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="placesPaid">Places Paid</label>
+                        <label htmlFor="placesPaid">Places paid</label>
                         <input id="placesPaid"
                             type="number"
                             name="placesPaid"
@@ -257,7 +257,7 @@ export default function EditGamePage() {
 
             {/* Payouts */}
             <fieldset className="form__fieldset">
-                <legend>Payout Distribution (%)</legend>
+                <legend>Payout distribution (%)</legend>
 
                 <div className="form__grid">
                     {payouts.map((p, idx) => (
@@ -296,7 +296,7 @@ export default function EditGamePage() {
                 </legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label htmlFor="smallBlind">Small Blind</label>
+                        <label htmlFor="smallBlind">Small blind</label>
                         <input id="smallBlind"
                             type="number"
                             name="smallBlind"
@@ -305,7 +305,7 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="bigBlind">Big Blind</label>
+                        <label htmlFor="bigBlind">Big blind</label>
                         <input id="bigBlind"
                             type="number"
                             name="bigBlind"
@@ -314,7 +314,7 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="levelDuration">Level Duration (min)</label>
+                        <label htmlFor="levelDuration">Level duration (min)</label>
                         <input id="levelDuration"
                             type="number"
                             name="levelDuration"
@@ -331,7 +331,7 @@ export default function EditGamePage() {
                         checked={formData.enableBlindTimer}
                         onChange={handleChange}
                     />
-                    <span>Enable blind timer during the session</span>
+                    <span>Enable blind timer during the game</span>
                 </label>
             </fieldset>
 
@@ -354,7 +354,7 @@ export default function EditGamePage() {
                     <FontAwesomeIcon icon={faXmark} /> Cancel
                 </button>
                 <button type="submit" className="btn btn--primary" disabled={payoutError}>
-                    <FontAwesomeIcon icon={faSave} /> Save Changes
+                    <FontAwesomeIcon icon={faSave} /> Save changes
                 </button>
             </div>
         </form>

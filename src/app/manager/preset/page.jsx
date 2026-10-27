@@ -9,6 +9,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
 
+// 1st, 2nd, 3rd, 4th… (11th, 12th, 13th compris)
+function ordinal(n) {
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+    return `${n}${{ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th"}`;
+}
+
 export default function PresetForm() {
     // En premier : la sauvegarde doit être relue avant que les effets ci-dessous n'écrivent dans le preset
     const hydrated = usePresetHydrated();
@@ -169,12 +176,12 @@ export default function PresetForm() {
         router.push("/manager");
     };
 
-    if (!hydrated) return <p>Loading...</p>;
+    if (!hydrated) return <p>Loading…</p>;
 
     return (
         <form className="form form--preset" onSubmit={handleSubmit}>
             <h2>
-                Game <span className="red">Preset</span>
+                Game <span className="red">setup</span>
             </h2>
 
             {/* Preset encore lié à une partie (ex: retour via "Edit" depuis le manager) */}
@@ -212,7 +219,7 @@ export default function PresetForm() {
                     />
                 </div>
                 <div className="form__row">
-                    <label htmlFor="chipsPerPlayer">Chips / Player</label>
+                    <label htmlFor="chipsPerPlayer">Chips per player</label>
                     <input id="chipsPerPlayer"
                         type="number"
                         name="chipsPerPlayer"
@@ -227,7 +234,7 @@ export default function PresetForm() {
                 <legend>Blinds</legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label htmlFor="smallBlind">Small Blind</label>
+                        <label htmlFor="smallBlind">Small blind</label>
                         <input id="smallBlind"
                             type="number"
                             name="smallBlind"
@@ -236,7 +243,7 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="bigBlind">Big Blind</label>
+                        <label htmlFor="bigBlind">Big blind</label>
                         <input id="bigBlind"
                             type="number"
                             name="bigBlind"
@@ -245,7 +252,7 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="levelDurationMin">Level Duration (min)</label>
+                        <label htmlFor="levelDurationMin">Level duration (min)</label>
                         <input id="levelDurationMin"
                             type="number"
                             name="levelDurationMin"
@@ -304,10 +311,10 @@ export default function PresetForm() {
                     className="btn btn--addPlayer"
                     onClick={handleAddPlayer}
                 >
-                    <FontAwesomeIcon icon={faPlus} /> Add Player
+                    <FontAwesomeIcon icon={faPlus} /> Add player
                 </button>
                 <div className="form__row">
-                    <label htmlFor="playersNumber">Players Number</label>
+                    <label htmlFor="playersNumber">Players</label>
                     <input
                         id="playersNumber"
                         type="number"
@@ -329,9 +336,9 @@ export default function PresetForm() {
 
             {/* Payout */}
             <fieldset className="form__fieldset">
-                <legend>Prize Distribution</legend>
+                <legend>Prize distribution</legend>
                 <div className="form__row" style={{ marginBottom: "2rem" }}>
-                    <label htmlFor="placesPaid">Places Paid</label>
+                    <label htmlFor="placesPaid">Places paid</label>
                     <input id="placesPaid"
                         type="number"
                         name="placesPaid"
@@ -344,7 +351,7 @@ export default function PresetForm() {
                     <div key={i} className="form__grid">
                         <div className="form__row">
                             <label htmlFor={`payout-${i}`}>
-                                {p.place}ᵉ place{" "}
+                                {ordinal(p.place)} place{" "}
                                 <small>
                                     {" "}
                                     ({p.percent}% →{" "}
@@ -379,7 +386,7 @@ export default function PresetForm() {
 
                 {/* Prize Pool (auto) */}
                 <div className="form__row">
-                    <label htmlFor="prizePool">Prize Pool</label>
+                    <label htmlFor="prizePool">Prize pool</label>
                     <input id="prizePool" type="number" value={preset.prizePool || 0} readOnly />
                 </div>
             </fieldset>
@@ -388,7 +395,7 @@ export default function PresetForm() {
             {playerError && <p className="error">{playerError}</p>}
 
             <button className="btn btn--full" type="submit">
-                Use Preset
+                Start Game Manager
             </button>
         </form>
     );

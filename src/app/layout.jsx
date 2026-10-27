@@ -1,4 +1,4 @@
-import { Roboto } from "next/font/google";
+import { Roboto, Barlow_Condensed } from "next/font/google";
 import "./globals.scss";
 import "./styles/base/base.scss";
 import "./styles/base/typography.scss";
@@ -31,6 +31,13 @@ const roboto = Roboto({
   subsets: ["latin"],
 });
 
+// Police d'affichage condensée pour titres, timer et blinds
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-display",
+  weight: ["600", "700"],
+  subsets: ["latin"],
+});
+
 export const metadata = {
   title: "PokerBuddy | Home Poker Games Manager",
   description: "PokerBuddy your bestfriend to manage home poker games with your bestfriends !",
@@ -45,7 +52,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="PokerBuddy" />
       </head>
 
-      <body className={roboto.variable}>
+      <body className={`${roboto.variable} ${barlowCondensed.variable}`}>
         <AuthInit />
         <Header />
         <main>{children}</main>

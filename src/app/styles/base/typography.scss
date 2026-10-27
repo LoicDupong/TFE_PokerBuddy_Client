@@ -1,21 +1,46 @@
 //*  Typography
-// Roboto est chargée par next/font dans layout.jsx (variable --font-roboto)
+// Roboto (corps) et Barlow Condensed (titres) sont chargées par next/font dans layout.jsx
 
-* {
+// Échelle typographique fixe (UI d'app), rapport ~1.25 ; les pages n'utilisent que ces 5 tailles
+:root {
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+}
+
+// Sur body (hérité) et non sur * : les <span> dans un titre gardent la police du titre
+body {
   font-family: var(--font-roboto), "Roboto", sans-serif;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3,
+.title,
+.subtitle--display {
+  font-family: var(--font-display), "Barlow Condensed", var(--font-roboto), sans-serif;
+}
+
 h1 {
-  font-size: 38px;
+  font-size: var(--text-2xl);
   letter-spacing: 1px;
 }
 
 h2 {
-  font-size: 30px;
+  font-size: var(--text-xl);
 }
 
 h3 {
-  font-size: 22px;
+  font-size: var(--text-lg);
   text-transform: uppercase;
 }
 
@@ -38,7 +63,7 @@ p {
   }
 
   &--friend {
-    font-size: 20px;
+    font-size: var(--text-lg);
     text-align: center;
   }
 
@@ -46,13 +71,13 @@ p {
     margin-bottom: 2rem;
   }
 
-  &--section{
-    font-size: 30px;
+  &--section {
+    font-size: var(--text-xl);
   }
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 200;
   color: var(--secondary-text);
   margin-bottom: 1rem;
@@ -68,7 +93,7 @@ p {
 }
 
 .form__error {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--secondary-color-text);
   margin-top: 0.3rem;
 }

@@ -93,6 +93,8 @@ main:has(.manager) {
   }
 
   &__timer {
+    font-family: var(--font-display), "Barlow Condensed", sans-serif;
+    font-variant-numeric: tabular-nums;
     font-size: min(18vw, 30vh);
     line-height: 0.95;
     font-weight: 700;
@@ -122,6 +124,8 @@ main:has(.manager) {
   }
 
   &__blinds {
+    font-family: var(--font-display), "Barlow Condensed", sans-serif;
+    font-variant-numeric: tabular-nums;
     font-weight: 700;
     line-height: 1;
     white-space: nowrap;
