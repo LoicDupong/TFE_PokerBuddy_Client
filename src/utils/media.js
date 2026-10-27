@@ -4,6 +4,8 @@
  */
 export const serverUrl = (path) => {
     if (!path) return null;
+    // Avatar stocké sur Cloudinary : l'URL est déjà complète
+    if (/^https?:\/\//.test(path)) return path;
     return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`;
 };
 
