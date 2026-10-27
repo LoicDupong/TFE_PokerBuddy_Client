@@ -6,9 +6,9 @@ const fail = (error, fallback) => ({
 });
 
 const joinService = {
-    joinByToken: async (token) => {
+    joinByToken: async (token, status = "accepted") => {
         try {
-            const res = await api.post(`/join/${token}`);
+            const res = await api.post(`/join/${token}`, { status });
             return { success: true, data: res.data };
         } catch (error) {
             return fail(error, "Failed to join game");

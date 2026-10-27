@@ -69,6 +69,19 @@ const userService = {
     }
   },
 
+  // POST /auth/update-pwd
+  updatePassword: async (oldPassword, newPassword) => {
+    try {
+      await api.post("/auth/update-pwd", { oldPassword, newPassword });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        errorMessage: [error.response?.data?.error || "Could not change the password"],
+      };
+    }
+  },
+
   searchByUsername: async (username) => {
     try {
       const res = await api.get(`/user/search`, { params: { username } });

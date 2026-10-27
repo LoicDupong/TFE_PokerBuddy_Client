@@ -8,6 +8,7 @@ import { faCheck, faUser, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AccountSettings from "@/components/account-settings/account-settings.jsx";
 
 export default function EditProfilePage() {
     const [user, setUser] = useState(null);
@@ -140,6 +141,8 @@ export default function EditProfilePage() {
                     </div>
                 </div>
             </section>
+
+            <AccountSettings username={user.username} />
         </>
     );
 }

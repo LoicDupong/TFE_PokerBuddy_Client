@@ -64,3 +64,48 @@
         background-color: var(--secondary-color-trans);
     }
 }
+
+// Section "Account" de la page d'édition
+.account {
+    &__card {
+        margin-top: 1rem;
+        text-align: left;
+    }
+
+    &__subtitle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    &__danger {
+        border: 2px solid var(--secondary-color);
+
+        .account__subtitle { color: var(--secondary-color-text); }
+    }
+
+    &__confirm {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+}
+
+// Rouge plein pour l'action destructive ; texte blanc lisible sur le rouge
+.btn--danger {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--secondary-color);
+    border-radius: 8px;
+    background: var(--secondary-color);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}

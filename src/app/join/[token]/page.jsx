@@ -70,15 +70,11 @@ export default function JoinPage() {
             const res = await gameInviteService.respond(myInviteId, status);
             ok = res.success;
             if (!ok) setFormError(res.errorMessage?.[0]);
-        } else if (status === "accepted") {
-            const res = await joinService.joinByToken(token);
+        } else {
+            // Pas de ligne pour moi : l'endpoint la crée (aussi pour un refus, que l'hôte doit voir)
+            const res = await joinService.joinByToken(token, status);
             ok = res.success;
             if (!ok) setFormError(res.error);
-        } else {
-            // Pas de ligne pour moi dans la partie : rien à enregistrer pour un refus
-            setMyStatus("refused");
-            setBusy(false);
-            return;
         }
         if (ok) {
             setMyStatus(status);

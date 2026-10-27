@@ -58,7 +58,40 @@ export default function ProfilePage() {
                             <p className="subtitle subtitle--email">{user.email}</p>
                         </div>
                         <div className="user__description">
-                            <p>{user.description || "No description set."}</p>
+                            {user.description ? (
+                                <p>{user.description}</p>
+                            ) : (
+                                <p className="gray">
+                                    Tell your friends who they are playing with.{" "}
+                                    <Link href="/profile/edit" className="link">Add a short bio</Link>
+                                </p>
+                            )}
+                        </div>
+                        <div className="user__stats">
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.totalGames || 0}</h2>
+                                <p className="subtitle">Games Played</p>
+                            </div>
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.winRate ? `${user.stats.winRate}%` : "0%"}</h2>
+                                <p className="subtitle">Win Rate</p>
+                            </div>
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.wins || 0}</h2>
+                                <p className="subtitle">Wins</p>
+                            </div>
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.avgPlacement ?? "-"}</h2>
+                                <p className="subtitle">Avg. Place</p>
+                            </div>
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.gamesHosted || 0}</h2>
+                                <p className="subtitle">Hosted</p>
+                            </div>
+                            <div className="user__stat">
+                                <h2 className="title title--stat">{user.stats?.bestStreak || 0}</h2>
+                                <p className="subtitle">Best Streak</p>
+                            </div>
                         </div>
                         <Link href={"/profile/edit"} className="btn btn--user">
                             <FontAwesomeIcon icon={faPenToSquare} /> Edit Profile
