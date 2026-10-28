@@ -65,6 +65,56 @@
     }
 }
 
+// Ordinateur : identité à gauche, stats principales à droite, au lieu d'une colonne étirée
+// sur toute la largeur. Le mobile garde la grille complète des 6 stats.
+@media (min-width: 900px) {
+    .section__user .user {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "avatar infos stats"
+            "avatar desc stats"
+            "avatar action stats";
+        align-items: center;
+        column-gap: 2.5rem;
+        padding: 2rem;
+
+        .user__avatar {
+            grid-area: avatar;
+            align-self: start;
+            margin-bottom: 0;
+        }
+
+        .user__infos { grid-area: infos; }
+
+        .user__description {
+            grid-area: desc;
+            margin-bottom: 0;
+        }
+
+        .btn--user,
+        .user__request {
+            grid-area: action;
+            justify-self: start;
+        }
+
+        .user__stats {
+            grid-area: stats;
+            grid-template-columns: repeat(2, minmax(7rem, auto));
+            gap: 1rem 2.5rem;
+        }
+
+        .user__stat--extra { display: none; }
+    }
+}
+
+// Écran large : les 4 stats sur une ligne
+@media (min-width: 1400px) {
+    .section__user .user .user__stats {
+        grid-template-columns: repeat(4, minmax(6rem, auto));
+    }
+}
+
 // Section "Account" de la page d'édition
 .account {
     &__card {

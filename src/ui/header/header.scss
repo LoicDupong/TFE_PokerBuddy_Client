@@ -9,3 +9,13 @@ header{
 }
 
 
+
+
+// Logo : jamais plus grand que sur desktop, et il ne s'écrase plus quand la nav prend la place
+header > a {
+    max-width: 245px;
+
+    @media (min-width: 1281px) {
+        flex: 0 0 clamp(150px, 12vw, 245px);
+    }
+}

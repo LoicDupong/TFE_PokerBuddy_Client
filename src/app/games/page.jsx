@@ -23,6 +23,20 @@ export default function GamesPage() {
     <>
       <h1>My <span className="red">games</span></h1>
 
+      {/* Stats en tête de page ; un squelette les remplace pendant le chargement sans bloquer les listes */}
+      <section className="section section--games-stats" aria-label="My stats">
+        {stats ? (
+          <dl className="stat-grid">
+            <div className="stat-grid__item"><dt>Games</dt><dd>{stats.totalGames}</dd></div>
+            <div className="stat-grid__item"><dt>Wins</dt><dd>{stats.wins}</dd></div>
+            <div className="stat-grid__item"><dt>Win rate</dt><dd>{stats.winRate}%</dd></div>
+            <div className="stat-grid__item"><dt>Hosted</dt><dd>{stats.gamesHosted}</dd></div>
+          </dl>
+        ) : (
+          <div className="skeleton" role="status" aria-busy="true" aria-label="Loading stats"></div>
+        )}
+      </section>
+
       <InvitesDisplay />
 
       <section className="section section--current-games">
@@ -45,22 +59,6 @@ export default function GamesPage() {
           <span className="red">Recent</span> games
         </h3>
         <PreviousGamesDisplay />
-      </section>
-
-      <div className="divider"></div>
-
-      {/* Les statistiques viennent après les parties : on ne bloque plus la page pendant leur chargement */}
-      <section className="section section--games-stats" aria-label="My stats">
-        {stats ? (
-          <dl className="stat-grid">
-            <div className="stat-grid__item"><dt>Games</dt><dd>{stats.totalGames}</dd></div>
-            <div className="stat-grid__item"><dt>Wins</dt><dd>{stats.wins}</dd></div>
-            <div className="stat-grid__item"><dt>Win rate</dt><dd>{stats.winRate}%</dd></div>
-            <div className="stat-grid__item"><dt>Hosted</dt><dd>{stats.gamesHosted}</dd></div>
-          </dl>
-        ) : (
-          <div className="skeleton" role="status" aria-busy="true" aria-label="Loading stats"></div>
-        )}
       </section>
     </>
   );

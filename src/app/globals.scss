@@ -10,6 +10,7 @@
   --secondary-color: #d70022;
   --secondary-color-text: #ff5468; // rouge lisible en texte sur fond marine (contraste AA)
   --secondary-color-trans: rgba(215, 0, 34, 0.5);
+  --secondary-color-deep: #790e24; // fond du menu mobile : --secondary-color-trans posé sur le marine
 
 }
 
@@ -41,9 +42,20 @@ body {
   margin: 0;
 }
 
-body.no-scroll {
+// Menu mobile ouvert : page bloquée. Safari iOS 26 n'affiche pas les éléments fixed sous sa barre
+// d'outils flottante : une fois le menu entré (0.4s), on masque la page et le fond prend la couleur
+// du menu, pour que la bande sous la barre se confonde avec lui.
+body.menu-open {
   overflow: hidden;
   height: 100vh;
+  background-color: var(--secondary-color-deep);
+  transition: background-color 0s linear 0.4s;
+
+  main,
+  footer {
+    visibility: hidden;
+    transition: visibility 0s linear 0.4s;
+  }
 }
 
 

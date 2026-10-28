@@ -42,7 +42,8 @@ export default function Navbar() {
     const bellClass = `notification${unreadCount > 0 ? " has-notification" : ""}`;
 
     const pathname = usePathname();
-    const mobile = 950;
+    // Sous 1280px les 7 liens ne tiennent pas sur une ligne à côté du logo : menu burger
+    const mobile = 1280;
 
     // null tant que la largeur n'est pas connue : évite d'afficher la nav mobile un instant sur desktop
     const [isMobile, setIsMobile] = useState(null);
@@ -69,12 +70,12 @@ export default function Navbar() {
 
     useEffect(() => {
         if (isOpen) {
-            document.body.classList.add("no-scroll");
+            document.body.classList.add("menu-open");
         } else {
-            document.body.classList.remove("no-scroll");
+            document.body.classList.remove("menu-open");
         }
 
-        return () => document.body.classList.remove("no-scroll"); // cleanup
+        return () => document.body.classList.remove("menu-open"); // cleanup
     }, [isOpen]);
 
     if (isMobile === null) return <nav className="nav" />;
@@ -134,68 +135,83 @@ export default function Navbar() {
             </button>
 
             <div className={`nav--mobile ${isOpen ? "open" : ""}`}>
-                <Link href={"/"} onClick={() => setIsOpen(false)}>
-                    <Image
-                        src="/pokerbuddy_logo_light.png"
-                        className="logo logo--header"
-                        alt="PokerBuddy logo"
-                        width={135}
-                        height={70}
-                        priority
-                    />
-                </Link>
-                <button type="button" className="nav__close" onClick={() => setIsOpen(false)} aria-label="Close menu">
-                    <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
-                </button>
-                {navLinks.map(({ href, name }) => (
-                    <Link
-                        key={href}
-                        href={href}
-                        className={pathname === href ? "active nav__item" : "nav__item"}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        {name}
+                {/* Même barre que l'en-tête (logo, cloche, croix à la place du burger) : le logo ne bouge pas */}
+                <div className="nav__mobile-top">
+                    <Link href={"/"} onClick={() => setIsOpen(false)}>
+                        <Image
+                            src="/pokerbuddy_logo_light.png"
+                            className="logo logo--header"
+                            alt="PokerBuddy logo"
+                            width={145}
+                            height={70}
+                            priority
+                        />
                     </Link>
-                ))}
+                    <div className="nav__mobile-actions">
+                        {user && (
+                            <Link href={'/notifications'} aria-label={bellLabel} className={bellClass} onClick={() => setIsOpen(false)}>
+                                <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" aria-hidden="true" />
+                            </Link>
+                        )}
+                        <button type="button" className="nav__close" onClick={() => setIsOpen(false)} aria-label="Close menu">
+                            <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
+                        </button>
+                    </div>
+                </div>
 
-                {/* Learn dropdown mobile */}
-                <button
-                    type="button"
-                    className="nav__item nav__item--dropdown"
-                    onClick={() => setLearnOpen(!learnOpen)}
-                    aria-expanded={learnOpen}
-                >
-                    Learn{" "}
-                    <FontAwesomeIcon
-                        icon={learnOpen ? faChevronUp : faChevronDown}
-                        className="nav__icon"
-                    />
-                </button>
-                <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
-                    {learnLinks.map(({ href, name }) => (
+                <div className="nav__mobile-links">
+                    {navLinks.map(({ href, name }) => (
                         <Link
                             key={href}
                             href={href}
-                            className={pathname === href ? "active nav__subitem" : "nav__subitem"}
+                            className={pathname === href ? "active nav__item" : "nav__item"}
+                            aria-current={pathname === href ? "page" : undefined}
                             onClick={() => setIsOpen(false)}
                         >
                             {name}
                         </Link>
                     ))}
-                </div>
 
-                {user && (
-                    <Link
-                        href="/"
-                        onClick={() => {
-                            logout();
-                            setIsOpen(false);
-                        }}
-                        className="nav__item nav__item--logout"
+                    {/* Learn dropdown mobile */}
+                    <button
+                        type="button"
+                        className="nav__item nav__item--dropdown"
+                        onClick={() => setLearnOpen(!learnOpen)}
+                        aria-expanded={learnOpen}
                     >
-                        Logout
-                    </Link>
-                )}
+                        Learn{" "}
+                        <FontAwesomeIcon
+                            icon={learnOpen ? faChevronUp : faChevronDown}
+                            className="nav__icon"
+                        />
+                    </button>
+                    <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
+                        {learnLinks.map(({ href, name }) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={pathname === href ? "active nav__subitem" : "nav__subitem"}
+                                aria-current={pathname === href ? "page" : undefined}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                {name}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {user && (
+                        <Link
+                            href="/"
+                            onClick={() => {
+                                logout();
+                                setIsOpen(false);
+                            }}
+                            className="nav__item nav__item--logout"
+                        >
+                            Logout
+                        </Link>
+                    )}
+                </div>
             </div>
         </nav>
     );

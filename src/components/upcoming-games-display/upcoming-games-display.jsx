@@ -11,6 +11,7 @@ import { apiUrl } from '@/utils/media.js';
 import { currencySymbol } from '@/utils/game.utils.js';
 import { relativeDateTime } from '@/utils/date.utils.js';
 import gameInviteService from "@/services/gameInvite.service.js";
+import useAuthStore from "@/stores/useAuthStore.js";
 
 function UpcomingCard({ g }) {
   return (
@@ -39,38 +40,53 @@ function UpcomingCard({ g }) {
   );
 }
 
-export default function UpcomingGamesDisplay() {
+export default function UpcomingGamesDisplay({ excludeId = null, includeToday = false }) {
   const [games, setGames] = useState(null);
   const [isExpand, setIsExpand] = useState(false);
   // Invitations en attente : on n'affiche pas "No upcoming games yet." tant qu'il y en a
-  const [hasInvites, setHasInvites] = useState(false);
+  const [invites, setInvites] = useState([]);
+  const userId = useAuthStore((state) => state.user?.id);
   const pathname = usePathname();
 
   useEffect(() => {
     (async () => {
-      const data = await gameService.getAll("upcoming");
-      const gamesArray = data?.games || data || [];
-      const invites = await gameInviteService.getMyInvites();
-      setHasInvites(!!invites?.length);
-      setGames(gamesArray);
+      const toList = (d) => d?.games || (Array.isArray(d) ? d : []);
+      const [upcoming, today, myInvites] = await Promise.all([
+        gameService.getAll("upcoming"),
+        includeToday ? gameService.getAll("today") : null,
+        gameInviteService.getMyInvites(),
+      ]);
+      // Accueil (sans section "Today's games") : les parties du jour où je joue ou que j'organise.
+      // Les invitations du jour en attente sont déjà dans les cartes d'invitation.
+      const todayGames = toList(today).filter((g) =>
+        g.host?.id === userId || g.playerLinks?.some((p) => p.userId === userId && p.status === "accepted"));
+      setInvites(myInvites || []);
+      setGames([...todayGames, ...toList(upcoming)]);
     })();
-  }, []);
+  }, [includeToday, userId]);
 
   if (!games) return <UpcomingGamesSkeleton />;
-  if (games.length === 0) return hasInvites ? null : <p className="empty-state">No upcoming games yet.</p>;
 
-  // Sur l'accueil : la prochaine partie + "Show more" ; sur /games : toutes
+  const list = games.filter((g) => g.id !== excludeId);
+  const hasInvites = invites.some((i) => i.gameId !== excludeId);
+  if (list.length === 0) {
+    if (hasInvites) return null;
+    // La seule partie prévue est déjà affichée en haut de l'accueil
+    return <p className="empty-state">{excludeId ? "Nothing else planned yet." : "No upcoming games yet."}</p>;
+  }
+
+  // Sur l'accueil : une carte + "Show more" ; sur /games : toutes
   const collapsible = pathname !== "/games";
-  const visible = collapsible && !isExpand ? games.slice(0, 1) : games;
+  const visible = collapsible && !isExpand ? list.slice(0, 1) : list;
 
   return (
     <div className="cards cards--planned">
       {visible.map((g) => <UpcomingCard key={g.id} g={g} />)}
-      {collapsible && games.length > 1 && (
+      {collapsible && list.length > 1 && (
         <button type="button" className="btn btn--secondary btn--card" style={{ gridColumn: "1 / -1" }} onClick={() => setIsExpand(!isExpand)} aria-expanded={isExpand}>
           {isExpand
             ? <><FontAwesomeIcon icon={faMinus} /> Show less</>
-            : <><FontAwesomeIcon icon={faPlus} /> Show more ({games.length - 1})</>}
+            : <><FontAwesomeIcon icon={faPlus} /> Show more ({list.length - 1})</>}
         </button>
       )}
     </div>

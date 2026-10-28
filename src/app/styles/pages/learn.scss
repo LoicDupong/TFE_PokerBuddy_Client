@@ -20,6 +20,7 @@
     p {
         color: var(--secondary-text);
         line-height: 1.75;
+        max-width: 75ch; // lignes lisibles sur grand écran
     }
 
     article {
@@ -149,5 +150,25 @@
 @media (max-width: 640px) {
     .learn-hub__grid {
         grid-template-columns: 1fr;
+    }
+}
+
+// Ordinateur : titres de paragraphe et textes secondaires à la taille du texte courant
+// (en --text-sm, ils restaient minuscules sur grand écran). Le mobile garde ses tailles.
+@media (min-width: 1024px) {
+    .poker-hands,
+    .learn-page {
+        article h3,
+        ul li h3 {
+            font-size: var(--text-base);
+        }
+
+        ul li p {
+            font-size: var(--text-base);
+        }
+    }
+
+    .learn-hub__card p {
+        font-size: var(--text-base);
     }
 }

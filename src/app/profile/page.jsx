@@ -67,6 +67,7 @@ export default function ProfilePage() {
                                 </p>
                             )}
                         </div>
+                        {/* Sur ordinateur, seules les 4 stats principales restent (les --extra sont masquées) */}
                         <div className="user__stats">
                             <div className="user__stat">
                                 <h2 className="title title--stat">{user.stats?.totalGames || 0}</h2>
@@ -80,7 +81,7 @@ export default function ProfilePage() {
                                 <h2 className="title title--stat">{user.stats?.wins || 0}</h2>
                                 <p className="subtitle">Wins</p>
                             </div>
-                            <div className="user__stat">
+                            <div className="user__stat user__stat--extra">
                                 <h2 className="title title--stat">{user.stats?.avgPlacement ?? "-"}</h2>
                                 <p className="subtitle">Avg. Place</p>
                             </div>
@@ -88,7 +89,7 @@ export default function ProfilePage() {
                                 <h2 className="title title--stat">{user.stats?.gamesHosted || 0}</h2>
                                 <p className="subtitle">Hosted</p>
                             </div>
-                            <div className="user__stat">
+                            <div className="user__stat user__stat--extra">
                                 <h2 className="title title--stat">{user.stats?.bestStreak || 0}</h2>
                                 <p className="subtitle">Best Streak</p>
                             </div>

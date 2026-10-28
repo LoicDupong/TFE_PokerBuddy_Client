@@ -5,23 +5,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import gameInviteService from "@/services/gameInvite.service.js";
 import useToastStore from "@/stores/useToastStore.js";
-import { getLocalDayBounds, relativeDateTime } from "@/utils/date.utils.js";
+import { relativeDateTime } from "@/utils/date.utils.js";
 import { inviteResponseToast } from "@/utils/game.utils.js";
 import Link from "next/link.js";
 
-export default function GameInvitesDisplay({ onAccept }) {
+export default function GameInvitesDisplay({ excludeId, onAccept }) {
     const [invites, setInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
     const { showToast } = useToastStore();
 
     useEffect(() => {
-        // Les parties du jour ont leurs boutons sur leur carte dans "Today's Games"
-        const { dayStart, dayEnd } = getLocalDayBounds();
-        const isToday = (i) => i.dateStart >= dayStart && i.dateStart < dayEnd;
-        gameInviteService.getMyInvites().then((data) => setInvites((data || []).filter((i) => !isToday(i))));
+        gameInviteService.getMyInvites().then((data) => setInvites(data || []));
     }, []);
 
-    if (invites.length === 0) return null;
+    // La partie déjà mise en avant dans "Your next game" n'est pas répétée
+    const visible = invites.filter((i) => i.gameId !== excludeId);
+    if (visible.length === 0) return null;
 
     const handleRespond = async (invite, action) => {
         if (actingId) return;
@@ -39,7 +38,7 @@ export default function GameInvitesDisplay({ onAccept }) {
 
     return (
         <div className="cards cards--invites">
-            {invites.map((invite) => {
+            {visible.map((invite) => {
                 return (
                     <div key={invite.inviteId} className="card card--invite-game">
                         <div className="card__header">

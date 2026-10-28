@@ -12,7 +12,7 @@ import { getConfirmedCount, inviteResponseToast } from '@/utils/game.utils.js';
 import { isSameLocalDay, relativeDateTime } from '@/utils/date.utils.js';
 
 // Prochaine partie de l'utilisateur : la plus proche parmi aujourd'hui, invitations en attente et à venir
-export default function NextGame({ onResponded }) {
+export default function NextGame({ onLoaded, onResponded }) {
   const [candidates, setCandidates] = useState(null);
   const [acting, setActing] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
@@ -62,9 +62,14 @@ export default function NextGame({ onResponded }) {
     })();
   }, [userId]);
 
-  if (!candidates) return <div className="next-game"><div className="skeleton" role="status" aria-busy="true" aria-label="Loading your next game"></div></div>;
+  const next = candidates && [...candidates].sort((a, b) => new Date(a.dateStart) - new Date(b.dateStart))[0];
 
-  const next = [...candidates].sort((a, b) => new Date(a.dateStart) - new Date(b.dateStart))[0];
+  // L'accueil retire cette partie des listes en dessous (pas de doublon)
+  useEffect(() => {
+    if (candidates) onLoaded?.(next?.gameId ?? null);
+  }, [candidates, next?.gameId, onLoaded]);
+
+  if (!candidates) return <div className="next-game"><div className="skeleton" role="status" aria-busy="true" aria-label="Loading your next game"></div></div>;
 
   if (!next) {
     return (

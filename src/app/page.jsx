@@ -8,7 +8,6 @@ import UpcomingGamesDisplay from "@/components/upcoming-games-display/upcoming-g
 import LeaderboardDisplay from "@/components/leaderboard-display/leaderboard-display.jsx";
 import InstallPrompt from "@/components/pwa/installPrompt.jsx";
 import useAuthStore from "@/stores/useAuthStore.js";
-import ActiveGameDisplay from "@/components/active-game-display/active-game-display.jsx";
 import GameInvitesDisplay from "@/components/game-invites-display/game-invites-display.jsx";
 import NextGame from "@/components/next-game/next-game.jsx";
 import gameService from "@/services/game.service.js";
@@ -19,6 +18,8 @@ export default function HomePage() {
     // Clés de rechargement : une réponse à une invitation met à jour les autres blocs
     const [listKey, setListKey] = useState(0);
     const [nextKey, setNextKey] = useState(0);
+    // Partie déjà affichée dans "Your next game" : les listes en dessous ne la répètent pas
+    const [nextId, setNextId] = useState(null);
     // null = inconnu (on n'affiche rien plutôt que de faire clignoter le bloc débutant)
     const [hasFinished, setHasFinished] = useState(null);
 
@@ -38,7 +39,7 @@ export default function HomePage() {
                 <div className="hero__container">
                     <div className="hero__header">
                         <h1 className="title title--hero">Welcome, <br /> <span className="red">{user.username}</span></h1>
-                        <NextGame key={nextKey} onResponded={() => setListKey((k) => k + 1)} />
+                        <NextGame key={nextKey} onLoaded={setNextId} onResponded={() => setListKey((k) => k + 1)} />
                         <div className="hero__actions">
                             <Link href={'/games/create'} className="btn btn--secondary"><FontAwesomeIcon icon={faPlus} /> Create New Game</Link>
                             <Link href={'/manager/preset'} className="btn btn--secondary"><FontAwesomeIcon icon={faDice} /> Live Game Manager</Link>
@@ -46,11 +47,10 @@ export default function HomePage() {
                     </div>
                 </div>
                 <div className="games__container">
-                    <ActiveGameDisplay key={"a" + listKey} onResponded={() => setNextKey((k) => k + 1)} />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Upcoming</span> Games</h3>
-                    <GameInvitesDisplay key={"i" + listKey} onAccept={() => { setListKey((k) => k + 1); setNextKey((k) => k + 1); }} />
-                    <UpcomingGamesDisplay key={"u" + listKey} />
+                    <GameInvitesDisplay key={"i" + listKey} excludeId={nextId} onAccept={() => { setListKey((k) => k + 1); setNextKey((k) => k + 1); }} />
+                    <UpcomingGamesDisplay key={"u" + listKey} excludeId={nextId} includeToday />
                     <div className="divider"></div>
                     <h3 className="title--section"><span className="red">Recent</span> games</h3>
                     <PreviousGamesDisplay />
