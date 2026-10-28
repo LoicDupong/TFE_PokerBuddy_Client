@@ -79,6 +79,120 @@
     }
 }
 
+// ── Glossary search (/learn/terms) ───────────────────────────────────────────
+
+.glossary {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    // L'espacement vient du gap (sinon s'ajoute la marge globale des <article>)
+    > article {
+        margin-bottom: 0;
+    }
+
+    // Barre collante : la recherche reste à portée de pouce pendant le défilement de la liste
+    &__search {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.75rem 0;
+        background-color: var(--primary-color);
+        border-bottom: 1px solid rgba(156, 163, 175, 0.15);
+    }
+
+    &__label {
+        font-size: var(--text-sm);
+        letter-spacing: 0.5px;
+    }
+
+    &__field {
+        position: relative;
+    }
+
+    &__icon {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: var(--secondary-text);
+        pointer-events: none;
+    }
+
+    &__input {
+        width: 100%;
+        min-height: 48px;
+        // 16px minimum : pas de zoom automatique sur iOS
+        font-size: max(1rem, var(--text-base));
+        padding: 0.75rem 3rem 0.75rem 2.75rem;
+        border-color: rgba(156, 163, 175, 0.5);
+
+        &::placeholder {
+            color: var(--secondary-text);
+        }
+
+        &:focus {
+            border-color: var(--primary-color-light);
+        }
+
+        // Bouton d'effacement natif masqué : on affiche le nôtre (même rendu partout, cible 44px)
+        &::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+    }
+
+    &__clear {
+        position: absolute;
+        top: 50%;
+        right: 2px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        color: var(--secondary-text);
+
+        &:hover {
+            color: var(--primary-text);
+        }
+    }
+
+    // Imbriqué pour passer devant `.learn-page p` (line-height 1.75 trop aéré pour un compteur)
+    .glossary__count {
+        font-size: var(--text-sm);
+        line-height: 1.4;
+    }
+
+    &__mark {
+        background-color: var(--secondary-color-trans);
+        color: var(--primary-text);
+        border-radius: 2px;
+        padding: 0 1px;
+    }
+
+    &__empty {
+        background-color: var(--primary-text-trans);
+        border: 1px dashed rgba(156, 163, 175, 0.35);
+        border-radius: 10px;
+        padding: 1.5rem;
+
+        p:first-child {
+            color: var(--primary-text);
+            font-weight: 600;
+        }
+    }
+
+    &__reset {
+        margin-top: 1rem;
+    }
+}
+
 // ── Hands chart ─────────────────────────────────────────────────────────────
 
 .img--chart-wrapper {
