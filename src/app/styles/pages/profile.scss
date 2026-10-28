@@ -36,33 +36,7 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
-    // friend user
-    &--friend {
-        padding: 1.5rem .5rem;
-        
-        &__avatar {
-            text-align: center;
-            max-width: 150px;
-
-            img {
-                width: 66px;
-                height: 66px;
-                border-width: 2px;
-            }
-        }
-
-        .icon--avatar {
-            width: 30px;
-            height: 30px;
-            border-width: 2px;
-            padding: 1rem;
-        }
-    }
-
-    &--selected {
-        border: 1px solid var(--secondary-text);
-        background-color: var(--secondary-color-trans);
-    }
+    // Les cartes d'amis (ex-.user--friend) sont dans components/friend-card
 }
 
 // Ordinateur : identité à gauche, stats principales à droite, au lieu d'une colonne étirée

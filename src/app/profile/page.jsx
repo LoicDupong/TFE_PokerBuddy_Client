@@ -2,6 +2,7 @@
 
 import FriendInviteDisplay from '@/components/friends-display/friends-invites.jsx';
 import FriendInvite from '@/features/invite/friend-invite.jsx';
+import FriendCard from '@/components/friend-card/friend-card.jsx';
 import userService from '@/services/user.service.js';
 import {
     faPenToSquare,
@@ -103,25 +104,18 @@ export default function ProfilePage() {
 
             {/* --- FRIENDS --- */}
             <section className="section section__friends">
-                <h2 className="red">Friends ({friends.length})</h2>
-                <div className="cards cards--friends">
-                    {friends.map((f) => (
-                        <Link key={f.id} href={`/profile/${f.id}`}>
-                            <div className="card user user--friend">
-                                <div className="user__avatar user--friend__avatar">
-                                    {f.avatar ? (
-                                        <img src={serverUrl(f.avatar)} alt={f.username} />
-                                    ) : (
-                                        <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
-                                    )}
-                                </div>
-                                <div className="user__infos">
-                                    <h2 className="title title--friend">{f.username}</h2>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                <h2 className="red" id="friends-title">Friends ({friends.length})</h2>
+                {friends.length > 0 ? (
+                    <ul className="friend-grid" aria-labelledby="friends-title">
+                        {friends.map((f) => (
+                            <li key={f.id}>
+                                <FriendCard user={f} href={`/profile/${f.id}`} />
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="empty-state">No friends yet. Add your poker crew below.</p>
+                )}
 
                 <FriendInviteDisplay onAccept={refreshFriends} />
 

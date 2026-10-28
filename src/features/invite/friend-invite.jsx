@@ -1,27 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { faXmark, faUserPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
 import useToastStore from "@/stores/useToastStore.js";
-import { serverUrl } from "@/utils/media.js";
+import FriendCard from "@/components/friend-card/friend-card.jsx";
 
 export default function FriendInvite({ onClose, friends = [] }) {
     const [username, setUsername] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [searched, setSearched] = useState(false);
     const [sentIds, setSentIds] = useState(new Set());
     const { showToast } = useToastStore();
 
-    // 🔍 Cherche un user par username
-    const searchUser = async () => {
+    // 🔍 Cherche un user par username (bouton ou touche Entrée)
+    const searchUser = async (e) => {
+        e?.preventDefault();
         if (!username.trim()) return;
         setLoading(true);
 
         const users = await userService.searchByUsername(username);
-        setResults(users);
+        setResults(users || []);
+        setSearched(true);
         setLoading(false);
     };
 
@@ -48,7 +51,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
                 <h2 className="modal__title">Add a Friend</h2>
 
                 {/* 🔹 Input recherche */}
-                <div className="form__row">
+                <form className="form__row" role="search" onSubmit={searchUser}>
                     <label htmlFor="username">Search by username</label>
                     <input
                         id="username"
@@ -56,54 +59,53 @@ export default function FriendInvite({ onClose, friends = [] }) {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Enter username"
+                        autoComplete="off"
+                        enterKeyHint="search"
                     />
-                    <button className="btn btn--primary" onClick={searchUser}>
+                    <button type="submit" className="btn btn--primary">
                         Search
                     </button>
-                </div>
+                </form>
 
                 {/* 🔹 Résultats */}
                 <div className="section section__results">
                     {loading && <p>Searching...</p>}
-                    {!loading && results.length === 0 && (
+                    {/* Message affiché seulement après une recherche (et plus à l'ouverture de la modale) */}
+                    {!loading && searched && results.length === 0 && (
                         <p>No users found. Try another username.</p>
                     )}
-                    {results.map((u) => (
-                        <div key={u.id} className="card card--invite-friend">
-                            <div className="card__body">
-                                <div className="user__avatar user--friend__avatar">
-                                    {u.avatar ? (
-                                        <img src={serverUrl(u.avatar)} alt={u.username} />
-                                    ) : (
-                                        <FontAwesomeIcon
-                                            icon={faUser}
-                                            size="xl"
-                                            className="icon--avatar"
-                                        />
-                                    )}
-                                </div>
-                                <div className="user__infos">
-                                    <h2 className="title title--friend">{u.username}</h2>
-                                </div>
-                            </div>
-                            {friends.some(f => f.id === u.id) ? (
-                                <button className="btn btn--small" disabled>
-                                    Friend
-                                </button>
-                            ) : sentIds.has(u.id) ? (
-                                <button className="btn btn--small" disabled>
-                                    Request Sent
-                                </button>
-                            ) : (
-                                <button
-                                    className="btn btn--small btn--primary"
-                                    onClick={() => addFriend(u.id)}
-                                >
-                                    <FontAwesomeIcon icon={faUserPlus} /> Add
-                                </button>
-                            )}
-                        </div>
-                    ))}
+                    {results.length > 0 && (
+                        <ul className="friend-grid friend-grid--rows">
+                            {results.map((u) => (
+                                <li key={u.id}>
+                                    <FriendCard
+                                        user={u}
+                                        layout="row"
+                                        actions={
+                                            friends.some(f => f.id === u.id) ? (
+                                                <button type="button" className="btn btn--small" disabled>
+                                                    Friend
+                                                </button>
+                                            ) : sentIds.has(u.id) ? (
+                                                <button type="button" className="btn btn--small" disabled>
+                                                    Request Sent
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn--small btn--primary"
+                                                    aria-label={`Add ${u.username} as a friend`}
+                                                    onClick={() => addFriend(u.id)}
+                                                >
+                                                    <FontAwesomeIcon icon={faUserPlus} /> Add
+                                                </button>
+                                            )
+                                        }
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             </div>
         </div>
