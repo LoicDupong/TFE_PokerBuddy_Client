@@ -36,10 +36,10 @@
         }
     }
 
-    // Logo discret : largeur fixe, hauteur déduite du ratio réel de l'image (736×333)
+    // Logo discret 88×40 (attributs de next/image, ratio du fichier 736×333) ; contain : jamais
+    // déformé même si l'image redimensionnée par Next arrondit sa hauteur (96×43)
     &__logo-img {
-        width: 88px;
-        height: auto;
+        object-fit: contain;
     }
 
     &__tagline {
