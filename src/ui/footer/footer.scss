@@ -19,11 +19,27 @@
         gap: 0.4rem;
     }
 
+    // Lien logo : cible tactile de 44px de haut, largeur ajustée au logo
     &__logo {
-        font-size: 18px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        color: var(--secondary-color-text);
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        min-height: 44px;
+        transition: opacity 0.15s ease;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+        }
+    }
+
+    // Logo discret : largeur fixe, hauteur déduite du ratio réel de l'image (736×333)
+    &__logo-img {
+        width: 88px;
+        height: auto;
     }
 
     &__tagline {
@@ -34,7 +50,8 @@
 
     &__nav {
         display: flex;
-        gap: 1.5rem;
+        // Pas d'écart vertical : les liens font déjà 44px de haut quand ils passent à la ligne
+        gap: 0 1.5rem;
         align-items: center;
         flex-wrap: wrap;
 

@@ -1,6 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation.js";
 import Link from "next/link.js";
+import Image from "next/image";
 import useAuthStore from "@/stores/useAuthStore";
 
 export default function Footer() {
@@ -12,7 +13,17 @@ export default function Footer() {
         <footer className="footer">
             <div className="footer__inner">
                 <div className="footer__brand">
-                    <span className="footer__logo">♠ PokerBuddy</span>
+                    {/* Variante claire (lisible sur le marine) ; nom du lien porté par aria-label,
+                        image décorative (alt vide) pour éviter une double annonce */}
+                    <Link href="/" className="footer__logo" aria-label="PokerBuddy home">
+                        <Image
+                            src="/pokerbuddy_logo_light.png"
+                            alt=""
+                            width={88}
+                            height={40}
+                            className="footer__logo-img"
+                        />
+                    </Link>
                     <p className="footer__tagline">Home poker nights, made simple.</p>
                 </div>
 
