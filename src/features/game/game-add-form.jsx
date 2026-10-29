@@ -23,6 +23,8 @@ import {
     faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import GameInvite from "../invite/game-invite.jsx";
+import FinanceFields from "./finance-fields.jsx";
+import { centsToInput } from "@/utils/money.utils.js";
 
 // Champs du bloc replié : une erreur ici doit rouvrir le bloc
 const ADVANCED_FIELDS = [
@@ -30,6 +32,9 @@ const ADVANCED_FIELDS = [
     "maxPlayers",
     "placesPaid",
     "payoutDistribution",
+    "rebuyAmount",
+    "pkoBountyPercent",
+    "pkoCashPercent",
     "smallBlind",
     "bigBlind",
     "levelDuration",
@@ -60,6 +65,10 @@ export default function GameAddForm() {
         levelDuration: 15,
         enableBlindTimer: false,
         allowRebuys: false,
+        rebuyAmount: "",
+        pkoEnabled: false,
+        pkoBountyPercent: 50,
+        pkoCashPercent: 50,
         description: "",
     });
     const setAdvField = (name, value) => setAdv((prev) => ({ ...prev, [name]: value }));
@@ -143,6 +152,10 @@ export default function GameAddForm() {
             levelDuration: Number(g.levelDuration) || 15,
             enableBlindTimer: !!g.enableBlindTimer,
             allowRebuys: !!g.allowRebuys,
+            rebuyAmount: g.rebuyAmountCents != null ? centsToInput(g.rebuyAmountCents) : "",
+            pkoEnabled: !!g.pkoEnabled,
+            pkoBountyPercent: g.pkoBountyPercent ?? 50,
+            pkoCashPercent: g.pkoCashPercent ?? 50,
             description: g.description || "",
         });
         setPrefillNotice(`Settings copied from "${g.name}".`);
@@ -387,15 +400,14 @@ export default function GameAddForm() {
                             </div>
                         </div>
 
-                        <label className="form__checkbox">
-                            <input
-                                type="checkbox"
-                                name="allowRebuys"
-                                checked={adv.allowRebuys}
-                                onChange={(e) => setAdvField("allowRebuys", e.target.checked)}
-                            />
-                            <span>Allow rebuys</span>
-                        </label>
+                        <FinanceFields
+                            values={adv}
+                            onChange={setAdvField}
+                            buyIn={buyIn}
+                            currency={currency}
+                            fieldError={fieldError}
+                            errProps={errProps}
+                        />
 
                         {/* Payout distribution editor */}
                         <fieldset className="form__fieldset">

@@ -1,8 +1,11 @@
 "use client";
 
 import gameService from "@/services/game.service.js";
+import gameFinanceService from "@/services/gameFinance.service.js";
+import FinanceRecap from "@/features/game/finance-recap.jsx";
+import { formatCents } from "@/utils/money.utils.js";
 import { relativeDateTime, shortDateTime } from "@/utils/date.utils.js";
-import { gameStatusLabel, currencySymbol, getPayouts, getPrizePool } from "@/utils/game.utils.js";
+import { gameStatusLabel, currencySymbol, getPayouts, getPrizePool, displayPlayerName, resultPrize } from "@/utils/game.utils.js";
 import { faComment, faCrown, faDollarSign, faFlagCheckered, faHourglassEnd, faHourglassStart, faMoneyCheckDollar, faRankingStar, faSackDollar, faTrophy, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link.js";
@@ -14,6 +17,7 @@ import PreviousGamesSkeleton from "./previous-games-skeleton.jsx";
 export default function PreviousGameDetails({ actions = null }) {
   const { id } = useParams();
   const [game, setGame] = useState(null);
+  const [recap, setRecap] = useState(null);
 
 
   useEffect(() => {
@@ -22,6 +26,19 @@ export default function PreviousGameDetails({ actions = null }) {
       setGame(data?.game ?? null);
     })();
   }, [id]);
+
+  // Recap financier (parties suivies par le Game Manager) ; les anciennes parties n'en ont pas
+  const finished = game?.status === "finished";
+  useEffect(() => {
+    if (!finished) return;
+    let cancelled = false;
+    gameFinanceService.get(id).then((res) => {
+      if (!cancelled && res.success) setRecap(res.data.finance.recap ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, finished]);
 
   if (!game || game.length === 0) return <PreviousGamesSkeleton />;
   // Dates
@@ -34,6 +51,9 @@ export default function PreviousGameDetails({ actions = null }) {
   const prizePool = getPrizePool(game);
   const payouts = getPayouts(game, prizePool);
   const cur = currencySymbol(game.currency);
+  // Parties avec centimes : montants a 2 decimales ; anciennes parties : affichage inchange
+  const hasCents = (game.results || []).some((r) => r.prizeCents != null);
+  const money = (units) => (hasCents ? formatCents(Math.round(units * 100), game.currency) : `${units}${cur}`);
 
   return (
     <>
@@ -51,19 +71,19 @@ export default function PreviousGameDetails({ actions = null }) {
             <p><FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
               {winner ? (
                 winner.user
-                  ? <Link href={`/profile/${winner.user.id}`} className="title--winner"><span className="title--winner">{winner.user.username}</span></Link>
-                  : <span className="title--winner">{winner.guestName}</span>
+                  ? <Link href={`/profile/${winner.user.id}`} className="title--winner"><span className="title--winner">{displayPlayerName(winner.user.username)}</span></Link>
+                  : <span className="title--winner">{displayPlayerName(winner.guestName)}</span>
               ) : "N/A"}</p>
             <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Players:</span> {game.results?.length || game.playerLinks.length}</p>
             <p><FontAwesomeIcon icon={faFlagCheckered} className="fa-icon" /> <span className="gray">Level 1:</span> Blinds {game.smallBlind}/{game.bigBlind}</p>
             <div className="divider"></div>
             <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {game.buyIn}{cur}</p>
-            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize pool:</span> {prizePool}{cur}</p>
+            <p><FontAwesomeIcon icon={faSackDollar} className="fa-icon" /> <span className="gray">Prize pool:</span> {money(prizePool)}</p>
             <p><FontAwesomeIcon icon={faMoneyCheckDollar} className="fa-icon" /> <span className="gray">Places paid:</span> {payouts.length || game.placesPaid}</p>
             <p><FontAwesomeIcon icon={faRankingStar} className="fa-icon" /> <span className="gray">Prize distribution:</span></p>
             <ul>
               {payouts.map((p) => (
-                <li key={p.place}>{p.place}. {p.amount}{cur}</li>
+                <li key={p.place}>{p.place}. {money(p.amount)}</li>
               ))}
             </ul>
           </div>
@@ -79,15 +99,25 @@ export default function PreviousGameDetails({ actions = null }) {
                   .sort((a, b) => a.rank - b.rank)
                   .map((r) => (
                     <li key={r.id}>
-                      {r.rank}. {r.player.user?.username || r.player.guestName}
+                      {r.rank}. {displayPlayerName(r.player.user?.username || r.player.guestName)}
                       {r.rank === 1 && <FontAwesomeIcon icon={faCrown} className="fa-icon" />}
-                      {r.prize > 0 && <span className="gray"> — {r.prize}{cur}</span>}
+                      {resultPrize(r) > 0 && <span className="gray"> — {money(resultPrize(r))}</span>}
                     </li>
                   ))}
               </ul>
 
             </div>
           </div>
+
+          {recap && (
+            <>
+              <div className="divider"></div>
+              <div className="card__list">
+                <h3>Money</h3>
+                <FinanceRecap recap={recap} currency={game.currency} />
+              </div>
+            </>
+          )}
 
           {game.description?.trim() && (
             <>

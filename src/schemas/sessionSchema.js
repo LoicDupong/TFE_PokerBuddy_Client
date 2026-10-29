@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { parseAmountToCents } from "@/utils/money.utils.js";
+
+const percent = (message) =>
+  z.coerce.number({ message }).int(message).min(0, message).max(100, message);
 
 const sessionSchema = z.object({
   // Titre
@@ -33,6 +37,29 @@ const sessionSchema = z.object({
     (val) => val === "on" || val === true,
     z.boolean()
   ).default(false),
+
+  // Prix d'un rebuy / add-on, en unités saisies ("12,50") ; vide = prix du buy-in. Converti en centimes.
+  rebuyAmount: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val, ctx) => {
+      if (val == null || String(val).trim() === "") return null;
+      const cents = parseAmountToCents(val);
+      if (cents === null || cents <= 0) {
+        ctx.addIssue({ code: "custom", message: "Rebuy price must be a positive amount" });
+        return z.NEVER;
+      }
+      return cents;
+    }),
+
+  // PKO (bounties) : part de chaque entrée mise sur la tête du joueur, part versée tout de suite au KO
+  pkoEnabled: z.preprocess(
+    (val) => val === "on" || val === true,
+    z.boolean()
+  ).default(false),
+  pkoBountyPercent: percent("Bounty share must be a whole percentage between 0 and 100").default(50),
+  pkoCashPercent: percent("Knockout cash share must be a whole percentage between 0 and 100").default(50),
 
   maxPlayers: z.union([
     z.coerce.number().min(2).max(200),
@@ -81,5 +108,7 @@ export function validateSession(data) {
     }));
     return { ok: false, errors };
   }
-  return { ok: true, data: result.data };
+  // Le serveur attend des centimes sous le nom rebuyAmountCents
+  const { rebuyAmount, ...rest } = result.data;
+  return { ok: true, data: { ...rest, rebuyAmountCents: rebuyAmount ?? null } };
 }
