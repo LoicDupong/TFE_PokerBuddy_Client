@@ -4,10 +4,11 @@ const notificationService = {
     getAll: async () => {
         try {
             const res = await api.get("/notifications");
-            return res.data; // { notifications, unreadCount }
+            return { success: true, ...res.data }; // { success, notifications, unreadCount }
         } catch (error) {
             console.error("getAll notifications error:", error);
-            return { notifications: [], unreadCount: 0 };
+            // success: false → le store garde son état (sinon une erreur réseau passerait pour "aucune notification")
+            return { success: false, notifications: [], unreadCount: 0 };
         }
     },
 

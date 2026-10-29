@@ -7,22 +7,11 @@ import useToastStore from "@/stores/useToastStore";
 import friendService from "@/services/friend.service";
 import gameInviteService from "@/services/gameInvite.service";
 import { inviteResponseToast } from "@/utils/game.utils";
-import {
-    faBell, faCheck, faXmark, faUserPlus, faUserCheck, faEnvelopeOpenText,
-    faReply, faTrophy, faClock,
-} from "@fortawesome/free-solid-svg-icons";
+import { getNotificationIcon, getNotificationLink } from "@/utils/notification.utils";
+import { faBell, faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-const TYPE_ICONS = {
-    friend_request: faUserPlus,
-    friend_accepted: faUserCheck,
-    game_invite: faEnvelopeOpenText,
-    game_invite_responded: faReply,
-    game_result: faTrophy,
-    game_result_reminder: faClock,
-};
 
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const isToday = (iso) => startOfDay(new Date(iso)).getTime() === startOfDay(new Date()).getTime();
@@ -40,7 +29,10 @@ function relativeTime(iso) {
 }
 
 export default function NotificationsPage() {
-    const { notifications, fetchNotifications, markAllRead } = useNotificationStore();
+    // Sélecteurs : la page ne se re-rend pas à chaque toast
+    const notifications = useNotificationStore((state) => state.notifications);
+    const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
+    const markAllRead = useNotificationStore((state) => state.markAllRead);
     const [friendInvites, setFriendInvites] = useState([]);
     const [gameInvites, setGameInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
@@ -99,13 +91,16 @@ export default function NotificationsPage() {
     };
 
     const renderActions = (n) => {
+        // Lien commun avec les toasts (utils/notification.utils.js)
+        const link = getNotificationLink(n);
+
         if (n.type === "friend_request") {
             // Match by Friend record id stored as referenceId
             const invite = friendInvites.find((i) => i.id === n.referenceId);
             if (!invite) return friendsLoaded ? <span className="notification__status">Handled</span> : null;
             return (
                 <div className="notification__actions">
-                    <Link href={`/profile/${invite.User.id}`} className="notification__link">
+                    <Link href={getNotificationLink(n, { senderId: invite.User.id })} className="notification__link">
                         {invite.User.username}
                     </Link>
                     <button
@@ -136,15 +131,17 @@ export default function NotificationsPage() {
                 return gamesLoaded ? (
                     <div className="notification__actions">
                         <span className="notification__status">Answered</span>
-                        <Link href={`/games/${n.referenceId}`} className="notification__link">View game</Link>
+                        {link && <Link href={link} className="notification__link">View game</Link>}
                     </div>
                 ) : null;
             }
             return (
                 <div className="notification__actions">
-                    <Link href={`/games/${invite.gameId}`} className="notification__link">
-                        View game
-                    </Link>
+                    {link && (
+                        <Link href={link} className="notification__link">
+                            View game
+                        </Link>
+                    )}
                     <button
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
@@ -165,20 +162,20 @@ export default function NotificationsPage() {
             );
         }
 
-        if (n.type === "game_result" || n.type === "game_invite_responded") {
+        if ((n.type === "game_result" || n.type === "game_invite_responded") && link) {
             return (
                 <div className="notification__actions">
-                    <Link href={`/games/${n.referenceId}`} className="notification__link">
+                    <Link href={link} className="notification__link">
                         View game
                     </Link>
                 </div>
             );
         }
 
-        if (n.type === "game_result_reminder") {
+        if (n.type === "game_result_reminder" && link) {
             return (
                 <div className="notification__actions">
-                    <Link href={`/games/${n.referenceId}`} className="notification__link">
+                    <Link href={link} className="notification__link">
                         Submit results
                     </Link>
                 </div>
@@ -210,7 +207,7 @@ export default function NotificationsPage() {
                                     return (
                                         <li key={n.id} className={`notification__item${unread ? " notification__item--unread" : ""}`}>
                                             <span className="notification__icon" aria-hidden="true">
-                                                <FontAwesomeIcon icon={TYPE_ICONS[n.type] || faBell} />
+                                                <FontAwesomeIcon icon={getNotificationIcon(n)} />
                                             </span>
                                             <div className="notification__body">
                                                 <p className="notification__message">
