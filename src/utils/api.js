@@ -19,14 +19,30 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Endpoints publics : un 401 y signifie "identifiants refusés", pas "session expirée"
+const PUBLIC_AUTH_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"];
+
+// Token envoyé avec une requête (AxiosHeaders ou objet simple)
+const sentToken = (config) => {
+  const headers = config?.headers;
+  const value = typeof headers?.get === "function" ? headers.get("Authorization") : headers?.Authorization;
+  return typeof value === "string" ? value.replace(/^Bearer\s+/i, "") : null;
+};
+
 // Déconnexion automatique sur token expiré
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error.config?.url ?? "";
-    const isAuthEndpoint = url.startsWith("/auth/login") || url.startsWith("/auth/register");
+    const isAuthEndpoint = PUBLIC_AUTH_ENDPOINTS.some((path) => url.startsWith(path));
 
-    if (error.response?.status === 401 && !isAuthEndpoint) {
+    // Requête partie avec l'ancien token alors qu'un nouveau a été enregistré entre-temps
+    // (changement de mot de passe) : ce 401 ne concerne pas la session actuelle
+    const token = sentToken(error.config);
+    const current = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const staleToken = Boolean(token && current && token !== current);
+
+    if (error.response?.status === 401 && !isAuthEndpoint && !staleToken) {
       useAuthStore.getState().logout();
 
       // Sinon la page reste bloquée sur "Loading..." ; on revient ici après la reconnexion

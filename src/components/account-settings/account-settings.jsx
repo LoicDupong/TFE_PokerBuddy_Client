@@ -1,28 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import "./account-settings.scss";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { faEye, faEyeSlash, faKey, faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import {
+    faCalendarXmark,
+    faEye,
+    faEyeSlash,
+    faKey,
+    faRightFromBracket,
+    faTrashCan,
+    faTriangleExclamation,
+    faTrophy,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import userService from "@/services/user.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
 import useToastStore from "@/stores/useToastStore.js";
+import { getPasswordError } from "@/schemas/authSchema.js";
 
-// Mêmes règles que l'inscription (schemas/authSchema.js)
-function validateNewPassword(value) {
-    if (value.length < 6) return "Password must be at least 6 characters";
-    if (!/[A-Z]/.test(value)) return "Password must contain at least one uppercase letter";
-    if (!/[0-9]/.test(value)) return "Password must contain at least one number";
-    return null;
-}
-
-function PasswordField({ id, label, value, onChange, autoComplete, error }) {
+function PasswordField({ id, label, value, onChange, autoComplete, error, inputRef }) {
     const [visible, setVisible] = useState(false);
     return (
         <div className="form__row">
             <label htmlFor={id}>{label}</label>
             <div className="input__container">
                 <input
+                    ref={inputRef}
                     type={visible ? "text" : "password"}
                     id={id}
                     value={value}
@@ -47,17 +51,37 @@ function PasswordField({ id, label, value, onChange, autoComplete, error }) {
     );
 }
 
-export default function AccountSettings({ username }) {
+// Ce que la suppression efface et ce qui reste (politique serveur : utils/account.utils.js)
+const DELETE_CONSEQUENCES = [
+    { icon: faTrashCan, title: "Erased", text: "Your email, username, avatar, bio, friends list and notifications." },
+    { icon: faCalendarXmark, title: "Cancelled", text: "Games you host that haven't been played yet. Invited players are told." },
+    { icon: faRightFromBracket, title: "Left", text: "Upcoming games you were invited to." },
+    { icon: faTrophy, title: "Kept, without your name", text: "Results of games already played, so your friends' stats and leaderboard stay right. You show up as a deleted player." },
+];
+
+// Message affiché pour un échec de suppression (le mauvais mot de passe va sous le champ)
+function deleteErrorMessage(res) {
+    if (res.code === "LAST_ADMIN") {
+        return "You're the last admin. Give the admin role to someone else before deleting your account.";
+    }
+    return res.error;
+}
+
+export default function AccountSettings() {
     const router = useRouter();
     const showToast = useToastStore((s) => s.showToast);
     const logout = useAuthStore((s) => s.logout);
+    const updateToken = useAuthStore((s) => s.updateToken);
 
     const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
 
-    const [confirming, setConfirming] = useState(false);
-    const [typed, setTyped] = useState("");
+    const dialogRef = useRef(null);
+    const deletePasswordRef = useRef(null);
+    const [deletePassword, setDeletePassword] = useState("");
+    const [deleteError, setDeleteError] = useState(null);
+    const [deleteFormError, setDeleteFormError] = useState(null);
     const [deleting, setDeleting] = useState(false);
 
     const setField = (field) => (e) => setPwd((p) => ({ ...p, [field]: e.target.value }));
@@ -66,7 +90,7 @@ export default function AccountSettings({ username }) {
         e.preventDefault();
         const next = {};
         if (!pwd.current) next.current = "Current password is required";
-        const rule = validateNewPassword(pwd.next);
+        const rule = getPasswordError(pwd.next);
         if (rule) next.next = rule;
         if (pwd.confirm !== pwd.next) next.confirm = "Passwords do not match";
         setErrors(next);
@@ -76,27 +100,58 @@ export default function AccountSettings({ username }) {
         const res = await userService.updatePassword(pwd.current, pwd.next);
         setSaving(false);
         if (res.success) {
+            // Les autres appareils sont déconnectés ; celui-ci garde la session avec le nouveau token
+            if (res.data?.token) updateToken(res.data.token);
             setPwd({ current: "", next: "", confirm: "" });
-            showToast("Password updated", "success", 5000);
-        } else {
+            showToast("Password updated. Your other devices have been logged out.", "success", 6000);
+        } else if (/old password/i.test(res.error)) {
             // Le serveur répond "Old password invalid" : message plus clair, rattaché au bon champ
-            const msg = res.errorMessage[0];
-            if (/old password/i.test(msg)) setErrors({ current: "Current password is incorrect" });
-            else showToast(msg);
+            setErrors({ current: "Current password is incorrect" });
+        } else {
+            showToast(res.error);
         }
     };
 
-    const handleDelete = async () => {
-        if (typed !== username || deleting) return;
+    const openDeleteDialog = () => {
+        setDeletePassword("");
+        setDeleteError(null);
+        setDeleteFormError(null);
+        dialogRef.current?.showModal();
+        deletePasswordRef.current?.focus();
+    };
+
+    const closeDeleteDialog = () => {
+        if (!deleting) dialogRef.current?.close();
+    };
+
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        if (deleting) return;
+        if (!deletePassword) {
+            setDeleteError("Enter your password to confirm");
+            deletePasswordRef.current?.focus();
+            return;
+        }
+
+        setDeleteError(null);
+        setDeleteFormError(null);
         setDeleting(true);
-        const res = await userService.deleteMe();
+        const res = await userService.deleteMe(deletePassword);
+
         if (res.success) {
+            dialogRef.current?.close();
             logout();
             router.replace("/");
-            showToast("Your account has been deleted", "info", 6000);
+            showToast("Your account has been deleted. Thanks for all the games!", "info", 6000);
+            return;
+        }
+
+        setDeleting(false);
+        if (res.code === "INVALID_PASSWORD") {
+            setDeleteError("Incorrect password");
+            deletePasswordRef.current?.focus();
         } else {
-            setDeleting(false);
-            showToast(res.errorMessage?.[0] || "Could not delete the account");
+            setDeleteFormError(deleteErrorMessage(res));
         }
     };
 
@@ -113,6 +168,7 @@ export default function AccountSettings({ username }) {
                         onChange={setField("next")} autoComplete="new-password" error={errors.next} />
                     <PasswordField id="pwd-confirm" label="Confirm new password" value={pwd.confirm}
                         onChange={setField("confirm")} autoComplete="new-password" error={errors.confirm} />
+                    <p className="account__hint">Your other devices will be logged out.</p>
                     <button type="submit" className="btn btn--user" disabled={saving}>
                         {saving ? "Saving…" : "Update password"}
                     </button>
@@ -122,38 +178,61 @@ export default function AccountSettings({ username }) {
             <div className="card account__card account__danger">
                 <h3 className="account__subtitle"><FontAwesomeIcon icon={faTriangleExclamation} /> Delete account</h3>
                 <p>
-                    Your profile, avatar and bio are erased and you can no longer log in.
-                    Results you played stay in your friends&apos; games.
+                    Erases your profile and friends list and cancels the games you host that haven&apos;t been
+                    played yet. Results of games already played stay, without your name.
                 </p>
-                {!confirming ? (
-                    <button type="button" className="btn btn--danger" onClick={() => setConfirming(true)}>
-                        Delete my account
-                    </button>
-                ) : (
-                    <div className="account__confirm">
-                        <label htmlFor="delete-confirm">
-                            Type <strong>{username}</strong> to confirm. This cannot be undone.
-                        </label>
-                        <input
-                            id="delete-confirm"
-                            type="text"
-                            value={typed}
-                            onChange={(e) => setTyped(e.target.value)}
-                            autoComplete="off"
-                            autoCapitalize="off"
-                            className="input"
-                        />
-                        <div className="btn__container">
-                            <button type="button" className="btn btn--danger" disabled={typed !== username || deleting} onClick={handleDelete}>
-                                {deleting ? "Deleting…" : "Permanently delete"}
-                            </button>
-                            <button type="button" className="btn btn--user" onClick={() => { setConfirming(false); setTyped(""); }}>
-                                Keep my account
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <button type="button" className="btn btn--danger" onClick={openDeleteDialog} aria-haspopup="dialog">
+                    Delete my account
+                </button>
             </div>
+
+            {/* <dialog> natif : focus piégé, Échap pour fermer, reste de la page inerte */}
+            <dialog
+                ref={dialogRef}
+                className="delete-dialog"
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-desc"
+                onCancel={(e) => { if (deleting) e.preventDefault(); }}
+            >
+                <form className="delete-dialog__form" onSubmit={handleDelete} noValidate>
+                    <h2 id="delete-dialog-title" className="delete-dialog__title">
+                        <FontAwesomeIcon icon={faTriangleExclamation} aria-hidden="true" /> Delete your account?
+                    </h2>
+                    <p id="delete-dialog-desc" className="delete-dialog__lead">
+                        This can&apos;t be undone. Here&apos;s what happens:
+                    </p>
+
+                    <ul className="delete-dialog__list">
+                        {DELETE_CONSEQUENCES.map(({ icon, title, text }) => (
+                            <li key={title} className="delete-dialog__item">
+                                <FontAwesomeIcon icon={icon} className="delete-dialog__icon" aria-hidden="true" />
+                                <p><strong>{title}:</strong> {text}</p>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <PasswordField
+                        id="delete-password"
+                        label="Your password"
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                        autoComplete="current-password"
+                        error={deleteError}
+                        inputRef={deletePasswordRef}
+                    />
+
+                    {deleteFormError && <p className="form__error" role="alert">{deleteFormError}</p>}
+
+                    <div className="delete-dialog__actions">
+                        <button type="button" className="btn btn--secondary" onClick={closeDeleteDialog} disabled={deleting}>
+                            Keep my account
+                        </button>
+                        <button type="submit" className="btn btn--danger" disabled={deleting}>
+                            {deleting ? "Deleting…" : "Delete my account"}
+                        </button>
+                    </div>
+                </form>
+            </dialog>
         </section>
     );
 }
