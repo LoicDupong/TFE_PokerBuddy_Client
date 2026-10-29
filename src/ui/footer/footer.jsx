@@ -32,6 +32,7 @@ export default function Footer() {
                     {user && <Link href="/games">My Games</Link>}
                     {user && <Link href="/leaderboard">Leaderboard</Link>}
                     <Link href="/learn">Learn</Link>
+                    <Link href="/help">Help</Link>
                     {user && <Link href="/profile">Profile</Link>}
                 </nav>
 
