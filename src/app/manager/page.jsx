@@ -174,9 +174,10 @@ export default function GameManager() {
     // Prize pool réel (buy-ins + rebuys + add-ons, hors bounties) pour une partie suivie
     const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency) : `${buyIn * totalPlayers}${symbol}`;
     // Stack moyen : masqué sans jetons de départ (sinon "0" n'aurait aucun sens)
+    // Partie suivie : jetons réellement en jeu (rebuys et add-ons inclus) quand le serveur les connaît
     const avgStack =
         preset.chipsPerPlayer && totalPlayers
-            ? Math.floor((preset.chipsPerPlayer * totalPlayers) / playersLeft)
+            ? Math.floor((tracked && finance.totals.chips > 0 ? finance.totals.chips : preset.chipsPerPlayer * totalPlayers) / playersLeft)
             : 0;
 
     const blinds = `${preset.smallBlind * level} / ${preset.bigBlind * level}`;
@@ -377,6 +378,7 @@ export default function GameManager() {
                         finance={finance}
                         gameId={preset.gameId}
                         currency={preset.currency}
+                        chips={Number(preset.chipsPerPlayer) || 0}
                         onFinance={setFinance}
                         onClose={() => setShowPlayers(false)}
                     />

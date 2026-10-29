@@ -12,7 +12,7 @@ const TYPE_LABEL = { rebuy: "Rebuy", addon: "Add-on", knockout: "Knockout", buyi
 // Panneau « Players » de l'hôte : argent de chaque joueur et actions rebuy / add-on / knockout.
 // Toute action d'argent passe par une confirmation ; l'opId est créé une fois par action et
 // réutilisé tel quel si on renvoie la même requête (double clic, réseau coupé).
-export default function FinancePanel({ finance, gameId, currency, onFinance, onClose }) {
+export default function FinancePanel({ finance, gameId, currency, chips, onFinance, onClose }) {
     const [dialog, setDialog] = useState(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState(null);
@@ -71,7 +71,7 @@ export default function FinancePanel({ finance, gameId, currency, onFinance, onC
             }
             return {
                 run: (opId) =>
-                    gameFinanceService.addEntry(gameId, { opId, type: d.kind, gamePlayerId: d.player.id, amountCents: cents }),
+                    gameFinanceService.addEntry(gameId, { opId, type: d.kind, gamePlayerId: d.player.id, amountCents: cents, ...(chips > 0 && { chips }) }),
                 body: { cents },
             };
         }
