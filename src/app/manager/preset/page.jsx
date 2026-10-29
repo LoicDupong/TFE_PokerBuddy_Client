@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { goToLevel } from "@/utils/timer.utils.js";
-import { currencySymbol } from "@/utils/game.utils.js";
+import { currencySymbol, displayPlayerName } from "@/utils/game.utils.js";
+import gameFinanceService from "@/services/gameFinance.service";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
@@ -22,6 +23,7 @@ export default function PresetForm() {
     const { preset, setPreset, resetPreset } = usePresetStore();
     const router = useRouter();
     const [playerError, setPlayerError] = useState(null);
+    const [starting, setStarting] = useState(false);
 
     const normalizeName = (name) =>
         (name || "").trim().replace(/\s+/g, " ").toLowerCase();
@@ -44,8 +46,9 @@ export default function PresetForm() {
                         .filter((p) => p.status !== "refused")
                         .map((p) => ({
                             id: p.id,
-                            name: p.user?.username || p.userName || p.guestName,
+                            name: displayPlayerName(p.user?.username || p.userName || p.guestName),
                             status: p.status,
+                            linked: true, // a déjà un GamePlayer côté serveur
                         }));
                     const presetData = {
                         gameId: g.id, // ⚡ stocke l'ID de la game dans le preset
@@ -58,6 +61,10 @@ export default function PresetForm() {
                         levelDurationMin: g.levelDuration || 15,
                         enableBlindTimer: g.enableBlindTimer ?? true,
                         allowRebuys: g.allowRebuys || false,
+                        rebuyAmountCents: g.rebuyAmountCents ?? null,
+                        pkoEnabled: g.pkoEnabled || false,
+                        pkoBountyPercent: g.pkoBountyPercent ?? 50,
+                        pkoCashPercent: g.pkoCashPercent ?? 50,
                         payoutDistribution: g.payoutDistribution || [],
                         placesPaid:
                             g.placesPaid || (g.payoutDistribution?.length ?? 0),
@@ -151,7 +158,7 @@ export default function PresetForm() {
         0
     );
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const filteredPlayers = (preset.players || []).filter(
@@ -172,7 +179,30 @@ export default function PresetForm() {
         }
 
         setPlayerError(null);
-        setPreset({ players: filteredPlayers });
+
+        // Partie liée : chaque joueur assis paie son buy-in côté serveur, et les walk-ins
+        // reçoivent un GamePlayer. Les ids du preset sont remplacés par les gamePlayerId.
+        let players = filteredPlayers;
+        if (preset.gameId) {
+            setStarting(true);
+            const res = await gameFinanceService.seats(
+                preset.gameId,
+                filteredPlayers.map((p) => ({
+                    key: p.id,
+                    gamePlayerId: p.linked ? p.id : undefined,
+                    name: p.name.trim(),
+                })),
+                Number(preset.chipsPerPlayer) || undefined
+            );
+            setStarting(false);
+            if (!res.success) {
+                setPlayerError(res.error);
+                return;
+            }
+            const idByKey = new Map(res.data.seats.map((seat) => [seat.key, seat.gamePlayerId]));
+            players = filteredPlayers.map((p) => ({ ...p, id: idByKey.get(p.id) ?? p.id, linked: true }));
+        }
+        setPreset({ players, maxPlayers: players.length });
         router.push("/manager");
     };
 
@@ -330,7 +360,7 @@ export default function PresetForm() {
                         checked={preset.allowRebuys}
                         onChange={handleChange}
                     />
-                    <span>Allow rebuys</span>
+                    <span>Allow rebuys and add-ons</span>
                 </label>
             </fieldset>
 
@@ -394,8 +424,8 @@ export default function PresetForm() {
 
             {playerError && <p className="error">{playerError}</p>}
 
-            <button className="btn btn--full" type="submit">
-                Start Game Manager
+            <button className="btn btn--full" type="submit" disabled={starting}>
+                {starting ? "Seating players…" : "Start Game Manager"}
             </button>
         </form>
     );

@@ -16,6 +16,7 @@ import {
     faForward,
     faUserMinus,
     faUserPlus,
+    faCoins,
 } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { NEW_TIMER, formatTime, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
@@ -26,6 +27,9 @@ import Link from "next/link.js";
 import Image from "next/image";
 
 import EndGameModal from "@/features/game/end-game-modal.jsx";
+import FinancePanel from "@/features/game/finance-panel.jsx";
+import useGameFinance from "@/features/game/use-game-finance.js";
+import { formatCents } from "@/utils/money.utils.js";
 import {
     playBeeps,
     unlockAudio,
@@ -54,6 +58,11 @@ export default function GameManager() {
     const [showEndModal, setShowEndModal] = useState(false);
     const [now, setNow] = useState(() => Date.now());
     const [flash, setFlash] = useState(0);
+    const [showPlayers, setShowPlayers] = useState(false);
+    // Argent de la partie liée (rebuys, add-ons, bounties) ; null en session libre
+    const { finance, setFinance } = useGameFinance(preset.gameId);
+    const tracked = Boolean(finance?.tracked);
+    const pko = Boolean(finance?.config.pkoEnabled);
 
     // Timer sauvegardé dans le preset : survit à un rechargement de la page
     const timer = preset.timer ?? NEW_TIMER;
@@ -62,12 +71,14 @@ export default function GameManager() {
     const isRunning = timer.endsAt !== null;
     const timeLeft = getTimeLeft(timer, levelSeconds, now); // en secondes
     const totalPlayers = Number(preset.maxPlayers) || preset.players?.length || 0;
-    const playersLeft = Math.min(Math.max(preset.playersLeft ?? totalPlayers, 1), Math.max(totalPlayers, 1));
+    const manualLeft = Math.min(Math.max(preset.playersLeft ?? totalPlayers, 1), Math.max(totalPlayers, 1));
+    // En PKO, les joueurs restants viennent des knockouts enregistrés
+    const playersLeft = pko ? Math.max(finance.totals.aliveCount, 1) : manualLeft;
 
     const { supported: fullscreenOk, active: isFullscreen, toggle: toggleFullscreen } = useFullscreen();
     const isWide = useMediaQuery("(min-width: 1024px)");
     // Jamais masqué en pause : l'hôte doit voir ses boutons
-    const idle = useIdle(isWide && isRunning && !showEndModal);
+    const idle = useIdle(isWide && isRunning && !showEndModal && !showPlayers);
     useWakeLock(isRunning);
 
     // redirect si pas de preset (une fois la sauvegarde relue)
@@ -152,7 +163,7 @@ export default function GameManager() {
             next: () => changeLevel(level + 1),
             fullscreen: toggleFullscreen,
         },
-        showEndModal
+        showEndModal || showPlayers
     );
 
     if (!hydrated || (!preset.title && !showEndModal)) return null;
@@ -160,7 +171,8 @@ export default function GameManager() {
     // calculs utiles
     const symbol = currencySymbol(preset.currency);
     const buyIn = Number(preset.buyIn) || 0;
-    const prizePool = buyIn * totalPlayers; // simplifié (sans rebuys)
+    // Prize pool réel (buy-ins + rebuys + add-ons, hors bounties) pour une partie suivie
+    const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency) : `${buyIn * totalPlayers}${symbol}`;
     // Stack moyen : masqué sans jetons de départ (sinon "0" n'aurait aucun sens)
     const avgStack =
         preset.chipsPerPlayer && totalPlayers
@@ -229,6 +241,9 @@ export default function GameManager() {
                     <Link href={"/manager/preset"} className="btn btn--control">
                         <FontAwesomeIcon icon={faPenToSquare} /> Edit
                     </Link>
+                    <button type="button" className="btn btn--control" onClick={() => setShowPlayers(true)}>
+                        <FontAwesomeIcon icon={faCoins} /> Players
+                    </button>
                     {/* Bouton END → ouvre la modal */}
                     <button
                         type="button"
@@ -274,14 +289,20 @@ export default function GameManager() {
                 {buyIn > 0 && totalPlayers > 0 && (
                     <div className="manager__stat">
                         <span>Prize pool</span>
-                        <strong>{prizePool}{symbol}</strong>
+                        <strong>{prizePoolText}</strong>
+                    </div>
+                )}
+                {pko && (
+                    <div className="manager__stat">
+                        <span>Bounties in play</span>
+                        <strong>{formatCents(finance.totals.bountiesOnTableCents, preset.currency)}</strong>
                     </div>
                 )}
                 {totalPlayers > 0 && (
                     <div className="manager__stat">
                         <span>Players left</span>
                         <strong>{playersLeft} / {totalPlayers}</strong>
-                        <div className="manager__stat-actions">
+                        {!pko && <div className="manager__stat-actions">
                             <button
                                 type="button"
                                 className="btn btn--small btn--control"
@@ -299,7 +320,7 @@ export default function GameManager() {
                             >
                                 <FontAwesomeIcon icon={faUserPlus} /> +1
                             </button>
-                        </div>
+                        </div>}
                     </div>
                 )}
                 {avgStack > 0 && (
@@ -311,7 +332,7 @@ export default function GameManager() {
                 {buyIn > 0 && (
                     <div className="manager__stat">
                         <span>Buy-in</span>
-                        <strong>{buyIn}{symbol}{preset.allowRebuys ? " + rebuys" : ""}</strong>
+                        <strong>{buyIn}{symbol}{(finance?.config.allowRebuys ?? preset.allowRebuys) ? " + rebuys" : ""}</strong>
                     </div>
                 )}
                 {levelSeconds > 0 && (
@@ -349,6 +370,35 @@ export default function GameManager() {
             </div>
 
             </>)}
+
+            {showPlayers && (
+                finance ? (
+                    <FinancePanel
+                        finance={finance}
+                        gameId={preset.gameId}
+                        currency={preset.currency}
+                        onFinance={setFinance}
+                        onClose={() => setShowPlayers(false)}
+                    />
+                ) : (
+                    <div className="fin-panel" role="dialog" aria-modal="true" aria-label="Players">
+                        <div className="fin-panel__overlay" onClick={() => setShowPlayers(false)} />
+                        <aside className="fin-panel__sheet">
+                            <header className="fin-panel__head">
+                                <h2>Players</h2>
+                                <button type="button" className="fin-panel__close" onClick={() => setShowPlayers(false)} aria-label="Close the players panel">
+                                    <FontAwesomeIcon icon={faCircleXmark} />
+                                </button>
+                            </header>
+                            <p className="fin-note">
+                                {preset.gameId
+                                    ? "Loading the game finances…"
+                                    : "Start the Game Manager from a game to track rebuys and knockouts."}
+                            </p>
+                        </aside>
+                    </div>
+                )
+            )}
 
             {/* Modal affichée si showEndModal = true */}
             {showEndModal && (
