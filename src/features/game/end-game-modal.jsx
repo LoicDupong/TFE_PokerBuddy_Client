@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
 import usePresetStore from "@/stores/usePresetStore";
 import { toDatetimeLocalValue } from "@/utils/date.utils.js";
-import { currencySymbol } from "@/utils/game.utils.js";
+import { currencySymbol, displayPlayerName } from "@/utils/game.utils.js";
+import gameFinanceService from "@/services/gameFinance.service";
+import { centsToInput, formatCents, parseAmountToCents, splitByPercents } from "@/utils/money.utils.js";
+import FinanceRecap from "@/features/game/finance-recap.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faGripLines, faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -37,23 +40,56 @@ export default function EndGameModal({
     const focusAfterMove = useRef(null);
     const symbol = currencySymbol(currency);
 
-    const prizePool = buyIn * (players?.length || 0);
+    // Recap financier du serveur (partie liee suivie) : prize pool reel, classement suggere
+    const [financeState, setFinanceState] = useState({ loading: Boolean(gameId), finance: null });
+    useEffect(() => {
+        if (!gameId) return;
+        let cancelled = false;
+        gameFinanceService.get(gameId).then((res) => {
+            if (!cancelled) setFinanceState({ loading: false, finance: res.success ? res.data.finance : null });
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [gameId]);
+    const finance = financeState.finance;
+    const tracked = Boolean(finance?.tracked);
+    const poolCents = tracked ? finance.totals.prizePoolCents : 0;
+    const money = (cents) => formatCents(cents, currency);
+
+    // Ancien flux (partie jamais suivie) : unites entieres, comme avant
+    const prizePool = tracked ? poolCents / 100 : buyIn * (players?.length || 0);
+
+    // Joueurs du classement : ceux qui ont paye (en PKO, du dernier elimine au premier d'abord)
+    const rankedPlayers = useMemo(() => {
+        if (!tracked) {
+            return players.map((p) => ({ gamePlayerId: p.id, name: p.user ? p.user.username : p.name }));
+        }
+        const byId = new Map(finance.players.map((p) => [p.id, p]));
+        const presetOrder = players.map((p) => p.id).filter((id) => byId.has(id));
+        const order = finance.config.pkoEnabled && finance.suggestedOrder?.length ? finance.suggestedOrder : presetOrder;
+        const ids = [...order.filter((id) => byId.has(id)), ...finance.players.map((p) => p.id).filter((id) => !order.includes(id))];
+        return ids.map((id) => ({ gamePlayerId: id, name: byId.get(id).name }));
+    }, [tracked, finance, players]);
+
+    // Prizes proposes selon la repartition (centimes repartis comme le serveur le fait)
+    const withPrizes = (list) => {
+        const percents = list.map((_, idx) => payoutDistribution.find((d) => d.place === idx + 1)?.percent ?? 0);
+        if (tracked) {
+            const shares = splitByPercents(poolCents, percents);
+            return list.map((player, idx) => ({ ...player, prize: centsToInput(shares[idx]) }));
+        }
+        return list.map((player, idx) => ({ ...player, prize: Math.round((prizePool * percents[idx]) / 100) }));
+    };
 
     // 🔹 Pré-remplissage des prizes
-    const prefilled = useMemo(() => players.map((p, idx) => {
-        const dist = payoutDistribution.find((d) => d.place === idx + 1);
-        const percent = dist ? dist.percent : 0;
-        return {
-            gamePlayerId: p.id,
-            name: p.user ? p.user.username : p.name,
-            prize: Math.round((prizePool * percent) / 100),
-        };
-    }), [players, payoutDistribution, prizePool]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const prefilled = useMemo(() => withPrizes(rankedPlayers), [rankedPlayers, payoutDistribution, prizePool, tracked]);
 
     // Classement en cours gardé dans le preset (localStorage) : fermer la modale ou recharger
     // la page ne le remet plus à zéro. Il repart du pré-remplissage si les joueurs, le buy-in
     // ou la répartition changent entre-temps.
-    const draftKey = JSON.stringify([prefilled.map((r) => [r.gamePlayerId, r.name]).sort(), prizePool, payoutDistribution]);
+    const draftKey = JSON.stringify([prefilled.map((r) => [r.gamePlayerId, r.name]).sort(), tracked, prizePool, payoutDistribution]);
     const results = resultsDraft?.key === draftKey ? resultsDraft.results : prefilled;
     const setResults = (next) => setPreset({ resultsDraft: { key: draftKey, results: next } });
 
@@ -65,16 +101,7 @@ export default function EndGameModal({
         reordered.splice(to, 0, moved);
 
         // 🔹 Recalcul des prizes en fonction du nouveau classement
-        const recalculated = reordered.map((player, idx) => {
-            const dist = payoutDistribution.find((d) => d.place === idx + 1);
-            const percent = dist ? dist.percent : 0;
-            return {
-                ...player,
-                prize: Math.round((prizePool * percent) / 100),
-            };
-        });
-
-        setResults(recalculated);
+        setResults(withPrizes(reordered));
     };
 
     // Gestion drag & drop
@@ -103,12 +130,26 @@ export default function EndGameModal({
 
     // Modifier un prize manuellement
     const handlePrizeChange = (index, value) => {
-        setResults(results.map((r, i) => (i === index ? { ...r, prize: Number(value) } : r)));
+        setResults(results.map((r, i) => (i === index ? { ...r, prize: tracked ? value : Number(value) } : r)));
     };
 
-    const totalPrizes = results.reduce((sum, r) => sum + (Number(r.prize) || 0), 0);
-    const matches = totalPrizes === prizePool;
-    const amount = (value) => `${Number(value) || 0} ${symbol}`;
+    // Suivi : tout en centimes, la somme doit etre exactement le prize pool
+    const prizeCentsList = results.map((r) => parseAmountToCents(r.prize === "" ? "0" : r.prize));
+    const hasInvalidPrize = tracked && prizeCentsList.some((v) => v === null);
+    const totalCents = prizeCentsList.reduce((sum, v) => sum + (v ?? 0), 0);
+    const leftCents = poolCents - totalCents;
+    const totalPrizes = tracked ? totalCents / 100 : results.reduce((sum, r) => sum + (Number(r.prize) || 0), 0);
+    const matches = tracked ? !hasInvalidPrize && leftCents === 0 : totalPrizes === prizePool;
+    const amount = (value) => (tracked ? money(Math.round(Number(value) * 100)) : `${Number(value) || 0} ${symbol}`);
+    const prizeAmount = (r) => (tracked ? money(parseAmountToCents(r.prize === "" ? "0" : r.prize) ?? 0) : amount(r.prize));
+    const leftText = hasInvalidPrize
+        ? "Check the prize amounts: use numbers such as 12 or 12,50."
+        : leftCents > 0
+            ? `${money(leftCents)} left to distribute`
+            : `${money(-leftCents)} too much distributed`;
+    // En PKO, chaque joueur encore en jeu garde sa bounty : l'hote doit le savoir avant d'enregistrer
+    const aliveCount = finance?.totals?.aliveCount ?? 0;
+    const multipleAlive = tracked && finance.config.pkoEnabled && aliveCount > 1;
 
     const normalizeName = (name) =>
         (name || "").trim().replace(/\s+/g, " ").toLowerCase();
@@ -119,6 +160,11 @@ export default function EndGameModal({
 
         if (!gameId) {
             setError(["No game linked to this session. Use the 'Use Preset' button from a game page."]);
+            return;
+        }
+
+        if (tracked && !matches) {
+            setError([leftText]);
             return;
         }
 
@@ -143,12 +189,17 @@ export default function EndGameModal({
         setLoading(true);
         setError(null);
 
-        const payload = results.map((player, index) => ({
-            gamePlayerId: player.gamePlayerId,
-            rank: index + 1, // ordre dans la liste = classement
-            prize: parseInt(player.prize, 10) || 0,
-            guestName: player.name, // used by backend to create walk-in GamePlayer if ID is unknown
-        }));
+        // L'ordre du tableau = le classement. Partie suivie : centimes ; sinon ancien format en unites.
+        const payload = results.map((player, index) =>
+            tracked
+                ? { gamePlayerId: player.gamePlayerId, prizeCents: prizeCentsList[index] ?? 0 }
+                : {
+                    gamePlayerId: player.gamePlayerId,
+                    rank: index + 1,
+                    prize: parseInt(player.prize, 10) || 0,
+                    guestName: player.name, // used by backend to create walk-in GamePlayer if ID is unknown
+                }
+        );
 
         const res = await gameResultsService.createResults(
             gameId,
@@ -158,7 +209,7 @@ export default function EndGameModal({
 
         if (res.success) {
             // Copie pour l'écran de résultats, avant de vider le preset
-            setSaved({ results, prizePool });
+            setSaved({ results, prizePool, recap: res.data?.finance?.recap ?? null });
             // La partie est close : le preset ne doit plus pointer dessus
             resetPreset();
             setStep("done");
@@ -193,20 +244,21 @@ export default function EndGameModal({
                 {step === "done" && saved && (
                     <div className="results-summary">
                         <p className="results-summary__winner">
-                            Winner: <strong>{saved.results[0]?.name}</strong>
+                            Winner: <strong>{displayPlayerName(saved.results[0]?.name)}</strong>
                         </p>
-                        <ol className="results-recap">
+                        {saved.recap && <FinanceRecap recap={saved.recap} currency={currency} />}
+                        {!saved.recap && <ol className="results-recap">
                             {saved.results
                                 .map((r, i) => ({ ...r, rank: i + 1 }))
                                 .filter((r) => r.rank === 1 || Number(r.prize) > 0)
                                 .map((r) => (
                                     <li key={r.gamePlayerId}>
                                         <span className="results-recap__rank">#{r.rank}</span>
-                                        <span className="results-recap__name">{r.name}</span>
+                                        <span className="results-recap__name">{displayPlayerName(r.name)}</span>
                                         <span>{amount(r.prize)}</span>
                                     </li>
                                 ))}
-                        </ol>
+                        </ol>}
                         <button type="button" className="btn btn--primary" onClick={backToHome}>
                             Back to home
                         </button>
@@ -220,8 +272,8 @@ export default function EndGameModal({
                             {results.map((r, i) => (
                                 <li key={r.gamePlayerId}>
                                     <span className="results-recap__rank">#{i + 1}</span>
-                                    <span className="results-recap__name">{r.name}</span>
-                                    <span>{amount(r.prize)}</span>
+                                    <span className="results-recap__name">{displayPlayerName(r.name)}</span>
+                                    <span>{prizeAmount(r)}</span>
                                 </li>
                             ))}
                         </ol>
@@ -229,6 +281,11 @@ export default function EndGameModal({
                             Distributed {amount(totalPrizes)} of {amount(prizePool)}
                             {matches ? "" : " (does not match the prize pool)"}
                         </p>
+                        {multipleAlive && (
+                            <p className="results-total is-warning">
+                                {aliveCount} players are still in: each keeps their own remaining bounty.
+                            </p>
+                        )}
                         {error && <p className="error">{error}</p>}
                         <div className="results-actions">
                             <button
@@ -262,10 +319,20 @@ export default function EndGameModal({
                             />
                         </label>
 
+                        {financeState.loading && <p className="results-total">Loading the game finances…</p>}
                         <p className="results-total">
                             Prize Pool: {amount(prizePool)} — Distributed:{" "}
                             <span className={matches ? "" : "is-warning"}>{amount(totalPrizes)}</span>
                         </p>
+                        {tracked && !matches && <p className="results-total is-warning" role="status">{leftText}</p>}
+                        {tracked && finance.totals.prizePoolCents !== finance.totals.investedCents && (
+                            <p className="gray">Bounties are paid on top by the app: only the prize pool is split here.</p>
+                        )}
+                        {multipleAlive && (
+                            <p className="results-total is-warning">
+                                {aliveCount} players are still in. Record the remaining knockouts first, or each keeps their own bounty.
+                            </p>
+                        )}
 
                         <DragDropContext onDragEnd={handleDragEnd}>
                             <Droppable droppableId="players">
@@ -295,7 +362,7 @@ export default function EndGameModal({
                                                             <FontAwesomeIcon icon={faGripLines} />
                                                         </span>
                                                         <span className="results-rank">#{index + 1}</span>
-                                                        <span className="player-name">{player.name}</span>
+                                                        <span className="player-name">{displayPlayerName(player.name)}</span>
                                                         <span className="results-move">
                                                             <button
                                                                 type="button"
@@ -318,7 +385,7 @@ export default function EndGameModal({
                                                         </span>
                                                         <span className="results-prize">
                                                             <input
-                                                                type="number"
+                                                                {...(tracked ? { type: "text", inputMode: "decimal" } : { type: "number" })}
                                                                 placeholder="Prize"
                                                                 aria-label={`Prize for ${player.name}`}
                                                                 value={player.prize}
@@ -342,7 +409,7 @@ export default function EndGameModal({
                         </DragDropContext>
 
                         {error && <p className="error">{error}</p>}
-                        <button type="submit" className="btn btn--primary">
+                        <button type="submit" className="btn btn--primary" disabled={financeState.loading || (tracked && !matches)}>
                             Review results
                         </button>
                     </form>

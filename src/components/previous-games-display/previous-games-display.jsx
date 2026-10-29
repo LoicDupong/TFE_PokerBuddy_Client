@@ -5,7 +5,7 @@ import { faDollarSign, faTrophy, faUserGroup, faSackDollar, faChartBar } from '@
 import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import gameService from '@/services/game.service.js';
-import { currencySymbol, getPrizePool } from '@/utils/game.utils.js';
+import { currencySymbol, getPrizePool, displayPlayerName } from '@/utils/game.utils.js';
 import { relativeDateTime } from '@/utils/date.utils.js';
 import PreviousGamesSkeleton from './previous-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
@@ -26,8 +26,8 @@ function PreviousCard({ g }) {
                             <FontAwesomeIcon icon={faTrophy} className="fa-icon" /> <span className="gray">Winner:</span>{" "}
                             {winner ? (
                                 winner.user
-                                    ? <Link href={`/profile/${winner.user.id}`}><span className="title--winner">{winner.user.username}</span></Link>
-                                    : <span className="title--winner">{winner.guestName || "Guest"}</span>
+                                    ? <Link href={`/profile/${winner.user.id}`}><span className="title--winner">{displayPlayerName(winner.user.username)}</span></Link>
+                                    : <span className="title--winner">{displayPlayerName(winner.guestName) || "Guest"}</span>
                             ) : "N/A"}
                         </p>
                         <p><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> <span className="gray">Players:</span> {g.results?.length || 0}</p>
