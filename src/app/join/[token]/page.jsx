@@ -9,6 +9,8 @@ import joinService from "@/services/join.service";
 import gameService from "@/services/game.service.js";
 import gameInviteService from "@/services/gameInvite.service.js";
 import { currencySymbol, inviteResponseToast } from "@/utils/game.utils.js";
+import { canAddToCalendar } from "@/utils/calendar.utils.js";
+import AddToCalendar from "./add-to-calendar.jsx";
 
 // Clé du jeton invité : un par partie et par navigateur
 const guestKey = (gameId) => `pokerbuddy-guest-${gameId}`;
@@ -141,6 +143,8 @@ export default function JoinPage() {
                         <div><dt>Buy-in</dt><dd>{info.buyIn} {symbol}</dd></div>
                         <div><dt>Confirmed</dt><dd>{info.confirmedCount}{info.maxPlayers ? ` / ${info.maxPlayers}` : ""} {info.confirmedCount === 1 && !info.maxPlayers ? "player" : "players"}</dd></div>
                     </dl>
+
+                    {canAddToCalendar(info) && <AddToCalendar token={token} info={info} />}
 
                     {info.status === "finished" ? (
                         <p>This game is already finished.</p>
