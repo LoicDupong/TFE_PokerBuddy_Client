@@ -79,6 +79,188 @@
     }
 }
 
+// ── Glossary search (/learn/terms) ───────────────────────────────────────────
+
+.glossary {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    // L'espacement vient du gap (sinon s'ajoute la marge globale des <article>)
+    > article {
+        margin-bottom: 0;
+    }
+
+    // Barre collante : la recherche reste à portée de pouce pendant le défilement de la liste
+    &__search {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.75rem 0;
+        background-color: var(--primary-color);
+        border-bottom: 1px solid rgba(156, 163, 175, 0.15);
+    }
+
+    &__label {
+        font-size: var(--text-sm);
+        letter-spacing: 0.5px;
+    }
+
+    &__field {
+        position: relative;
+    }
+
+    &__icon {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: var(--secondary-text);
+        pointer-events: none;
+    }
+
+    &__input {
+        width: 100%;
+        min-height: 48px;
+        // 16px minimum : pas de zoom automatique sur iOS
+        font-size: max(1rem, var(--text-base));
+        padding: 0.75rem 3rem 0.75rem 2.75rem;
+        border-color: rgba(156, 163, 175, 0.5);
+
+        &::placeholder {
+            color: var(--secondary-text);
+        }
+
+        &:focus {
+            border-color: var(--primary-color-light);
+        }
+
+        // Bouton d'effacement natif masqué : on affiche le nôtre (même rendu partout, cible 44px)
+        &::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+    }
+
+    &__clear {
+        position: absolute;
+        top: 50%;
+        right: 2px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        color: var(--secondary-text);
+
+        &:hover {
+            color: var(--primary-text);
+        }
+    }
+
+    // Imbriqué pour passer devant `.learn-page p` (line-height 1.75 trop aéré pour un compteur)
+    .glossary__count {
+        font-size: var(--text-sm);
+        line-height: 1.4;
+    }
+
+    &__mark {
+        background-color: var(--secondary-color-trans);
+        color: var(--primary-text);
+        border-radius: 2px;
+        padding: 0 1px;
+    }
+
+    &__empty {
+        background-color: var(--primary-text-trans);
+        border: 1px dashed rgba(156, 163, 175, 0.35);
+        border-radius: 10px;
+        padding: 1.5rem;
+
+        p:first-child {
+            color: var(--primary-text);
+            font-weight: 600;
+        }
+    }
+
+    &__reset {
+        margin-top: 1rem;
+    }
+}
+
+// ── Hand examples (/learn/hands) ─────────────────────────────────────────────
+
+.hand-rank__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+
+    h2 {
+        flex: 1 1 12rem;
+        margin-bottom: 0;
+    }
+}
+
+// Largeur explicite (exigée par container-type) : les cartes se dimensionnent sur ce conteneur
+.hand-example {
+    container-type: inline-size;
+    flex: 0 0 auto;
+    width: min(100%, 17rem);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding-top: 6px; // place pour les cartes surélevées
+}
+
+.playing-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    aspect-ratio: 5 / 7;
+    padding: 10% 12%;
+    border-radius: 6px;
+    background-color: var(--primary-text);
+    color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transform: translateY(-4px);
+
+    &--red {
+        color: var(--secondary-color);
+    }
+
+    // Kicker : atténué et non surélevé
+    &--kicker {
+        opacity: 0.4;
+        transform: none;
+        box-shadow: none;
+    }
+
+    &__rank {
+        font-family: var(--font-display), "Barlow Condensed", sans-serif;
+        font-weight: 700;
+        line-height: 1;
+        font-size: 1rem;
+        font-size: 7.5cqi;
+    }
+
+    &__suit {
+        align-self: flex-end;
+        width: 62%;
+        height: auto;
+    }
+}
+
+.poker-hands .hand-legend {
+    font-size: var(--text-sm);
+}
+
 // ── Hands chart ─────────────────────────────────────────────────────────────
 
 .img--chart-wrapper {

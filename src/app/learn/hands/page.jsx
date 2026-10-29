@@ -1,4 +1,6 @@
 import Image from "next/image";
+import HANDS from "./hands.data.js";
+import HandExample from "./hand-example.jsx";
 
 export default function LearnHandsPage() {
   return (
@@ -44,103 +46,20 @@ export default function LearnHandsPage() {
           <p>We’ll start with the best poker hand and work our way down the rankings.</p>
         </article>
 
-        <article>
-          <h2>#1 – Royal Flush</h2>
-          <p>Ts Js Qs Ks As</p>
-          <p>
-            A straight flush is five cards in sequential order, all of the same suit. As this straight
-            flush is all the way to the ace, it is known as a royal flush and is an unbeatable high hand.
-          </p>
-        </article>
+        {/* Légende commune aux visuels */}
+        <p className="hand-legend">Bright cards make the hand; faded cards are kickers, used only to break ties.</p>
 
-        <article>
-          <h2>#2 – Straight Flush</h2>
-          <p>4h 5h 6h 7h 8h</p>
-          <p>
-            A straight flush that stops short of the ace is still one of the strongest hands in almost
-            every poker game. It’s called a straight flush because it meets the requirements of both a
-            flush and a straight.
-          </p>
-        </article>
-
-        <article>
-          <h2>#3 – Four of a Kind</h2>
-          <p>9h 9c 9s 9d Jh</p>
-          <p>
-            Also known as quads, four of a kind is just what it sounds like: four cards of the same rank,
-            plus any other card. In the case of a tie, the player with the higher ranked quads wins.
-          </p>
-          <p>
-            In flop games, or games using wildcards, more than one player may make the same set of quads,
-            in which case the unmatched fifth card (the kicker) is used to determine the winner.
-          </p>
-        </article>
-
-        <article>
-          <h2>#4 – Full House</h2>
-          <p>Qd Qh Qs Kd Ks</p>
-          <p>
-            Also known as a boat, a full house consists of three-of-a-kind plus a pair. In case of a tie,
-            the highest ranked three-of-a-kind wins. If they are equal, the highest accompanying pair wins.
-          </p>
-        </article>
-
-        <article>
-          <h2>#5 – Flush</h2>
-          <p>2d Td Qd 6d 5d</p>
-          <p>
-            Five cards of the same suit make a flush. What differentiates one flush from another is the rank
-            of the highest card. An ace-high flush is the strongest flush.
-          </p>
-        </article>
-
-        <article>
-          <h2>#6 – Straight</h2>
-          <p>3h 4s 5s 6d 7s</p>
-          <p>
-            Five cards in sequence – of any suits – make a straight. The highest card in the straight
-            determines the winner in case of a tie.
-          </p>
-          <p>
-            Note: an ace may be high (A-K-Q-J-T) or low (A-2-3-4-5).
-          </p>
-        </article>
-
-        <article>
-          <h2>#7 – Three-of-a-Kind</h2>
-          <p>5c 5h 5s 9h 2d</p>
-          <p>
-            Three cards of the same rank plus two unrelated cards. Known as a set (if you hold the pair +
-            one on the board) or trips (if one in your hand matches a pair on the board).
-          </p>
-        </article>
-
-        <article>
-          <h2>#8 – Two Pair</h2>
-          <p>7h 7s 3d 3c Jh</p>
-          <p>
-            A hand containing two pairs plus a fifth card. Ties are broken by the highest pair, then by the
-            second pair, then by the kicker.
-          </p>
-        </article>
-
-        <article>
-          <h2>#9 – One Pair</h2>
-          <p>Ks Kh 9s 5d 2h</p>
-          <p>
-            A single pair of cards with the same rank plus three other unconnected cards. Ties are won by
-            the highest pair, then by kickers if needed.
-          </p>
-        </article>
-
-        <article>
-          <h2>#10 – High Card</h2>
-          <p>Ad Jh 8h 5s 6c</p>
-          <p>
-            If you don’t make any of the hands above, your hand strength is determined by your highest card.
-            Ace-high is the best, 6-high the weakest. Ties are broken by kickers.
-          </p>
-        </article>
+        {HANDS.map((hand) => (
+          <article key={hand.position} className="hand-rank">
+            <div className="hand-rank__header">
+              <h2>#{hand.position} – {hand.name}</h2>
+              <HandExample cards={hand.cards} made={hand.made} label={hand.label} />
+            </div>
+            {hand.paragraphs.map((text) => (
+              <p key={text}>{text}</p>
+            ))}
+          </article>
+        ))}
       </section>
 
     </>

@@ -255,19 +255,7 @@ main {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    &--friends {
-        // auto-fit : plus de 3 colonnes fixes qui débordent sur mobile
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        .card{
-            min-width: 0;
-            overflow-wrap: anywhere;
-            min-height: stretch;
-                display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-    }
+    // Cartes d'amis : composant partagé components/friend-card (grille .friend-grid)
 
     // Plusieurs colonnes dès qu'il y a la place (au lieu d'une seule colonne étroite)
     &--active, &--planned, &--previous, &--invites {
@@ -387,35 +375,6 @@ main {
         display: flex;
         align-items: center;
         gap: 1rem;
-    }
-
-    &--invite-friend {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-
-        .user__avatar {
-            margin: 0;
-
-            img {
-                width: 40px;
-                height: 40px;
-                border-width: 2.5px;
-            }
-        }
-
-        .btn {
-            margin: 0;
-        }
-
-        .icon--avatar {
-            border: 2.5px solid var(--primary-text);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            padding: .5rem;
-        }
     }
 
 }

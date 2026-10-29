@@ -1,8 +1,8 @@
 "use client";
 
 import userService from "@/services/user.service.js";
-import { serverUrl } from "@/utils/media.js";
-import { faXmark, faUser } from "@fortawesome/free-solid-svg-icons";
+import FriendCard from "@/components/friend-card/friend-card.jsx";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
@@ -75,43 +75,29 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
 
                 {/* ✅ Friends list */}
                 <div className="section section__friends">
-                    <h3>Your friends</h3>
-                    <div className="cards cards--friends">
-                        {user.friends.map((f) => {
-                            const alreadyInvited = invitedIds.includes(f.id);
-                            return (
-                                <div
-                                    key={f.id}
-                                    className={`card user user--friend ${invites.friends.some((sf) => sf.id === f.id) ? "user--selected" : ""
-                                        }`}
-                                    style={alreadyInvited ? { opacity: 0.5, cursor: "default" } : undefined}
-                                    onClick={alreadyInvited ? undefined : () => toggleFriend(f)}
-                                    role="button"
-                                    tabIndex={alreadyInvited ? -1 : 0}
-                                    aria-pressed={invites.friends.some((sf) => sf.id === f.id)}
-                                    aria-disabled={alreadyInvited}
-                                    onKeyDown={(e) => {
-                                        if (!alreadyInvited && (e.key === "Enter" || e.key === " ")) {
-                                            e.preventDefault();
-                                            toggleFriend(f);
-                                        }
-                                    }}
-                                >
-                                    <div className="user__avatar user--friend__avatar">
-                                        {f.avatar ? (
-                                            <img src={serverUrl(f.avatar)} alt={f.username} />
-                                        ) : (
-                                            <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
-                                        )}
-                                    </div>
-                                    <div className="user__infos">
-                                        <h2 className="title title--friend">{f.username}</h2>
-                                        {alreadyInvited && <small className="gray">Invited</small>}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <h3 id="game-invite-friends-title">Your friends</h3>
+                    {user.friends?.length > 0 ? (
+                        <ul className="friend-grid" aria-labelledby="game-invite-friends-title">
+                            {user.friends.map((f) => {
+                                const alreadyInvited = invitedIds.includes(f.id);
+                                return (
+                                    <li key={f.id}>
+                                        {/* Vrai bouton à bascule : Entrée/Espace et aria-pressed natifs ;
+                                            déjà invité = désactivé (hors tabulation, comme avant) */}
+                                        <FriendCard
+                                            user={f}
+                                            onToggle={toggleFriend}
+                                            selected={invites.friends.some((sf) => sf.id === f.id)}
+                                            disabled={alreadyInvited}
+                                            status={alreadyInvited ? "Invited" : null}
+                                        />
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="empty-state">No friends yet. Add some from your profile, or invite guests below.</p>
+                    )}
                 </div>
 
                 {/* ✅ Guests */}
