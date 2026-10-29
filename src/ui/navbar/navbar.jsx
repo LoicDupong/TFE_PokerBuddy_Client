@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation.js";
 import { useEffect, useState } from "react";
 
 import useAuthStore from "@/stores/useAuthStore";
-import useNotificationStore from "@/stores/useNotificationStore";
+import useNotificationStore, { useNotificationSync } from "@/stores/useNotificationStore";
 
 
 const learnLinks = [
@@ -21,7 +21,7 @@ const learnLinks = [
 export default function Navbar() {
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
-    const { unreadCount, fetchNotifications } = useNotificationStore();
+    const unreadCount = useNotificationStore((state) => state.unreadCount);
 
     // Logout est rendu à part : toujours en dernier et visuellement secondaire
     const links = [
@@ -60,13 +60,9 @@ export default function Navbar() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    useEffect(() => {
-        if (!user) return;
-        fetchNotifications();
-        const onFocus = () => fetchNotifications();
-        window.addEventListener("focus", onFocus);
-        return () => window.removeEventListener("focus", onFocus);
-    }, [user, fetchNotifications]);
+    // Notifications récupérées au montage, au focus, au retour sur l'onglet et toutes les 60 s
+    // (onglet visible) : boucle partagée avec les toasts, une seule requête à la fois
+    useNotificationSync(user?.id);
 
     useEffect(() => {
         if (isOpen) {
