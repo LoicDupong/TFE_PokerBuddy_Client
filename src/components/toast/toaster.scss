@@ -1,0 +1,199 @@
+// Zone des toasts (voir toaster.jsx) et toasts de notification
+
+// --- Mobile et tablette (jusqu'à 1280px, comme le menu burger) ---
+// Une colonne centrée en bas, à la hauteur de l'ancien toast (5rem : au-dessus des barres d'outils
+// des navigateurs mobiles) et jamais dans la zone sûre. La nav, en haut, n'est jamais couverte.
+.toaster {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: max(1rem, env(safe-area-inset-left, 0px)) max(1rem, env(safe-area-inset-right, 0px));
+  // La zone vide laisse passer les clics vers la page ; seuls les toasts sont cliquables
+  pointer-events: none;
+
+  // pointer-events est hérité : à rétablir explicitement sur le toast d'action
+  .toast {
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 1280px) {
+  // Le toast d'action se range sous les notifications au lieu d'être positionné seul
+  .toaster .toast {
+    position: static;
+    transform: none;
+    animation-name: toast-rise;
+  }
+}
+
+.notification-toasts {
+  width: 100%;
+  max-width: 24rem;
+  pointer-events: none;
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+// --- Grand écran : notifications en bas à droite, le toast d'action garde sa place d'origine ---
+@media (min-width: 1281px) {
+  .toaster {
+    display: contents;
+  }
+
+  .notification-toasts {
+    position: fixed;
+    right: max(1.5rem, env(safe-area-inset-right, 0px));
+    bottom: 1.5rem;
+    width: 22rem;
+    z-index: 9998; // sous le toast d'action s'ils devaient se croiser
+  }
+}
+
+// Menu mobile plein écran ouvert : les toasts ne couvrent pas ses liens (ils réapparaissent à la fermeture)
+body.menu-open .notification-toasts {
+  visibility: hidden;
+}
+
+// --- Toast de notification ---
+.notification-toast {
+  display: flex;
+  align-items: flex-start;
+  pointer-events: auto;
+  // Marine relevé + ombre portée : flotte au-dessus des cartes de la page sans quitter la palette
+  background-color: #282a41;
+  border: 1px solid rgba(159, 165, 223, 0.45);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+  color: var(--primary-text);
+  animation: toast-rise 0.22s ease-out;
+
+  // Durée = TOAST_EXIT_MS (useNotificationStore)
+  &--leaving {
+    animation: notification-toast-out 0.18s ease-in forwards;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0.25rem 0.75rem 0.75rem;
+    border-radius: 10px 0 0 10px;
+
+    &--link {
+      cursor: pointer;
+
+      @media (hover: hover) {
+        &:hover .notification-toast__title {
+          text-decoration: underline;
+          text-decoration-thickness: 2px;
+          text-underline-offset: 3px;
+        }
+      }
+    }
+  }
+
+  // Pastille rouge comme le point de la cloche : "nouveau"
+  &__icon {
+    flex: 0 0 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(215, 0, 34, 0.2);
+    color: var(--secondary-color-text);
+  }
+
+  &__text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  &__title {
+    font-family: var(--font-display), "Barlow Condensed", var(--font-roboto), sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  // 2 lignes max (nom de partie long) ; le texte complet reste sur la page Notifications
+  &__message {
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: rgba(255, 243, 243, 0.85);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  // Cible tactile de 44px
+  &__close {
+    flex: 0 0 44px;
+    min-height: 44px;
+    align-self: stretch;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 0.85rem;
+    color: var(--secondary-text);
+    border-radius: 0 10px 10px 0;
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--primary-text);
+      }
+    }
+  }
+}
+
+@keyframes toast-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes notification-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+// Mouvement réduit : apparition et disparition sans animation
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toaster .toast,
+  .notification-toast {
+    animation: none;
+  }
+
+  .notification-toast--leaving {
+    animation: none;
+    opacity: 0;
+  }
+}

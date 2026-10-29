@@ -21,8 +21,9 @@ import "../components/pwa/installPrompt.scss";
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
-import Toast from "@/components/toast/toast.jsx";
+import Toaster from "@/components/toast/toaster.jsx";
 import "../components/toast/toast.scss";
+import "../components/toast/toaster.scss";
 import AuthInit from "@/components/auth/auth-init.jsx";
 
 // Police servie par Next (plus d'@import Google Fonts bloquant dans le SCSS)
@@ -57,7 +58,7 @@ export default function RootLayout({ children }) {
         <Header />
         <main>{children}</main>
         <Footer />
-        <Toast />
+        <Toaster />
         <SpeedInsights/>
         <Analytics/>
       </body>
