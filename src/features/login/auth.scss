@@ -1,0 +1,87 @@
+// Compléments des pages d'auth (login, mot de passe oublié, nouveau mot de passe).
+// Les champs et boutons restent ceux de ui/styles/form.scss et base.scss.
+.auth {
+    // Texte d'introduction sous le titre
+    &__intro {
+        max-width: 38rem;
+        margin: -1rem 0 2rem;
+        color: var(--secondary-text);
+    }
+
+    // "Forgot password?" sous le champ mot de passe : cible tactile de 44 px
+    &__forgot {
+        align-self: flex-end;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        font-size: var(--text-sm);
+    }
+
+    // Consigne sous le label (règles du mot de passe)
+    &__hint {
+        font-size: var(--text-sm);
+        color: var(--secondary-text);
+        line-height: 1.4;
+    }
+
+    // Message de succès / lien expiré
+    &__panel {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        max-width: 38rem;
+        margin-bottom: 2rem;
+        padding: 1.25rem;
+        border: 1px solid var(--primary-color-light);
+        border-left: 4px solid var(--primary-color-light);
+        border-radius: 10px;
+        background-color: var(--primary-text-trans);
+
+        p + p {
+            margin-top: .75rem;
+        }
+
+        &--warning {
+            border-color: var(--secondary-color);
+        }
+    }
+
+    &__panel-icon {
+        flex-shrink: 0;
+        margin-top: .2rem;
+        font-size: 1.5rem;
+        color: var(--primary-color-light);
+
+        .auth__panel--warning & {
+            color: var(--secondary-color-text);
+        }
+    }
+
+    &__email {
+        overflow-wrap: anywhere;
+        color: var(--primary-text);
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+
+        .btn {
+            margin-top: 0;
+            min-height: 44px;
+        }
+    }
+
+    // Annonce "mot de passe modifié" au-dessus du formulaire de login
+    &__notice {
+        margin-bottom: 1.5rem;
+    }
+}
+
+// Le titre reçoit le focus quand l'écran change (lecteurs d'écran) : pas de contour à la souris
+.title--auth:focus {
+    outline: none;
+}

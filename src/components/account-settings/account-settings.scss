@@ -1,0 +1,122 @@
+// Réglages du compte : compléments à profile.scss (cartes .account__*) et à la modale de suppression
+
+.account__hint {
+    margin-top: -1rem;
+    font-size: var(--text-sm);
+    color: var(--secondary-text);
+}
+
+// Modale de confirmation de suppression (<dialog> natif)
+.delete-dialog {
+    // Le reset global "* { margin: 0 }" annule le centrage natif du <dialog>
+    margin: auto;
+    width: min(34rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid var(--secondary-color);
+    border-top-width: 4px;
+    border-radius: 12px;
+    background-color: var(--primary-color);
+    color: var(--primary-text);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+
+    &::backdrop {
+        background-color: rgba(10, 10, 18, 0.78);
+        backdrop-filter: blur(3px);
+    }
+
+    &[open] {
+        animation: delete-dialog-in 0.2s ease-out;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 1.5rem 1.25rem;
+
+        @media (min-width: 600px) {
+            padding: 2rem;
+        }
+    }
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: var(--text-xl);
+        line-height: 1.1;
+
+        svg {
+            font-size: 0.75em;
+            color: var(--secondary-color-text);
+        }
+    }
+
+    &__lead {
+        margin-top: -0.5rem;
+        color: var(--secondary-text);
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__item {
+        display: grid;
+        grid-template-columns: 1.25rem 1fr;
+        align-items: start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background-color: var(--primary-text-trans);
+
+        p {
+            line-height: 1.45;
+        }
+
+        strong {
+            color: var(--primary-text);
+        }
+    }
+
+    &__icon {
+        margin-top: 0.2rem;
+        color: var(--primary-color-light);
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        .btn {
+            flex: 1 1 12rem;
+            margin-top: 0;
+            min-height: 44px;
+            text-align: center;
+        }
+    }
+}
+
+@keyframes delete-dialog-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,6 +1,15 @@
 
 import api from "../utils/api"; // axios setup
 
+// Échec homogène : message lisible, code métier éventuel ("INVALID_PASSWORD", "LAST_ADMIN"…) et statut HTTP.
+// errorMessage : ancien format, gardé pour les appels existants
+function toFailure(error, fallback) {
+  const status = error.response?.status ?? null;
+  const message = error.response?.data?.error
+    || (status ? fallback : "Network error, check your connection and try again");
+  return { success: false, error: message, code: error.response?.data?.code ?? null, status, errorMessage: [message] };
+}
+
 const userService = {
   // 🔹 GET /user/:id
   getUserById: async (id) => {
@@ -53,32 +62,43 @@ const userService = {
     }
   },
 
-  // 🔹 DELETE /user/me
-  deleteMe: async () => {
+  // 🔹 DELETE /user/me { password } : le mot de passe est redemandé (réauthentification)
+  deleteMe: async (password) => {
     try {
-      const res = await api.delete(`/user/me`);
-      return {
-        success: true,
-        data: res.data,
-      };
+      const res = await api.delete(`/user/me`, { data: { password } });
+      return { success: true, data: res.data };
     } catch (error) {
-      return {
-        success: false,
-        errorMessage: [error.response?.data?.error || "Delete failed"],
-      };
+      return toFailure(error, "Could not delete the account, please try again");
     }
   },
 
-  // POST /auth/update-pwd
+  // POST /auth/update-pwd → { message, token } : nouveau token pour cet appareil, les autres sont déconnectés
   updatePassword: async (oldPassword, newPassword) => {
     try {
-      await api.post("/auth/update-pwd", { oldPassword, newPassword });
-      return { success: true };
+      const res = await api.post("/auth/update-pwd", { oldPassword, newPassword });
+      return { success: true, data: res.data };
     } catch (error) {
-      return {
-        success: false,
-        errorMessage: [error.response?.data?.error || "Could not change the password"],
-      };
+      return toFailure(error, "Could not change the password");
+    }
+  },
+
+  // POST /auth/forgot-password : même réponse que le compte existe ou non
+  requestPasswordReset: async (email) => {
+    try {
+      const res = await api.post("/auth/forgot-password", { email });
+      return { success: true, data: res.data };
+    } catch (error) {
+      return toFailure(error, "Could not send the link, please try again");
+    }
+  },
+
+  // POST /auth/reset-password → { message, email } ; lien invalide : code "INVALID_RESET_TOKEN"
+  resetPassword: async (token, password) => {
+    try {
+      const res = await api.post("/auth/reset-password", { token, password });
+      return { success: true, data: res.data };
+    } catch (error) {
+      return toFailure(error, "Could not save the new password, please try again");
     }
   },
 

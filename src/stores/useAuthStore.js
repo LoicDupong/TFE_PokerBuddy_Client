@@ -16,6 +16,13 @@ const useAuthStore = create((set, get) => ({
     set({ user, token, isReady: true });
   },
 
+  // Nouveau token pour la session en cours (changement de mot de passe : les autres appareils
+  // sont déconnectés, celui-ci reste connecté avec ce token)
+  updateToken: (token) => {
+    localStorage.setItem("token", token);
+    set({ token });
+  },
+
   // 🔹 Login → /auth/login
   login: async (email, password) => {
     try {
