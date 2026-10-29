@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useToastStore from "@/stores/useToastStore.js";
 import { combineDateAndTime, toDatetimeLocalValue } from "@/utils/date.utils.js";
 import { currencySymbol } from "@/utils/game.utils.js";
+import FinanceFields from "@/features/game/finance-fields.jsx";
+import { centsToInput, parseAmountToCents } from "@/utils/money.utils.js";
 import {
     faCalendar,
     faClock,
@@ -41,6 +43,10 @@ export default function EditGamePage() {
         maxPlayers: 0,
         placesPaid: 2,
         allowRebuys: false,
+        rebuyAmount: "",
+        pkoEnabled: false,
+        pkoBountyPercent: 50,
+        pkoCashPercent: 50,
         description: "",
     });
 
@@ -80,6 +86,10 @@ export default function EditGamePage() {
                     maxPlayers: Number(data.game.maxPlayers) || 0,
                     placesPaid: Number(data.game.placesPaid) || 2,
                     allowRebuys: data.game.allowRebuys || false,
+                    rebuyAmount: data.game.rebuyAmountCents != null ? centsToInput(data.game.rebuyAmountCents) : "",
+                    pkoEnabled: data.game.pkoEnabled || false,
+                    pkoBountyPercent: data.game.pkoBountyPercent ?? 50,
+                    pkoCashPercent: data.game.pkoCashPercent ?? 50,
                     description: data.game.description || "",
                 });
                 setPayouts(data.game.payoutDistribution || payouts);
@@ -118,8 +128,19 @@ export default function EditGamePage() {
     const handleConfirm = async (e) => {
         e.preventDefault();
         const start = formData.dateStart ? new Date(formData.dateStart) : null;
+        // Prix du rebuy saisi en unités → centimes (analyse de chaîne)
+        const { rebuyAmount, ...rest } = formData;
+        const rebuyText = String(rebuyAmount ?? "").trim();
+        const rebuyAmountCents = rebuyText === "" ? null : parseAmountToCents(rebuyText);
+        if (rebuyText !== "" && !rebuyAmountCents) {
+            showToast("Rebuy price must be a positive amount");
+            return;
+        }
         const res = await gameService.update(game.id, {
-            ...formData,
+            ...rest,
+            rebuyAmountCents,
+            pkoBountyPercent: Number(formData.pkoBountyPercent),
+            pkoCashPercent: Number(formData.pkoCashPercent),
             dateStart: start ? start.toISOString() : formData.dateStart,
             // Heure de table convertie ici, dans le fuseau de l'utilisateur ; vide → null pour l'effacer
             realStart: start && formData.realStart ? combineDateAndTime(start, formData.realStart) : null,
@@ -244,15 +265,13 @@ export default function EditGamePage() {
                     </div>
                 </div>
 
-                <label className="form__checkbox">
-                    <input
-                        type="checkbox"
-                        name="allowRebuys"
-                        checked={formData.allowRebuys}
-                        onChange={handleChange}
-                    />
-                    <span>Allow rebuys</span>
-                </label>
+                <FinanceFields
+                    values={formData}
+                    onChange={(name, value) => setFormData((prev) => ({ ...prev, [name]: value }))}
+                    buyIn={formData.buyIn}
+                    currency={formData.currency}
+                />
+                <p className="gray">Once a buy-in, rebuy or knockout is recorded in the Game Manager, the buy-in and PKO settings are locked.</p>
             </fieldset>
 
             {/* Payouts */}
