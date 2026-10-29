@@ -39,6 +39,90 @@
 
 .invite-modal p { margin: 0; }
 
+/* « Add to calendar » de la page d'invitation : action secondaire, discrète sous les infos */
+.calendar-add {
+    margin: -0.25rem 0 1.25rem;
+
+    &__toggle {
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 44px;
+        padding: 0.5rem 0.9rem;
+        border: 1px solid rgba(159, 165, 223, 0.55);
+        border-radius: 8px;
+        color: var(--primary-color-light);
+        font-weight: 600;
+        transition: background-color 0.15s ease;
+
+        &:hover { background-color: rgba(159, 165, 223, 0.12); }
+    }
+
+    &__chevron {
+        font-size: 0.75em;
+        transition: transform 0.2s ease;
+    }
+
+    &__toggle[aria-expanded="true"] &__chevron { transform: rotate(180deg); }
+
+    &__options {
+        list-style: none;
+        display: grid;
+        gap: 0.5rem;
+        margin: 0.5rem 0 0;
+        padding: 0;
+
+        // display: grid l'emporterait sur l'attribut hidden
+        &[hidden] { display: none; }
+    }
+
+    &__option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 48px;
+        padding: 0.6rem 0.9rem;
+        line-height: 1.3; // le corps de carte impose 1.8rem, trop aéré pour un libellé sur deux lignes
+        border: 1px solid rgba(255, 243, 243, 0.14);
+        border-radius: 8px;
+        background-color: var(--primary-text-trans);
+        color: var(--primary-text);
+        text-decoration: none;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+
+        &:hover {
+            border-color: var(--primary-color-light);
+            background-color: rgba(159, 165, 223, 0.08);
+        }
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        width: 1.1rem;
+        color: var(--primary-color-light);
+    }
+
+    &__label {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__hint {
+        color: var(--secondary-text);
+        font-size: 0.85rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__toggle,
+        &__chevron,
+        &__option { transition: none; }
+    }
+}
+
+// .card li ajoute un retrait de 1em aux listes des cartes : pas pour ces options
+.calendar-add .calendar-add__options > li { padding: 0; }
+
 /* Barre de réponse collée en bas (invité en attente) */
 .answer-bar {
     position: fixed;

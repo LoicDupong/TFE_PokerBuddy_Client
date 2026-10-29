@@ -1,4 +1,5 @@
 import api from "@/utils/api.js";
+import { apiUrl } from "@/utils/media.js";
 
 const fail = (error, fallback) => ({
     success: false,
@@ -34,6 +35,10 @@ const joinService = {
             return { ...fail(error, "Could not save your answer"), code: error.response?.status };
         }
     },
+
+    // Lien direct (pas d'appel axios) : Safari iOS n'ouvre la fiche « Ajouter au calendrier »
+    // que pour une vraie navigation vers le .ics, pas pour un fichier téléchargé en JS
+    icsUrl: (token) => apiUrl(`/join/${encodeURIComponent(token)}/ics`),
 
     // L'invité change sa réponse avec son jeton
     updateGuestAnswer: async (guestToken, status) => {
