@@ -10,6 +10,8 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Sans cette entrée, ESLint 9 n'analyse que les .js/.mjs/.cjs : aucun composant .jsx n'était vérifié
+  { files: ["**/*.{js,jsx,mjs}"] },
   ...compat.extends("next/core-web-vitals"),
   {
     ignores: [

@@ -55,7 +55,7 @@ export default function ActiveGameDisplay({ onResponded }) {
         <>
             <div className="divider"></div>
             <h3 className="title--section">
-                <span className="red">Today's</span> games
+                <span className="red">Today&apos;s</span> games
             </h3>
             <div className="cards cards--active">
 
