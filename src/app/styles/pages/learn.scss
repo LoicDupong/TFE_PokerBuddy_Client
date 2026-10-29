@@ -193,6 +193,74 @@
     }
 }
 
+// ── Hand examples (/learn/hands) ─────────────────────────────────────────────
+
+.hand-rank__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+
+    h2 {
+        flex: 1 1 12rem;
+        margin-bottom: 0;
+    }
+}
+
+// Largeur explicite (exigée par container-type) : les cartes se dimensionnent sur ce conteneur
+.hand-example {
+    container-type: inline-size;
+    flex: 0 0 auto;
+    width: min(100%, 17rem);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding-top: 6px; // place pour les cartes surélevées
+}
+
+.playing-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    aspect-ratio: 5 / 7;
+    padding: 10% 12%;
+    border-radius: 6px;
+    background-color: var(--primary-text);
+    color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transform: translateY(-4px);
+
+    &--red {
+        color: var(--secondary-color);
+    }
+
+    // Kicker : atténué et non surélevé
+    &--kicker {
+        opacity: 0.4;
+        transform: none;
+        box-shadow: none;
+    }
+
+    &__rank {
+        font-family: var(--font-display), "Barlow Condensed", sans-serif;
+        font-weight: 700;
+        line-height: 1;
+        font-size: 1rem;
+        font-size: 7.5cqi;
+    }
+
+    &__suit {
+        align-self: flex-end;
+        width: 62%;
+        height: auto;
+    }
+}
+
+.poker-hands .hand-legend {
+    font-size: var(--text-sm);
+}
+
 // ── Hands chart ─────────────────────────────────────────────────────────────
 
 .img--chart-wrapper {
