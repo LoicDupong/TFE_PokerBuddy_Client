@@ -7,11 +7,17 @@ import { faEnvelope, faEye, faEyeSlash, faLock, faUserPlus, faUser } from "@fort
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { validateRegister } from "@/schemas/authSchema.js";
+import { useT, useLocale } from "@/i18n/i18n-provider.jsx";
+import { AUTH_MESSAGES } from "./auth.messages.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 import { getFieldError } from "@/utils/getFieldError.utils.js";
 import { getSafeRedirect } from "@/utils/redirect.utils.js";
 import useAuthStore from "@/stores/useAuthStore";
 
 export default function RegisterForm() {
+    const { t } = useT(AUTH_MESSAGES);
+    const { locale } = useLocale();
+    const serverError = useServerError();
     const register = useAuthStore((state) => state.register);
     const setAuth = useAuthStore((state) => state.setAuth);
 
@@ -35,7 +41,7 @@ export default function RegisterForm() {
         const data = Object.fromEntries(formData);
 
         // ✅ Validation avec Zod
-        const validation = validateRegister(data);
+        const validation = validateRegister(data, locale);
         if (!validation.ok) {
             setErrorMessage(validation.errors);
             setIsPending(false);
@@ -47,7 +53,8 @@ export default function RegisterForm() {
             validation.data.username,
             validation.data.email,
             validation.data.password,
-            claim
+            claim,
+            locale
         );
 
         if (res.success) {
@@ -56,7 +63,7 @@ export default function RegisterForm() {
             setAuth(user, token);
             router.push(redirect || "/");
         } else {
-            setErrorMessage([{ field: "form", message: res.error?.error || "Registration failed" }]);
+            setErrorMessage([{ field: "form", message: serverError(res.error?.error) || t("registerFailed") }]);
         }
 
         setIsPending(false);
@@ -79,19 +86,19 @@ export default function RegisterForm() {
     return (
         <section className="auth auth--register">
             <h1 className="title title--auth">
-                Create <br /><span className="red">new account</span>
+                {t("createTitle")} <br /><span className="red">{t("createRed")}</span>
             </h1>
 
             <form onSubmit={handleRegister} className="form form--auth" id="register-form" noValidate>
                 <div className="form__row">
                     <label htmlFor={inputId + "username"}>
-                        <FontAwesomeIcon icon={faUser} /> Username
+                        <FontAwesomeIcon icon={faUser} /> {t("username")}
                     </label>
                     <input
                         type="text"
                         id={inputId + "username"}
                         name="username"
-                        placeholder="Choose a username"
+                        placeholder={t("usernamePh")}
                         autoComplete="username"
                         {...errProps("username")}
                     />
@@ -100,13 +107,13 @@ export default function RegisterForm() {
 
                 <div className="form__row">
                     <label htmlFor={inputId + "email"}>
-                        <FontAwesomeIcon icon={faEnvelope} /> Email
+                        <FontAwesomeIcon icon={faEnvelope} /> {t("email")}
                     </label>
                     <input
                         type="email"
                         id={inputId + "email"}
                         name="email"
-                        placeholder="Enter your email"
+                        placeholder={t("emailPh")}
                         autoComplete="email"
                         {...errProps("email")}
                     />
@@ -115,14 +122,14 @@ export default function RegisterForm() {
 
                 <div className="form__row">
                     <label htmlFor={inputId + "password"}>
-                        <FontAwesomeIcon icon={faLock} /> Password
+                        <FontAwesomeIcon icon={faLock} /> {t("password")}
                     </label>
                     <div className="input__container">
                         <input
                             type={showPassword ? "text" : "password"}
                             id={inputId + "password"}
                             name="password"
-                            placeholder="Enter your password"
+                            placeholder={t("passwordPh")}
                             autoComplete="new-password"
                             className="input--with-toggle"
                             {...errProps("password")}
@@ -131,7 +138,7 @@ export default function RegisterForm() {
                             type="button"
                             className="input__toggle"
                             onClick={() => setShowPassword((v) => !v)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                             aria-pressed={showPassword}
                         >
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
@@ -142,13 +149,13 @@ export default function RegisterForm() {
 
                 <div className="form__row">
                     <label htmlFor={inputId + "confirmPassword"}>
-                        <FontAwesomeIcon icon={faLock} /> Confirm password
+                        <FontAwesomeIcon icon={faLock} /> {t("confirmPassword")}
                     </label>
                     <input
                         type={showPassword ? "text" : "password"}
                         id={inputId + "confirmPassword"}
                         name="confirmPassword"
-                        placeholder="Confirm your password"
+                        placeholder={t("confirmPh")}
                         autoComplete="new-password"
                         {...errProps("confirmPassword")}
                     />
@@ -156,7 +163,7 @@ export default function RegisterForm() {
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending}>
-                    <FontAwesomeIcon icon={faUserPlus} /> {isPending ? "Registering…" : "Register"}
+                    <FontAwesomeIcon icon={faUserPlus} /> {isPending ? t("registerPending") : t("registerTitle")}
                 </button>
 
                 {/* Erreur globale */}
@@ -166,12 +173,12 @@ export default function RegisterForm() {
             </form>
 
             <p className="auth__redirect">
-                Already have an account?{" "}
+                {t("haveAccount")}{" "}
                 <Link
                     href={redirect ? `/auth/login?redirect=${encodeURIComponent(redirect)}` : "/auth/login"}
                     className="link"
                 >
-                    Log in
+                    {t("logIn")}
                 </Link>
             </p>
         </section>

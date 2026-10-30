@@ -5,18 +5,11 @@ import Link from "next/link";
 
 import supportService from "@/services/support.service.js";
 import { HELP_TEXT, formatDateTime, useRequireMember } from "../help.utils.js";
-
-const LIST_TEXT = {
-    title: "My requests",
-    newRequest: "New request",
-    loading: "Loading…",
-    empty: "You haven't sent any request yet.",
-    contact: "Contact us",
-    retry: "Try again",
-    loadError: "Could not load your requests.",
-};
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { HELP_MESSAGES } from "../help.messages.js";
 
 export default function MyTicketsPage() {
+    const { t, intlLocale } = useT(HELP_MESSAGES);
     const { allowed } = useRequireMember();
     const [tickets, setTickets] = useState(null);
     const [error, setError] = useState(null);
@@ -29,31 +22,31 @@ export default function MyTicketsPage() {
             const res = await supportService.getMyTickets();
             if (cancelled) return;
             if (res.success) { setTickets(res.data); setError(null); }
-            else setError(LIST_TEXT.loadError);
+            else setError(t("list.loadError"));
         })();
         return () => { cancelled = true; };
     }, [allowed, attempt]);
 
-    if (!allowed) return <p>{LIST_TEXT.loading}</p>;
+    if (!allowed) return <p>{t("list.loading")}</p>;
 
     return (
         <div className="help">
             <header className="help__header">
-                <h1>{LIST_TEXT.title}</h1>
-                <Link href="/help" className="btn btn--small help__link">{LIST_TEXT.newRequest}</Link>
+                <h1>{t("list.title")}</h1>
+                <Link href="/help" className="btn btn--small help__link">{t("list.newRequest")}</Link>
             </header>
 
             {error && (
                 <div className="help__section">
                     <p role="alert">{error}</p>
-                    <button type="button" className="btn btn--small" onClick={() => setAttempt((n) => n + 1)}>{LIST_TEXT.retry}</button>
+                    <button type="button" className="btn btn--small" onClick={() => setAttempt((n) => n + 1)}>{t("list.retry")}</button>
                 </div>
             )}
-            {!error && tickets === null && <p>{LIST_TEXT.loading}</p>}
+            {!error && tickets === null && <p>{t("list.loading")}</p>}
             {tickets?.length === 0 && (
                 <div className="help__section">
-                    <p className="help__hint">{LIST_TEXT.empty}</p>
-                    <Link href="/help" className="btn btn--secondary">{LIST_TEXT.contact}</Link>
+                    <p className="help__hint">{t("list.empty")}</p>
+                    <Link href="/help" className="btn btn--secondary">{t("list.contact")}</Link>
                 </div>
             )}
             {tickets?.length > 0 && (
@@ -62,9 +55,9 @@ export default function MyTicketsPage() {
                         <li key={ticket.id}>
                             <Link href={`/help/tickets/${ticket.id}`} className="help__ticket">
                                 <span className="help__ticket-subject">{ticket.subject}</span>
-                                <span className={`help__badge help__badge--${ticket.status}`}>{HELP_TEXT.statuses[ticket.status]}</span>
+                                <span className={`help__badge help__badge--${ticket.status}`}>{t(`statuses.${ticket.status}`)}</span>
                                 <span className="help__ticket-meta">
-                                    {HELP_TEXT.categories[ticket.category]} · {formatDateTime(ticket.lastMessageAt)}
+                                    {t(`categories.${ticket.category}`)} · {formatDateTime(ticket.lastMessageAt, intlLocale)}
                                 </span>
                             </Link>
                         </li>

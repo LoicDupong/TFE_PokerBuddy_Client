@@ -2,7 +2,9 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { formatInviteDate } from "@/utils/calendar.utils.js";
-import { confirmedSentence, fetchInvitePreview } from "../_lib/invite-preview.js";
+import { confirmedSentence, fetchInvitePreview, previewText } from "../_lib/invite-preview.js";
+import { getLocale } from "@/i18n/server.js";
+import { INTL_LOCALES } from "@/i18n/config.js";
 
 // Image de l'aperçu du lien d'invitation (WhatsApp, Discord, Messenger…).
 // Même règle que les métadonnées : nom, hôte, date/heure, confirmés ; jamais le lieu.
@@ -121,13 +123,14 @@ function Frame({ children }) {
     );
 }
 
-function InviteCard({ preview, logo }) {
-    const { day, time } = formatInviteDate(preview.dateStart);
+function InviteCard({ preview, logo, locale }) {
+    const tx = (key, params) => previewText(locale, key, params);
+    const { day, time } = formatInviteDate(preview.dateStart, { intlLocale: INTL_LOCALES[locale] });
     const { fontSize, text } = nameStyle(preview.name);
-    const badge = { finished: "Game over", active: "Live now" }[preview.status] ?? "You're invited";
+    const badge = { finished: tx("ogGameOver"), active: tx("ogLive") }[preview.status] ?? tx("ogInvited");
     const upcoming = preview.status !== "finished" && preview.status !== "active";
-    let intro = upcoming ? "You're invited to" : "Poker night";
-    if (preview.host) intro = upcoming ? `${preview.host} invites you to` : `Hosted by ${preview.host}`;
+    let intro = upcoming ? tx("ogInvitedTo") : tx("ogPokerNight");
+    if (preview.host) intro = upcoming ? tx("ogInvitesYouTo", { host: preview.host }) : tx("ogHostedBy", { host: preview.host });
 
     return (
         <Frame>
@@ -144,7 +147,7 @@ function InviteCard({ preview, logo }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", fontSize: 48, fontWeight: 700 }}>{`${day} · ${time}`}</div>
                 {preview.status !== "finished" && (
-                    <Badge color={PERIWINKLE} textColor={NAVY}>{confirmedSentence(preview).replace(/\.$/, "")}</Badge>
+                    <Badge color={PERIWINKLE} textColor={NAVY}>{confirmedSentence(preview, locale).replace(/\.$/, "")}</Badge>
                 )}
             </div>
         </Frame>
@@ -152,14 +155,14 @@ function InviteCard({ preview, logo }) {
 }
 
 // Lien invalide, désactivé ou API injoignable : carte PokerBuddy sans rien de la partie
-function GenericCard({ logo }) {
+function GenericCard({ logo, locale }) {
     return (
         <Frame>
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexGrow: 1 }}>
                 <Brand logo={logo} height={220} />
-                <div style={{ display: "flex", fontSize: 76, fontWeight: 700, marginTop: 36 }}>Home poker nights with friends</div>
+                <div style={{ display: "flex", fontSize: 76, fontWeight: 700, marginTop: 36 }}>{previewText(locale, "ogTagline")}</div>
                 <div style={{ display: "flex", fontSize: 38, fontWeight: 600, color: PERIWINKLE, marginTop: 8 }}>
-                    Invitations, blinds timer and results in one place.
+                    {previewText(locale, "ogSub")}
                 </div>
             </div>
         </Frame>
@@ -168,10 +171,10 @@ function GenericCard({ logo }) {
 
 export default async function Image({ params }) {
     const { token } = await params;
-    const [preview, logo, fonts] = await Promise.all([fetchInvitePreview(token), loadLogo(), loadDisplayFonts()]);
+    const [preview, logo, fonts, locale] = await Promise.all([fetchInvitePreview(token), loadLogo(), loadDisplayFonts(), getLocale()]);
 
     return new ImageResponse(
-        preview ? <InviteCard preview={preview} logo={logo} /> : <GenericCard logo={logo} />,
+        preview ? <InviteCard preview={preview} logo={logo} locale={locale} /> : <GenericCard logo={logo} locale={locale} />,
         {
             ...size,
             ...(fonts ? { fonts } : {}),

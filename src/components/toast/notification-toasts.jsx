@@ -8,7 +8,12 @@ import { useRef } from "react";
 
 import useAuthStore from "@/stores/useAuthStore";
 import useNotificationStore, { useNotificationSync } from "@/stores/useNotificationStore";
-import { getNotificationIcon, getNotificationLink, getNotificationTitle } from "@/utils/notification.utils";
+import {
+    NOTIFICATION_MESSAGES, getNotificationIcon, getNotificationLink, getNotificationText, getNotificationTitle,
+} from "@/utils/notification.utils";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const TOASTS_MESSAGES = { en: { list: "New notifications" }, fr: { list: "Nouvelles notifications" } };
 
 // Toast voisin encore affiché (pour y reporter le focus après une fermeture au clavier)
 function findNeighbour(item) {
@@ -18,7 +23,8 @@ function findNeighbour(item) {
 
 function NotificationToast({ toast }) {
     const { id, notification, leaving } = toast;
-    const title = getNotificationTitle(notification);
+    const { t } = useT(NOTIFICATION_MESSAGES);
+    const title = getNotificationTitle(notification, t);
     const href = getNotificationLink(notification);
 
     // Survol à la souris ou focus clavier : le toast reste affiché
@@ -46,7 +52,7 @@ function NotificationToast({ toast }) {
             </span>
             <span className="notification-toast__text">
                 <span className="notification-toast__title">{title}</span>
-                <span className="notification-toast__message">{notification.message}</span>
+                <span className="notification-toast__message">{getNotificationText(notification, t)}</span>
             </span>
         </>
     );
@@ -70,7 +76,7 @@ function NotificationToast({ toast }) {
                 type="button"
                 className="notification-toast__close"
                 onClick={handleClose}
-                aria-label={`Dismiss notification: ${title}`}
+                aria-label={t("dismiss", { title })}
             >
                 <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
             </button>
@@ -82,6 +88,7 @@ export default function NotificationToasts() {
     const userId = useAuthStore((state) => state.user?.id ?? null);
     const toasts = useNotificationStore((state) => state.toasts);
     const pathname = usePathname();
+    const { t } = useT(TOASTS_MESSAGES);
 
     // Même boucle que la cloche (une seule pour toute l'app, voir useNotificationStore)
     useNotificationSync(userId);
@@ -95,7 +102,7 @@ export default function NotificationToasts() {
     return (
         <div className="notification-toasts" aria-live="polite" aria-relevant="additions">
             {visible.length > 0 && (
-                <ul className="notification-toasts__list" aria-label="New notifications">
+                <ul className="notification-toasts__list" aria-label={t("list")}>
                     {visible.map((toast) => (
                         <NotificationToast key={toast.id} toast={toast} />
                     ))}

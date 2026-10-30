@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faUser } from "@fortawesome/free-solid-svg-icons";
 import { serverUrl } from "@/utils/media.js";
 import "./friend-card.scss";
-import { displayPlayerName } from "@/utils/game.utils.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
 
 // Pseudos collés (CamelCase, chiffres) : on autorise le retour à la ligne entre les "mots"
 // plutôt qu'au milieu d'un mot ("BluffMaster|Supreme" et non "BluffMasterSu|preme").
@@ -21,6 +21,7 @@ function breakableName(name = "") {
 }
 
 function FriendCardBody({ user, status, selected }) {
+    const displayPlayerName = useDisplayName();
     return (
         <>
             {/* Avatar décoratif : le pseudo est écrit juste à côté (pas de double annonce) */}

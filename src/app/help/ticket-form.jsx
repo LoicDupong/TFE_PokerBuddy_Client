@@ -8,25 +8,13 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import supportService from "@/services/support.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { HELP_TEXT } from "./help.utils.js";
-
-const FORM_TEXT = {
-    title: "Contact us",
-    intro: "Tell us what happened and we'll get back to you here. You'll get a notification when we reply.",
-    category: "What is it about?",
-    subject: "Subject",
-    subjectPlaceholder: "A few words to sum it up",
-    message: "Details",
-    messagePlaceholder: "What were you doing, and what did you expect to happen?",
-    submit: "Send request",
-    sending: "Sending…",
-    sent: "Request sent. We'll reply here.",
-    errors: {
-        subject: "Please add a subject",
-        message: "Please describe your request",
-    },
-};
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { HELP_MESSAGES } from "./help.messages.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 export default function TicketForm() {
+    const { t } = useT(HELP_MESSAGES);
+    const serverError = useServerError();
     const ids = { category: useId(), subject: useId(), message: useId() };
     const router = useRouter();
     const [category, setCategory] = useState("bug");
@@ -40,8 +28,8 @@ export default function TicketForm() {
         if (isPending) return;
 
         const next = {};
-        if (!subject.trim()) next.subject = FORM_TEXT.errors.subject;
-        if (!message.trim()) next.message = FORM_TEXT.errors.message;
+        if (!subject.trim()) next.subject = t("form.errors.subject");
+        if (!message.trim()) next.message = t("form.errors.message");
         setErrors(next);
         if (Object.keys(next).length) return;
 
@@ -50,36 +38,36 @@ export default function TicketForm() {
         setIsPending(false);
 
         if (!res.success) {
-            useToastStore.getState().showToast(res.error, "error");
+            useToastStore.getState().showToast(serverError(res.error), "error");
             return;
         }
-        useToastStore.getState().showToast(FORM_TEXT.sent, "success");
+        useToastStore.getState().showToast(t("form.sent"), "success");
         router.push(`/help/tickets/${res.data.id}`);
     }
 
     return (
         <section className="help__section" aria-labelledby="help-contact-title">
-            <h2 id="help-contact-title" className="help__title">{FORM_TEXT.title}</h2>
-            <p className="help__hint">{FORM_TEXT.intro}</p>
+            <h2 id="help-contact-title" className="help__title">{t("form.title")}</h2>
+            <p className="help__hint">{t("form.intro")}</p>
 
             <form className="form help__form" onSubmit={handleSubmit} noValidate>
                 <div className="form__row">
-                    <label htmlFor={ids.category}>{FORM_TEXT.category}</label>
+                    <label htmlFor={ids.category}>{t("form.category")}</label>
                     <select id={ids.category} value={category} onChange={(e) => setCategory(e.target.value)}>
-                        {Object.entries(HELP_TEXT.categories).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
+                        {Object.keys(HELP_MESSAGES.en.categories).map((value) => (
+                            <option key={value} value={value}>{t(`categories.${value}`)}</option>
                         ))}
                     </select>
                 </div>
 
                 <div className="form__row">
-                    <label htmlFor={ids.subject}>{FORM_TEXT.subject}</label>
+                    <label htmlFor={ids.subject}>{t("form.subject")}</label>
                     <input
                         id={ids.subject}
                         type="text"
                         value={subject}
                         maxLength={HELP_TEXT.subjectMax}
-                        placeholder={FORM_TEXT.subjectPlaceholder}
+                        placeholder={t("form.subjectPlaceholder")}
                         aria-invalid={Boolean(errors.subject)}
                         aria-describedby={errors.subject ? `${ids.subject}-error` : undefined}
                         onChange={(e) => setSubject(e.target.value)}
@@ -88,13 +76,13 @@ export default function TicketForm() {
                 </div>
 
                 <div className="form__row">
-                    <label htmlFor={ids.message}>{FORM_TEXT.message}</label>
+                    <label htmlFor={ids.message}>{t("form.message")}</label>
                     <textarea
                         id={ids.message}
                         rows={6}
                         value={message}
                         maxLength={HELP_TEXT.messageMax}
-                        placeholder={FORM_TEXT.messagePlaceholder}
+                        placeholder={t("form.messagePlaceholder")}
                         aria-invalid={Boolean(errors.message)}
                         aria-describedby={errors.message ? `${ids.message}-error` : undefined}
                         onChange={(e) => setMessage(e.target.value)}
@@ -103,7 +91,7 @@ export default function TicketForm() {
                 </div>
 
                 <button type="submit" className="btn btn--secondary help__submit" disabled={isPending}>
-                    <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" /> {isPending ? FORM_TEXT.sending : FORM_TEXT.submit}
+                    <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" /> {isPending ? t("form.sending") : t("form.submit")}
                 </button>
             </form>
         </section>

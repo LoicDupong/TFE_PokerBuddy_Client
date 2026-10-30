@@ -9,24 +9,13 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import supportService from "@/services/support.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { HELP_TEXT, formatDateTime, useRequireMember } from "../../help.utils.js";
-
-const THREAD_TEXT = {
-    loading: "Loading…",
-    notFound: "Request not found",
-    notFoundHint: "This request doesn't exist or isn't yours.",
-    back: "Back to my requests",
-    loadError: "Could not load this request.",
-    retry: "Try again",
-    you: "You",
-    staff: "PokerBuddy support",
-    reply: "Your reply",
-    send: "Send reply",
-    sending: "Sending…",
-    resolvedHint: "This request is marked as resolved. Sending a reply will reopen it.",
-    emptyReply: "Please write a message first",
-};
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { useServerError } from "@/utils/server-errors.utils.js";
+import { HELP_MESSAGES } from "../../help.messages.js";
 
 export default function TicketThreadPage() {
+    const { t, intlLocale } = useT(HELP_MESSAGES);
+    const serverError = useServerError();
     const { id } = useParams();
     const { allowed } = useRequireMember();
     const replyId = useId();
@@ -52,14 +41,14 @@ export default function TicketThreadPage() {
     async function handleSend(e) {
         e.preventDefault();
         if (isPending) return;
-        if (!reply.trim()) { setReplyError(THREAD_TEXT.emptyReply); return; }
+        if (!reply.trim()) { setReplyError(t("thread.emptyReply")); return; }
         setReplyError("");
 
         setIsPending(true);
         const res = await supportService.sendMessage(id, reply);
         setIsPending(false);
         if (!res.success) {
-            useToastStore.getState().showToast(res.error, "error");
+            useToastStore.getState().showToast(serverError(res.error), "error");
             return;
         }
         setTicket((current) => ({
@@ -71,23 +60,23 @@ export default function TicketThreadPage() {
         setReply("");
     }
 
-    if (!allowed || state === "loading") return <p>{THREAD_TEXT.loading}</p>;
+    if (!allowed || state === "loading") return <p>{t("thread.loading")}</p>;
 
     if (state === "notFound") {
         return (
             <div className="help">
-                <h1>{THREAD_TEXT.notFound}</h1>
-                <p className="help__hint">{THREAD_TEXT.notFoundHint}</p>
-                <Link href="/help/tickets" className="btn btn--secondary">{THREAD_TEXT.back}</Link>
+                <h1>{t("thread.notFound")}</h1>
+                <p className="help__hint">{t("thread.notFoundHint")}</p>
+                <Link href="/help/tickets" className="btn btn--secondary">{t("thread.back")}</Link>
             </div>
         );
     }
     if (state === "error") {
         return (
             <div className="help">
-                <p role="alert">{THREAD_TEXT.loadError}</p>
+                <p role="alert">{t("thread.loadError")}</p>
                 <button type="button" className="btn btn--small" onClick={() => { setState("loading"); setAttempt((n) => n + 1); }}>
-                    {THREAD_TEXT.retry}
+                    {t("thread.retry")}
                 </button>
             </div>
         );
@@ -96,11 +85,11 @@ export default function TicketThreadPage() {
     return (
         <div className="help">
             <header className="help__header">
-                <Link href="/help/tickets" className="help__back">← {THREAD_TEXT.back}</Link>
+                <Link href="/help/tickets" className="help__back">← {t("thread.back")}</Link>
                 <h1 className="help__thread-title">{ticket.subject}</h1>
                 <p className="help__ticket-meta">
-                    <span className={`help__badge help__badge--${ticket.status}`}>{HELP_TEXT.statuses[ticket.status]}</span>
-                    {" "}{HELP_TEXT.categories[ticket.category]}
+                    <span className={`help__badge help__badge--${ticket.status}`}>{t(`statuses.${ticket.status}`)}</span>
+                    {" "}{t(`categories.${ticket.category}`)}
                 </p>
             </header>
 
@@ -108,8 +97,8 @@ export default function TicketThreadPage() {
                 {ticket.messages.map((message) => (
                     <li key={message.id} className={`help__message${message.isStaff ? " help__message--staff" : ""}`}>
                         <p className="help__message-head">
-                            <strong>{message.isStaff ? THREAD_TEXT.staff : THREAD_TEXT.you}</strong>
-                            <time dateTime={message.createdAt}>{formatDateTime(message.createdAt)}</time>
+                            <strong>{message.isStaff ? t("thread.staff") : t("thread.you")}</strong>
+                            <time dateTime={message.createdAt}>{formatDateTime(message.createdAt, intlLocale)}</time>
                         </p>
                         {/* Texte brut : pre-wrap garde les retours à la ligne, React échappe le contenu */}
                         <p className="help__message-body">{message.body}</p>
@@ -118,9 +107,9 @@ export default function TicketThreadPage() {
             </ol>
 
             <form className="form help__form" onSubmit={handleSend} noValidate>
-                {ticket.status === "resolved" && <p className="help__hint">{THREAD_TEXT.resolvedHint}</p>}
+                {ticket.status === "resolved" && <p className="help__hint">{t("thread.resolvedHint")}</p>}
                 <div className="form__row">
-                    <label htmlFor={replyId}>{THREAD_TEXT.reply}</label>
+                    <label htmlFor={replyId}>{t("thread.reply")}</label>
                     <textarea
                         id={replyId}
                         rows={4}
@@ -133,7 +122,7 @@ export default function TicketThreadPage() {
                     {replyError && <p id={`${replyId}-error`} className="form__error" role="alert">{replyError}</p>}
                 </div>
                 <button type="submit" className="btn btn--secondary help__submit" disabled={isPending}>
-                    <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" /> {isPending ? THREAD_TEXT.sending : THREAD_TEXT.send}
+                    <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" /> {isPending ? t("thread.sending") : t("thread.send")}
                 </button>
             </form>
         </div>

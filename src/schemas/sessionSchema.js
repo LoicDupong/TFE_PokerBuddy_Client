@@ -98,13 +98,30 @@ const sessionSchema = z.object({
     }
   });
 
-// Validation Session Form
-export function validateSession(data) {
+// Messages en français, indexés par le message anglais du schéma (le schéma reste la source de vérité)
+const FR = {
+  "Title is required": "Le titre est obligatoire",
+  "Date & Time is required": "La date et l'heure sont obligatoires",
+  "Location is required": "Le lieu est obligatoire",
+  "Buy-in must be positive": "Le buy-in doit être positif",
+  "Small blind must be >= 1": "La petite blind doit être d'au moins 1",
+  "Big blind must be greater than small blind": "La grosse blind doit être supérieure à la petite blind",
+  "Currency must be EUR, USD, or GBP": "La devise doit être EUR, USD ou GBP",
+  "Duration max 120 min": "Durée maximale : 120 min",
+  "Rebuy price must be a positive amount": "Le prix du rebuy doit être un montant positif",
+  "Bounty share must be a whole percentage between 0 and 100": "La part de bounty doit être un pourcentage entier entre 0 et 100",
+  "Knockout cash share must be a whole percentage between 0 and 100": "La part cash du KO doit être un pourcentage entier entre 0 et 100",
+  "Payout distribution must sum to 100%": "La répartition des gains doit totaliser 100 %",
+  "Description too long": "Description trop longue",
+};
+
+// Validation Session Form. locale : "en" | "fr" (messages d'erreur)
+export function validateSession(data, locale = "en") {
   const result = sessionSchema.safeParse(data);
   if (!result.success) {
     const errors = result.error.issues.map((issue) => ({
       field: issue.path[0],
-      message: issue.message,
+      message: locale === "fr" ? (FR[issue.message] ?? issue.message) : issue.message,
     }));
     return { ok: false, errors };
   }

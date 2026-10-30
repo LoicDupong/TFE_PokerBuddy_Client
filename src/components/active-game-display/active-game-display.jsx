@@ -7,13 +7,17 @@ import gameService from '@/services/game.service.js';
 import gameInviteService from '@/services/gameInvite.service.js';
 import useAuthStore from '@/stores/useAuthStore.js';
 import useToastStore from '@/stores/useToastStore.js';
-import { currencySymbol, inviteResponseToast } from '@/utils/game.utils.js';
+import { currencySymbol } from '@/utils/game.utils.js';
+import { useGameT, useInviteResponseToast, useGameStatusLabel } from "@/utils/game-labels.utils.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
 import { relativeDateTime } from '@/utils/date.utils.js';
 import { useEffect, useState } from 'react';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
-import { displayPlayerName } from "@/utils/game.utils.js";
 
 export default function ActiveGameDisplay({ onResponded }) {
+    const { t, locale, intlLocale } = useGameT();
+    const displayName = useDisplayName();
+    const inviteToast = useInviteResponseToast();
     const [games, setGames] = useState(null);
     const [actingId, setActingId] = useState(null);
     const userId = useAuthStore((state) => state.user?.id);
@@ -34,10 +38,10 @@ export default function ActiveGameDisplay({ onResponded }) {
         const res = await gameInviteService.respond(invite.id, action);
         setActingId(null);
         if (!res.success) {
-            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(t("genericError"));
             return;
         }
-        showToast(...inviteResponseToast(action, game.name));
+        showToast(...inviteToast(action, game.name));
         onResponded?.();
         // Refusée : la partie quitte la liste ; acceptée : les boutons disparaissent
         setGames((prev) => action === "refused"
@@ -56,7 +60,7 @@ export default function ActiveGameDisplay({ onResponded }) {
         <>
             <div className="divider"></div>
             <h3 className="title--section">
-                <span className="red">Today&apos;s</span> games
+                <span className="red">{t("todaysRed")}</span> {t("todays")}
             </h3>
             <div className="cards cards--active">
 
@@ -66,19 +70,19 @@ export default function ActiveGameDisplay({ onResponded }) {
                         <div key={g.id} className="card card--active">
                             <div className="card__header">
                                 <h3 className="title title--card">{g.name}</h3>
-                                <p className="card__when">{relativeDateTime(g.dateStart)}</p>
-                                <h4 className="subtitle subtitle--card">Host: {displayPlayerName(g.host.username)}</h4>
+                                <p className="card__when">{relativeDateTime(g.dateStart, locale)}</p>
+                                <h4 className="subtitle subtitle--card">{t("host", { name: displayName(g.host.username) })}</h4>
                             </div>
                             <div className="card__body">
                                 <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {g.location}</p>
                                 {g.realStart && (
-                                    <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">Table start:</span> {new Date(g.realStart).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
+                                    <p><FontAwesomeIcon icon={faHourglassStart} className="fa-icon" /> <span className="gray">{t("tableStart")}</span> {new Date(g.realStart).toLocaleTimeString(intlLocale, { hour: "2-digit", minute: "2-digit" })}</p>
                                 )}
-                                <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
+                                <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">{t("entry")}</span> {g.buyIn}{currencySymbol(g.currency)}</p>
                                 {myInvite && (
                                     <p className="card__answer">
-                                        <span className="player__status player__status--pending">pending</span>
-                                        <span className="gray">Will you play?</span>
+                                        <span className="player__status player__status--pending">{t("playerStatus.pending")}</span>
+                                        <span className="gray">{t("willYouPlay")}</span>
                                     </p>
                                 )}
                                 <div className="card__actions">
@@ -90,7 +94,7 @@ export default function ActiveGameDisplay({ onResponded }) {
                                                 disabled={!!actingId}
                                                 onClick={() => handleRespond(g, myInvite, "accepted")}
                                             >
-                                                <FontAwesomeIcon icon={faCheck} /> Accept
+                                                <FontAwesomeIcon icon={faCheck} /> {t("accept")}
                                             </button>
                                             <button
                                                 type="button"
@@ -98,11 +102,11 @@ export default function ActiveGameDisplay({ onResponded }) {
                                                 disabled={!!actingId}
                                                 onClick={() => handleRespond(g, myInvite, "refused")}
                                             >
-                                                <FontAwesomeIcon icon={faXmark} /> Refuse
+                                                <FontAwesomeIcon icon={faXmark} /> {t("refuse")}
                                             </button>
                                         </>
                                     )}
-                                    <Link href={"/games/" + g.id} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faCircleInfo} /> More infos</Link>
+                                    <Link href={"/games/" + g.id} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faCircleInfo} /> {t("moreInfos")}</Link>
                                 </div>
                             </div>
                         </div>

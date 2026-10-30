@@ -10,8 +10,15 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/useAuthStore.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { serverUrl } from "@/utils/media.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { PROFILE_MESSAGES } from "@/app/profile/profile.messages.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 export default function ProfileByIdPage() {
+  const { t } = useT(PROFILE_MESSAGES);
+  const displayName = useDisplayName();
+  const serverError = useServerError();
   const { id } = useParams();
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -53,8 +60,8 @@ export default function ProfileByIdPage() {
     })();
   }, [id]);
 
-  if (notFound) return <p>User not found.</p>;
-  if (!user) return <p>Loading...</p>;
+  if (notFound) return <p>{t("notFound")}</p>;
+  if (!user) return <p>{t("loading")}</p>;
 
 
   // Retour en popup : une ligne sous le bouton passait inaperçue
@@ -63,17 +70,17 @@ export default function ProfileByIdPage() {
     if (res.success) {
       // S'il m'avait déjà envoyé une demande, le serveur l'accepte directement
       if (res.data.invite?.status === "accepted") {
-        showToast(`✅ You are now friends with ${user.username}!`, "success", 5000);
+        showToast(`✅ ${t("nowFriends", { name: displayName(user.username) })}`, "success", 5000);
         setFriendStatus("friends");
       } else {
-        showToast("✅ Friend request sent!", "success", 5000);
+        showToast(`✅ ${t("requestSent")}`, "success", 5000);
         setFriendStatus("sent");
       }
     } else if (/already exists/i.test(res.errorMessage?.[0] ?? "")) {
-      showToast("Friend request already sent.", "info", 5000);
+      showToast(t("alreadySent"), "info", 5000);
       setFriendStatus("sent");
     } else {
-      showToast(res.errorMessage?.[0] || "Friend request failed");
+      showToast(serverError(res.errorMessage?.[0]) || t("requestFailed"));
     }
   }
 
@@ -84,7 +91,7 @@ export default function ProfileByIdPage() {
     if (res.success) {
       router.push('/profile');
     } else {
-      showToast(res.errorMessage?.[0] || "Could not remove friend.");
+      showToast(t("removeFailed"));
     }
   }
 
@@ -92,46 +99,46 @@ export default function ProfileByIdPage() {
   return (
     <>
       <h1>
-        <span className="red">{user.username}</span> Profile
+        <span className="red">{displayName(user.username)}</span> {t("profile")}
       </h1>
       <section className="section section__user">
         <div className="cards">
           <div className="card user">
             <div className="user__avatar">
               {user.avatar
-                ? <img src={serverUrl(user.avatar)} alt="User avatar" />
+                ? <img src={serverUrl(user.avatar)} alt={t("avatarAlt")} />
                 : <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
               }
             </div>
             <div className="user__infos">
-              <h2 className="title title--user red">{user.username}</h2>
+              <h2 className="title title--user red">{displayName(user.username)}</h2>
             </div>
             <div className="user__description">
-              <p>{user.description || "No description provided."}</p>
+              <p>{user.description || t("noDescription")}</p>
             </div>
             <div className="user__stats">
               <div className="user__stat">
                 <h2 className="title title--stat">{user.stats?.totalGames || 0}</h2>
-                <p className="subtitle">Games Played</p>
+                <p className="subtitle">{t("gamesPlayed")}</p>
               </div>
               <div className="user__stat">
                 <h2 className="title title--stat">
                   {user.stats.winRate ? `${user.stats.winRate}%` : "0%"}
                 </h2>
-                <p className="subtitle">Win Rate</p>
+                <p className="subtitle">{t("winRate")}</p>
               </div>
             </div>
             {friendStatus === "friends" && (
               <button type="button" className="btn btn--user" onClick={() => setShowConfirmModal(true)}>
-                <FontAwesomeIcon icon={faUserMinus} /> Remove Friend
+                <FontAwesomeIcon icon={faUserMinus} /> {t("removeFriend")}
               </button>
             )}
             {friendStatus !== "sent" && friendStatus !== "friends" && (
               <button type="button" className="btn btn--user" onClick={handleAddFriend}>
-                <FontAwesomeIcon icon={faUserPlus} /> Add Friend
+                <FontAwesomeIcon icon={faUserPlus} /> {t("addFriend")}
               </button>
             )}
-            {friendStatus === "sent" && <p className="gray user__request">Friend request sent</p>}
+            {friendStatus === "sent" && <p className="gray user__request">{t("requestSentShort")}</p>}
           </div>
         </div>
       </section>
@@ -140,14 +147,14 @@ export default function ProfileByIdPage() {
         <div className="modal">
           <div className="modal__overlay" onClick={() => setShowConfirmModal(false)}></div>
           <div className="modal__content">
-            <h2>Remove friend?</h2>
-            <p>Are you sure you want to remove <strong>{user.username}</strong> from your friends?</p>
+            <h2>{t("removeTitle")}</h2>
+            <p>{t("removeText", { name: "\u0000" }).split("\u0000").flatMap((part, i) => i === 0 ? [part] : [<strong key="n">{displayName(user.username)}</strong>, part])}</p>
             <div className="btn__group">
               <button className="btn btn--primary" onClick={handleConfirmRemove} disabled={removing}>
-                Confirm
+                {t("confirm")}
               </button>
               <button className="btn" onClick={() => setShowConfirmModal(false)}>
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>

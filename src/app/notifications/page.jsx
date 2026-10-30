@@ -6,30 +6,85 @@ import useNotificationStore from "@/stores/useNotificationStore";
 import useToastStore from "@/stores/useToastStore";
 import friendService from "@/services/friend.service";
 import gameInviteService from "@/services/gameInvite.service";
-import { inviteResponseToast } from "@/utils/game.utils";
-import { getNotificationIcon, getNotificationLink } from "@/utils/notification.utils";
+import { useInviteResponseToast } from "@/utils/game-labels.utils";
+import {
+    NOTIFICATION_MESSAGES, getNotificationIcon, getNotificationLink, getNotificationText,
+} from "@/utils/notification.utils";
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { COMMON } from "@/i18n/common.js";
+import { useDisplayName } from "@/utils/player-name.utils";
 import { faBell, faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { displayPlayerName } from "@/utils/game.utils.js";
 
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const isToday = (iso) => startOfDay(new Date(iso)).getTime() === startOfDay(new Date()).getTime();
 
-// "Just now", "5 min ago", "2 h ago", "Yesterday", puis la date
-function relativeTime(iso) {
+const MESSAGES = {
+    en: {
+        ...COMMON.en,
+        title: "Notifications",
+        caughtUp: "You're all caught up.",
+        today: "Today",
+        earlier: "Earlier",
+        unread: "Unread",
+        handled: "Handled",
+        answered: "Answered",
+        viewGame: "View game",
+        viewReply: "View reply",
+        submitResults: "Submit results",
+        acceptFriend: "Accept friend request",
+        declineFriend: "Decline friend request",
+        acceptGame: "Accept game invitation",
+        declineGame: "Decline game invitation",
+        nowFriends: "You are now friends with {name}!",
+        justNow: "Just now",
+        minutesAgo: "{n} min ago",
+        hoursAgo: "{n} h ago",
+        yesterday: "Yesterday",
+    },
+    fr: {
+        ...COMMON.fr,
+        title: "Notifications",
+        caughtUp: "Tu es à jour.",
+        today: "Aujourd'hui",
+        earlier: "Plus tôt",
+        unread: "Non lue",
+        handled: "Traitée",
+        answered: "Répondu",
+        viewGame: "Voir la partie",
+        viewReply: "Voir la réponse",
+        submitResults: "Saisir les résultats",
+        acceptFriend: "Accepter la demande d'ami",
+        declineFriend: "Refuser la demande d'ami",
+        acceptGame: "Accepter l'invitation à la partie",
+        declineGame: "Refuser l'invitation à la partie",
+        nowFriends: "Tu es maintenant ami avec {name} !",
+        justNow: "À l'instant",
+        minutesAgo: "il y a {n} min",
+        hoursAgo: "il y a {n} h",
+        yesterday: "Hier",
+    },
+};
+
+// "À l'instant", "il y a 5 min", "il y a 2 h", "Hier", puis la date
+function relativeTime(iso, t, intlLocale) {
     const date = new Date(iso);
     const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes} min ago`;
-    if (isToday(iso)) return `${Math.floor(minutes / 60)} h ago`;
+    if (minutes < 1) return t("justNow");
+    if (minutes < 60) return t("minutesAgo", { n: minutes });
+    if (isToday(iso)) return t("hoursAgo", { n: Math.floor(minutes / 60) });
     const days = Math.round((startOfDay(new Date()) - startOfDay(date)) / 86400000);
-    if (days === 1) return "Yesterday";
-    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: days > 300 ? "numeric" : undefined });
+    if (days === 1) return t("yesterday");
+    return date.toLocaleDateString(intlLocale, { day: "numeric", month: "short", year: days > 300 ? "numeric" : undefined });
 }
 
 export default function NotificationsPage() {
+    const { t, intlLocale } = useT(MESSAGES);
+    const { t: tn } = useT(NOTIFICATION_MESSAGES);
+    const displayName = useDisplayName();
+    const inviteToast = useInviteResponseToast();
     // Sélecteurs : la page ne se re-rend pas à chaque toast
     const notifications = useNotificationStore((state) => state.notifications);
     const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
@@ -72,9 +127,9 @@ export default function NotificationsPage() {
         setActingId(null);
         if (res.success) {
             setFriendInvites((prev) => prev.filter((i) => i.id !== invite.id));
-            if (action === "accept") showToast(`✅ You are now friends with ${invite.User.username}!`, "success", 5000);
+            if (action === "accept") showToast(`✅ ${t("nowFriends", { name: displayName(invite.User.username) })}`, "success", 5000);
         } else {
-            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(t("genericError"));
         }
     };
 
@@ -85,9 +140,9 @@ export default function NotificationsPage() {
         setActingId(null);
         if (res.success) {
             setGameInvites((prev) => prev.filter((i) => i.inviteId !== invite.inviteId));
-            showToast(...inviteResponseToast(action, invite.gameName));
+            showToast(...inviteToast(action, invite.gameName));
         } else {
-            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(t("genericError"));
         }
     };
 
@@ -98,17 +153,17 @@ export default function NotificationsPage() {
         if (n.type === "friend_request") {
             // Match by Friend record id stored as referenceId
             const invite = friendInvites.find((i) => i.id === n.referenceId);
-            if (!invite) return friendsLoaded ? <span className="notification__status">Handled</span> : null;
+            if (!invite) return friendsLoaded ? <span className="notification__status">{t("handled")}</span> : null;
             return (
                 <div className="notification__actions">
                     <Link href={getNotificationLink(n, { senderId: invite.User.id })} className="notification__link">
-                        {displayPlayerName(invite.User.username)}
+                        {displayName(invite.User.username)}
                     </Link>
                     <button
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
                         onClick={() => handleFriendRespond(invite, "accept")}
-                        aria-label="Accept friend request"
+                        aria-label={t("acceptFriend")}
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
@@ -116,7 +171,7 @@ export default function NotificationsPage() {
                         className="btn btn--small"
                         disabled={!!actingId}
                         onClick={() => handleFriendRespond(invite, "decline")}
-                        aria-label="Decline friend request"
+                        aria-label={t("declineFriend")}
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>
@@ -131,8 +186,8 @@ export default function NotificationsPage() {
                 // Réponse déjà donnée ailleurs : on garde le lien vers la partie
                 return gamesLoaded ? (
                     <div className="notification__actions">
-                        <span className="notification__status">Answered</span>
-                        {link && <Link href={link} className="notification__link">View game</Link>}
+                        <span className="notification__status">{t("answered")}</span>
+                        {link && <Link href={link} className="notification__link">{t("viewGame")}</Link>}
                     </div>
                 ) : null;
             }
@@ -140,14 +195,14 @@ export default function NotificationsPage() {
                 <div className="notification__actions">
                     {link && (
                         <Link href={link} className="notification__link">
-                            View game
+                            {t("viewGame")}
                         </Link>
                     )}
                     <button
                         className="btn btn--small btn--primary"
                         disabled={!!actingId}
                         onClick={() => handleGameRespond(invite, "accepted")}
-                        aria-label="Accept game invitation"
+                        aria-label={t("acceptGame")}
                     >
                         <FontAwesomeIcon icon={faCheck} />
                     </button>
@@ -155,7 +210,7 @@ export default function NotificationsPage() {
                         className="btn btn--small"
                         disabled={!!actingId}
                         onClick={() => handleGameRespond(invite, "refused")}
-                        aria-label="Decline game invitation"
+                        aria-label={t("declineGame")}
                     >
                         <FontAwesomeIcon icon={faXmark} />
                     </button>
@@ -167,7 +222,7 @@ export default function NotificationsPage() {
             return (
                 <div className="notification__actions">
                     <Link href={link} className="notification__link">
-                        View game
+                        {t("viewGame")}
                     </Link>
                 </div>
             );
@@ -177,7 +232,7 @@ export default function NotificationsPage() {
             return (
                 <div className="notification__actions">
                     <Link href={link} className="notification__link">
-                        View reply
+                        {t("viewReply")}
                     </Link>
                 </div>
             );
@@ -187,7 +242,7 @@ export default function NotificationsPage() {
             return (
                 <div className="notification__actions">
                     <Link href={link} className="notification__link">
-                        Submit results
+                        {t("submitResults")}
                     </Link>
                 </div>
             );
@@ -199,19 +254,19 @@ export default function NotificationsPage() {
     return (
         <>
             <h1>
-                <FontAwesomeIcon icon={faBell} /> Notifications
+                <FontAwesomeIcon icon={faBell} /> {t("title")}
             </h1>
             <div className="divider"></div>
 
             {notifications.length === 0 ? (
-                <p>You&apos;re all caught up.</p>
+                <p>{t("caughtUp")}</p>
             ) : (
-                [["Today", notifications.filter((n) => isToday(n.createdAt))],
-                 ["Earlier", notifications.filter((n) => !isToday(n.createdAt))]]
+                [["today", notifications.filter((n) => isToday(n.createdAt))],
+                 ["earlier", notifications.filter((n) => !isToday(n.createdAt))]]
                     .filter(([, items]) => items.length > 0)
                     .map(([label, items]) => (
                         <section key={label} aria-labelledby={`notif-${label}`}>
-                            <h2 id={`notif-${label}`} className="notifications__group">{label}</h2>
+                            <h2 id={`notif-${label}`} className="notifications__group">{t(label)}</h2>
                             <ul className="notifications__list">
                                 {items.map((n) => {
                                     const unread = unreadIds.has(n.id);
@@ -222,10 +277,10 @@ export default function NotificationsPage() {
                                             </span>
                                             <div className="notification__body">
                                                 <p className="notification__message">
-                                                    {unread && <span className="notification__dot" role="img" aria-label="Unread" />}
-                                                    {n.message}
+                                                    {unread && <span className="notification__dot" role="img" aria-label={t("unread")} />}
+                                                    {getNotificationText(n, tn)}
                                                 </p>
-                                                <small>{relativeTime(n.createdAt)}</small>
+                                                <small>{relativeTime(n.createdAt, t, intlLocale)}</small>
                                                 {renderActions(n)}
                                             </div>
                                         </li>

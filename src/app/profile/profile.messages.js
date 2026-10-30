@@ -1,0 +1,41 @@
+import { COMMON } from "@/i18n/common.js";
+
+// Textes des pages profil, profil d'un ami, modification du profil et recherche d'amis
+export const PROFILE_MESSAGES = {
+    en: {
+        ...COMMON.en,
+        yourRed: "Your", profile: "Profile", avatarAlt: "User avatar", avatarPreview: "Avatar preview",
+        tellFriends: "Tell your friends who they are playing with.", addBio: "Add a short bio",
+        gamesPlayed: "Games Played", winRate: "Win Rate", wins: "Wins", avgPlace: "Avg. Place", hosted: "Hosted", bestStreak: "Best Streak",
+        editProfile: "Edit Profile", friends: "Friends", noFriends: "No friends yet. Add your poker crew below.", addFriends: "Add friends",
+        notFound: "User not found.", noDescription: "No description provided.",
+        nowFriends: "You are now friends with {name}!", requestSent: "Friend request sent!", alreadySent: "Friend request already sent.",
+        requestFailed: "Friend request failed", removeFailed: "Could not remove friend.",
+        ofProfile: "'s Profile", removeFriend: "Remove Friend", addFriend: "Add Friend", requestSentShort: "Friend request sent",
+        removeTitle: "Remove friend?", removeText: "Are you sure you want to remove {name} from your friends?", confirm: "Confirm",
+        editTitleA: "Edit", editTitleB: "Profile", upload: "Upload avatar", tooLarge: "File too large (max 2MB)",
+        username: "Username", bio: "Your short bio", bioPh: "Write a short bio...", updated: "Profile updated! Redirecting...", updateFailed: "Update failed",
+        addAFriend: "Add a Friend", search: "Search by username", usernamePh: "Enter username", searchBtn: "Search", searching: "Searching...",
+        invite: "Invite Friends", yourFriends: "Your friends", invitedStatus: "Invited", noFriendsInvite: "No friends yet. Add some from your profile, or invite guests below.",
+        addGuests: "Add Guests", guestsPh: "Separate names with commas ',' (John, Jane, ...)", selected: "Selected Friends", guestTag: "(Guest)", noneSelected: "No friends or guests selected.",
+        noUsers: "No users found. Try another username.", friendBtn: "Friend", sentBtn: "Request Sent", add: "Add", addAs: "Add {name} as a friend",
+    },
+    fr: {
+        ...COMMON.fr,
+        yourRed: "Ton", profile: "Profil", avatarAlt: "Avatar de l'utilisateur", avatarPreview: "Aperçu de l'avatar",
+        tellFriends: "Dis à tes amis avec qui ils jouent.", addBio: "Ajouter une courte bio",
+        gamesPlayed: "Parties jouées", winRate: "% victoires", wins: "Victoires", avgPlace: "Place moy.", hosted: "Organisées", bestStreak: "Meilleure série",
+        editProfile: "Modifier le profil", friends: "Amis", noFriends: "Pas encore d'amis. Ajoute ta bande de joueurs ci-dessous.", addFriends: "Ajouter des amis",
+        notFound: "Utilisateur introuvable.", noDescription: "Aucune description.",
+        nowFriends: "Tu es maintenant ami avec {name} !", requestSent: "Demande d'ami envoyée !", alreadySent: "Demande d'ami déjà envoyée.",
+        requestFailed: "La demande d'ami a échoué", removeFailed: "Impossible de retirer cet ami.",
+        ofProfile: "Profil de ", removeFriend: "Retirer l'ami", addFriend: "Ajouter en ami", requestSentShort: "Demande d'ami envoyée",
+        removeTitle: "Retirer cet ami ?", removeText: "Tu es sûr de vouloir retirer {name} de tes amis ?", confirm: "Confirmer",
+        editTitleA: "Modifier le profil de", editTitleB: "", upload: "Choisir un avatar", tooLarge: "Fichier trop lourd (2 Mo maximum)",
+        username: "Pseudo", bio: "Ta courte bio", bioPh: "Écris une courte bio...", updated: "Profil mis à jour ! Redirection...", updateFailed: "La mise à jour a échoué",
+        addAFriend: "Ajouter un ami", search: "Rechercher par pseudo", usernamePh: "Saisis un pseudo", searchBtn: "Rechercher", searching: "Recherche...",
+        invite: "Inviter des amis", yourFriends: "Tes amis", invitedStatus: "Invité", noFriendsInvite: "Pas encore d'amis. Ajoutes-en depuis ton profil, ou invite des invités ci-dessous.",
+        addGuests: "Ajouter des invités", guestsPh: "Sépare les prénoms par des virgules ',' (Jean, Julie, ...)", selected: "Amis sélectionnés", guestTag: "(invité)", noneSelected: "Aucun ami ni invité sélectionné.",
+        noUsers: "Aucun joueur trouvé. Essaie un autre pseudo.", friendBtn: "Ami", sentBtn: "Demande envoyée", add: "Ajouter", addAs: "Ajouter {name} en ami",
+    },
+};

@@ -9,8 +9,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AccountSettings from "@/components/account-settings/account-settings.jsx";
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { PROFILE_MESSAGES } from "@/app/profile/profile.messages.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 export default function EditProfilePage() {
+    const { t } = useT(PROFILE_MESSAGES);
+    const displayName = useDisplayName();
+    const serverError = useServerError();
     const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({ username: "", description: "", avatar: null });
     const [preview, setPreview] = useState(null); // 🔹 nouvelle state pour la preview
@@ -35,14 +42,14 @@ export default function EditProfilePage() {
         })();
     }, []);
 
-    if (!user) return <p>Loading...</p>;
+    if (!user) return <p>{t("loading")}</p>;
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (files) {
             const file = files[0];
             if (file && file.size > 2 * 1024 * 1024) {
-                setFileError("File too large (max 2MB)");
+                setFileError(t("tooLarge"));
                 return;
             }
             setFileError(null);
@@ -65,7 +72,7 @@ export default function EditProfilePage() {
                 router.push("/profile");
             }, 500);
         } else {
-            showToast(res.errorMessage?.[0] || "Update failed");
+            showToast(serverError(res.errorMessage?.[0]) || t("updateFailed"));
         }
     };
 
@@ -76,7 +83,7 @@ export default function EditProfilePage() {
     return (
         <>
             <h1>
-                Edit <span className="red">{user.username}</span> Profile
+                {t("editTitleA")} <span className="red">{displayName(user.username)}</span> {t("editTitleB")}
             </h1>
             <section className="section section__user">
                 <div className="cards">
@@ -84,14 +91,14 @@ export default function EditProfilePage() {
                         <form className="form form--edit" onSubmit={handleConfirm}>
                             <div className="user__avatar">
                                 {preview ? (
-                                    <img src={preview} alt="Avatar preview" />
+                                    <img src={preview} alt={t("avatarPreview")} />
                                 ) : (
                                     <FontAwesomeIcon icon={faUser} size="xl" className="icon--avatar" />
                                 )}
                             </div>
                             <div className="form__row">
                                 <label htmlFor="avatar" className="btn btn--user btn--file">
-                                    Upload avatar
+                                    {t("upload")}
                                 </label>
                                 <input
                                     type="file"
@@ -105,38 +112,38 @@ export default function EditProfilePage() {
                 {fileError && <p className="form__error">{fileError}</p>}
                             </div>
                             <div className="user__infos">
-                                <label htmlFor="username">Username</label>
+                                <label htmlFor="username">{t("username")}</label>
                                 <input
                                     type="text"
                                     id="username"
                                     name="username"
                                     value={formData.username}
                                     onChange={handleChange}
-                                    placeholder="Username"
+                                    placeholder={t("username")}
                                     className="input"
                                 />
                                 <p className="subtitle subtitle--email">{user.email}</p>
                             </div>
                             <div className="user__description">
-                                <label htmlFor="description">Your short bio</label>
+                                <label htmlFor="description">{t("bio")}</label>
                                 <textarea
                                     id="description"
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
-                                    placeholder="Write a short bio..."
+                                    placeholder={t("bioPh")}
                                     className="textarea"
                                 />
                             </div>
                             <div className="btn__container">
                                 <button type="submit" className="btn btn--user btn--confirm">
-                                    <FontAwesomeIcon icon={faCheck} /> Confirm
+                                    <FontAwesomeIcon icon={faCheck} /> {t("confirm")}
                                 </button>
                                 <button type="button" className="btn btn--user" onClick={handleCancel}>
-                                    <FontAwesomeIcon icon={faXmark} /> Cancel
+                                    <FontAwesomeIcon icon={faXmark} /> {t("cancel")}
                                 </button>
                             </div>
-                            {success && <p className="success">✅ Profile updated! Redirecting...</p>}
+                            {success && <p className="success">✅ {t("updated")}</p>}
                         </form>
                     </div>
                 </div>

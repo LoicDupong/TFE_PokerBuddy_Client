@@ -5,6 +5,7 @@ import Image from "next/image";
 import useAuthStore from "@/stores/useAuthStore";
 import { useT } from "@/i18n/i18n-provider.jsx";
 import LanguageSwitcher from "@/i18n/language-switcher.jsx";
+import userService from "@/services/user.service.js";
 
 const MESSAGES = {
     en: {
@@ -65,7 +66,7 @@ export default function Footer() {
                 </nav>
 
                 <div className="footer__credit">
-                    <LanguageSwitcher className="footer__language" />
+                    <LanguageSwitcher className="footer__language" onChange={(code) => { if (user) userService.updateLocale(code); }} />
                     <p>{t("madeBy")} <a href="https://github.com/LoicDupong" target="_blank" rel="noopener noreferrer" className="footer__link">Loïc Dupong</a></p>
                     <p className="footer__copy">© {new Date().getFullYear()} PokerBuddy</p>
                 </div>

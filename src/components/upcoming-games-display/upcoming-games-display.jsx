@@ -9,29 +9,32 @@ import UpcomingGamesSkeleton from './upcoming-games-skeleton.jsx';
 import { usePathname } from 'next/navigation.js';
 import { apiUrl } from '@/utils/media.js';
 import { currencySymbol } from '@/utils/game.utils.js';
+import { useGameT, useInviteResponseToast, useGameStatusLabel } from "@/utils/game-labels.utils.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
 import { relativeDateTime } from '@/utils/date.utils.js';
 import gameInviteService from "@/services/gameInvite.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
-import { displayPlayerName } from "@/utils/game.utils.js";
 
 function UpcomingCard({ g }) {
+  const { t, locale } = useGameT();
+  const displayName = useDisplayName();
   return (
     <div className="card card--planned">
       <div className="card__header">
         <h3 className="title title--card">{g.name}</h3>
-        <p className="card__when">{relativeDateTime(g.dateStart)}</p>
-        <h4 className="subtitle subtitle--card">Host: {displayPlayerName(g.host.username)}</h4>
+        <p className="card__when">{relativeDateTime(g.dateStart, locale)}</p>
+        <h4 className="subtitle subtitle--card">{t("host", { name: displayName(g.host.username) })}</h4>
       </div>
       <div className="card__body">
         <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {g.location}</p>
-        <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">Entry price:</span> {g.buyIn}{currencySymbol(g.currency)}</p>
+        <p><FontAwesomeIcon icon={faDollarSign} className="fa-icon" /> <span className="gray">{t("entry")}</span> {g.buyIn}{currencySymbol(g.currency)}</p>
         <div className="card__actions">
-          <Link href={"/games/" + g.id} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faCircleInfo} /> More infos</Link>
+          <Link href={"/games/" + g.id} className="btn btn--card btn--secondary"><FontAwesomeIcon icon={faCircleInfo} /> {t("moreInfos")}</Link>
           <a
             href={apiUrl(`/games/${g.id}/ics`)}
             download
             className="btn btn--small btn--secondary"
-            aria-label="Add to calendar"
+            aria-label={t("addToCalendar")}
           >
             <FontAwesomeIcon icon={faCalendarPlus} />
           </a>
@@ -42,6 +45,7 @@ function UpcomingCard({ g }) {
 }
 
 export default function UpcomingGamesDisplay({ excludeId = null, includeToday = false }) {
+  const { t } = useGameT();
   const [games, setGames] = useState(null);
   const [isExpand, setIsExpand] = useState(false);
   // Invitations en attente : on n'affiche pas "No upcoming games yet." tant qu'il y en a
@@ -73,7 +77,7 @@ export default function UpcomingGamesDisplay({ excludeId = null, includeToday = 
   if (list.length === 0) {
     if (hasInvites) return null;
     // La seule partie prévue est déjà affichée en haut de l'accueil
-    return <p className="empty-state">{excludeId ? "Nothing else planned yet." : "No upcoming games yet."}</p>;
+    return <p className="empty-state">{excludeId ? t("nothingElse") : t("noUpcoming")}</p>;
   }
 
   // Sur l'accueil : une carte + "Show more" ; sur /games : toutes
@@ -86,8 +90,8 @@ export default function UpcomingGamesDisplay({ excludeId = null, includeToday = 
       {collapsible && list.length > 1 && (
         <button type="button" className="btn btn--secondary btn--card" style={{ gridColumn: "1 / -1" }} onClick={() => setIsExpand(!isExpand)} aria-expanded={isExpand}>
           {isExpand
-            ? <><FontAwesomeIcon icon={faMinus} /> Show less</>
-            : <><FontAwesomeIcon icon={faPlus} /> Show more ({list.length - 1})</>}
+            ? <><FontAwesomeIcon icon={faMinus} /> {t("showLess")}</>
+            : <><FontAwesomeIcon icon={faPlus} /> {t("showMore", { n: list.length - 1 })}</>}
         </button>
       )}
     </div>

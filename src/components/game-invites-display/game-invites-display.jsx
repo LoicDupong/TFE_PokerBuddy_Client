@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import gameInviteService from "@/services/gameInvite.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { relativeDateTime } from "@/utils/date.utils.js";
-import { inviteResponseToast } from "@/utils/game.utils.js";
+import { useGameT, useInviteResponseToast } from "@/utils/game-labels.utils.js";
 import Link from "next/link.js";
 
 export default function GameInvitesDisplay({ excludeId, onAccept }) {
+    const { t, locale } = useGameT();
+    const inviteToast = useInviteResponseToast();
     const [invites, setInvites] = useState([]);
     const [actingId, setActingId] = useState(null);
     const { showToast } = useToastStore();
@@ -29,10 +31,10 @@ export default function GameInvitesDisplay({ excludeId, onAccept }) {
         setActingId(null);
         if (res.success) {
             setInvites((prev) => prev.filter((i) => i.inviteId !== invite.inviteId));
-            showToast(...inviteResponseToast(action, invite.gameName));
+            showToast(...inviteToast(action, invite.gameName));
             if (action === "accepted") onAccept?.();
         } else {
-            showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(t("genericError"));
         }
     };
 
@@ -43,8 +45,8 @@ export default function GameInvitesDisplay({ excludeId, onAccept }) {
                     <div key={invite.inviteId} className="card card--invite-game">
                         <div className="card__header">
                             <h3 className="title title--card">{invite.gameName}</h3>
-                            <p className="card__when">{relativeDateTime(invite.dateStart)}</p>
-                            <h4 className="subtitle subtitle--card">by {invite.host}</h4>
+                            <p className="card__when">{relativeDateTime(invite.dateStart, locale)}</p>
+                            <h4 className="subtitle subtitle--card">{t("by", { name: invite.host })}</h4>
                         </div>
                         <div className="card__body">
                             {invite.location && (
@@ -57,7 +59,7 @@ export default function GameInvitesDisplay({ excludeId, onAccept }) {
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "accepted")}
                                 >
-                                    <FontAwesomeIcon icon={faCheck} /> Accept
+                                    <FontAwesomeIcon icon={faCheck} /> {t("accept")}
                                 </button>
                                 <button
                                     type="button"
@@ -65,10 +67,10 @@ export default function GameInvitesDisplay({ excludeId, onAccept }) {
                                     disabled={!!actingId}
                                     onClick={() => handleRespond(invite, "refused")}
                                 >
-                                    <FontAwesomeIcon icon={faXmark} /> Refuse
+                                    <FontAwesomeIcon icon={faXmark} /> {t("refuse")}
                                 </button>
                                 <Link href={`/games/${invite.gameId}`} className="btn btn--card btn--link">
-                                    <FontAwesomeIcon icon={faEye} /> View
+                                    <FontAwesomeIcon icon={faEye} /> {t("view")}
                                 </Link>
                             </div>
                         </div>

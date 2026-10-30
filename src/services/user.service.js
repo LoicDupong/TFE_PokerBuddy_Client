@@ -33,6 +33,17 @@ const userService = {
     }
   },
 
+  // 🔹 PATCH /user/me { locale } : langue du compte (emails, notifications). Échec silencieux : le cookie fait foi côté interface.
+  updateLocale: async (locale) => {
+    try {
+      await api.patch("/user/me", { locale });
+      return true;
+    } catch (error) {
+      console.error("updateLocale error:", error);
+      return false;
+    }
+  },
+
   // 🔹 PATCH /user/me
   updateMe: async (formData) => {
     try {

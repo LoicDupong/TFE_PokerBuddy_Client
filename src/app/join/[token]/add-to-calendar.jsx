@@ -7,10 +7,17 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import joinService from "@/services/join.service";
 import { currencySymbol } from "@/utils/game.utils.js";
 import { googleCalendarUrl, inviteEventDetails } from "@/utils/calendar.utils.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: { add: "Add to calendar", newTab: " (opens in a new tab)", hint: ".ics file, works with most calendar apps" },
+    fr: { add: "Ajouter au calendrier", newTab: " (s'ouvre dans un nouvel onglet)", hint: "fichier .ics, compatible avec la plupart des agendas" },
+};
 
 // Bouton « Add to calendar » de la page d'invitation : un petit panneau dépliable (disclosure)
 // avec Google Calendar (lien construit ici) et un .ics servi par l'API (Apple, Outlook…)
 export default function AddToCalendar({ token, info }) {
+    const { t, locale } = useT(MESSAGES);
     const [open, setOpen] = useState(false);
     const rootRef = useRef(null);
     const toggleRef = useRef(null);
@@ -46,7 +53,7 @@ export default function AddToCalendar({ token, info }) {
             buyIn: info.buyIn,
             currencyLabel: currencySymbol(info.currency),
             inviteUrl,
-        }),
+        }, locale),
     });
 
     return (
@@ -60,7 +67,7 @@ export default function AddToCalendar({ token, info }) {
                 onClick={() => setOpen((value) => !value)}
             >
                 <FontAwesomeIcon icon={faCalendarPlus} aria-hidden="true" />
-                <span>Add to calendar</span>
+                <span>{t("add")}</span>
                 <FontAwesomeIcon icon={faChevronDown} className="calendar-add__chevron" aria-hidden="true" />
             </button>
 
@@ -76,7 +83,7 @@ export default function AddToCalendar({ token, info }) {
                         <FontAwesomeIcon icon={faGoogle} aria-hidden="true" className="calendar-add__icon" />
                         <span className="calendar-add__label">
                             Google Calendar
-                            <span className="sr-only"> (opens in a new tab)</span>
+                            <span className="sr-only">{t("newTab")}</span>
                         </span>
                     </a>
                 </li>
