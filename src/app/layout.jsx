@@ -7,6 +7,7 @@ import "./styles/pages/learn.scss";
 import "./styles/pages/profile.scss";
 import "./styles/pages/manager.scss";
 import "./styles/pages/invite.scss";
+import "./styles/pages/help.scss";
 
 
 import Header from "@/ui/header/header.jsx";
@@ -25,6 +26,7 @@ import Toaster from "@/components/toast/toaster.jsx";
 import "../components/toast/toast.scss";
 import "../components/toast/toaster.scss";
 import AuthInit from "@/components/auth/auth-init.jsx";
+import PageViewTracker from "@/components/analytics/page-view-tracker.jsx";
 
 // Police servie par Next (plus d'@import Google Fonts bloquant dans le SCSS)
 const roboto = Roboto({
@@ -55,6 +57,7 @@ export default function RootLayout({ children }) {
 
       <body className={`${roboto.variable} ${barlowCondensed.variable}`}>
         <AuthInit />
+        <PageViewTracker />
         <Header />
         <main>{children}</main>
         <Footer />

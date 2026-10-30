@@ -172,6 +172,16 @@ export default function NotificationsPage() {
             );
         }
 
+        if (n.type === "support_reply" && link) {
+            return (
+                <div className="notification__actions">
+                    <Link href={link} className="notification__link">
+                        View reply
+                    </Link>
+                </div>
+            );
+        }
+
         if (n.type === "game_result_reminder" && link) {
             return (
                 <div className="notification__actions">

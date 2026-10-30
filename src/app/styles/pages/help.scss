@@ -1,0 +1,200 @@
+// Aide et support : FAQ, formulaire, liste et fil des demandes (mobile d'abord)
+.help {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    min-width: 0;
+
+    &__header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+
+        h1 { overflow-wrap: anywhere; }
+    }
+
+    &__thread-title {
+        overflow-wrap: anywhere;
+    }
+
+    &__link {
+        margin: 0;
+    }
+
+    &__back {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--primary-color-light);
+    }
+
+    &__hint {
+        color: var(--secondary-text);
+        line-height: 1.5;
+    }
+
+    &__section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    &__title {
+        font-size: 1.4rem;
+    }
+
+    // FAQ
+    &__faq {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    &__faq-item {
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+
+        summary {
+            min-height: 44px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 700;
+            list-style-position: inside;
+        }
+
+        p {
+            padding: 0 1rem 1rem;
+            color: var(--secondary-text);
+            line-height: 1.5;
+        }
+    }
+
+    // Formulaires : champs sur toute la largeur, jamais de débordement à 375px
+    &__form {
+        width: 100%;
+        gap: 1.25rem;
+        margin-bottom: 0;
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+    }
+
+    &__submit {
+        margin-top: 0;
+        min-height: 44px;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    // Liste des demandes
+    &__tickets {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__ticket {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.25rem 0.75rem;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+        transition: background-color 0.15s ease;
+
+        &:hover { background: rgba(247, 248, 255, 0.1); }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+        }
+    }
+
+    &__ticket-subject {
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    &__ticket-meta {
+        grid-column: 1 / -1;
+        font-size: 0.85rem;
+        color: var(--secondary-text);
+    }
+
+    // Statut : couleur + texte (jamais la couleur seule)
+    &__badge {
+        display: inline-block;
+        padding: 0.1rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        font-size: 0.8rem;
+        white-space: nowrap;
+
+        &--new { color: var(--primary-color-light); }
+        &--in_progress { color: #f2c46d; }
+        &--resolved { color: #8ff1b2; }
+    }
+
+    // Fil de discussion
+    &__thread {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    &__message {
+        max-width: 92%;
+        padding: 0.75rem 1rem;
+        border-radius: 12px 12px 12px 4px;
+        background: var(--primary-text-trans);
+
+        // Réponse du support : alignée à droite, teinte douce
+        &--staff {
+            align-self: flex-end;
+            border-radius: 12px 12px 4px 12px;
+            background: rgba(159, 165, 223, 0.12);
+            outline: 1px solid rgba(159, 165, 223, 0.35);
+        }
+    }
+
+    &__message-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.25rem 0.75rem;
+        margin-bottom: 0.35rem;
+        font-size: 0.85rem;
+
+        time { color: var(--secondary-text); }
+    }
+
+    &__message-body {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+    }
+}
+
+@media (min-width: 950px) {
+    .help__message { max-width: 70%; }
+}

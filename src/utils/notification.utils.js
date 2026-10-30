@@ -1,5 +1,5 @@
 import {
-    faBell, faUserPlus, faUserCheck, faEnvelopeOpenText, faReply, faTrophy, faClock,
+    faBell, faUserPlus, faUserCheck, faEnvelopeOpenText, faReply, faTrophy, faClock, faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Parties : referenceId = id de la partie
@@ -28,6 +28,12 @@ export const NOTIFICATION_TYPES = {
     game_invite_responded: { title: "Invite answered", icon: faReply, link: gameLink },
     game_result: { title: "Results are in", icon: faTrophy, link: gameLink },
     game_result_reminder: { title: "Results to submit", icon: faClock, link: gameLink },
+    // Réponse du support : referenceId = id du ticket
+    support_reply: {
+        title: "Support reply",
+        icon: faHeadset,
+        link: (notification) => (notification.referenceId ? `/help/tickets/${notification.referenceId}` : "/help/tickets"),
+    },
 };
 
 // Type inconnu du client (ajouté côté serveur avant le client) : toast générique, sans lien
