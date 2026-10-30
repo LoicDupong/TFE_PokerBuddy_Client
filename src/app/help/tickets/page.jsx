@@ -22,7 +22,7 @@ export default function MyTicketsPage() {
             const res = await supportService.getMyTickets();
             if (cancelled) return;
             if (res.success) { setTickets(res.data); setError(null); }
-            else setError(t("list.loadError"));
+            else setError("list.loadError"); // clé et non texte : suit un changement de langue
         })();
         return () => { cancelled = true; };
     }, [allowed, attempt]);
@@ -38,7 +38,7 @@ export default function MyTicketsPage() {
 
             {error && (
                 <div className="help__section">
-                    <p role="alert">{error}</p>
+                    <p role="alert">{t(error)}</p>
                     <button type="button" className="btn btn--small" onClick={() => setAttempt((n) => n + 1)}>{t("list.retry")}</button>
                 </div>
             )}

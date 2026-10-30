@@ -29,7 +29,7 @@ import "../components/toast/toaster.scss";
 import AuthInit from "@/components/auth/auth-init.jsx";
 import PageViewTracker from "@/components/analytics/page-view-tracker.jsx";
 import { I18nProvider } from "@/i18n/i18n-provider.jsx";
-import { getLocale } from "@/i18n/server.js";
+import { getLocale, getT } from "@/i18n/server.js";
 
 // Police servie par Next (plus d'@import Google Fonts bloquant dans le SCSS)
 const roboto = Roboto({
@@ -44,12 +44,26 @@ const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "PokerBuddy | Home Poker Games Manager",
-  description: "PokerBuddy your bestfriend to manage home poker games with your bestfriends !",
-  // public/manifest.json n'est pas lié automatiquement par Next : sans ça, pas d'installation PWA sur Android
-  manifest: "/manifest.json",
+const MESSAGES = {
+  en: {
+    title: "PokerBuddy | Home Poker Games Manager",
+    description: "PokerBuddy, your best friend to manage home poker games with your friends!",
+  },
+  fr: {
+    title: "PokerBuddy | Tes parties de poker entre amis",
+    description: "PokerBuddy, ton meilleur allié pour organiser tes parties de poker entre amis !",
+  },
 };
+
+export async function generateMetadata() {
+  const { t } = await getT(MESSAGES);
+  return {
+    title: t("title"),
+    description: t("description"),
+    // public/manifest.json n'est pas lié automatiquement par Next : sans ça, pas d'installation PWA sur Android
+    manifest: "/manifest.json",
+  };
+}
 
 export default async function RootLayout({ children }) {
   // Langue lue dans le cookie (ou Accept-Language) : le HTML serveur est déjà dans la bonne langue

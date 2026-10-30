@@ -275,7 +275,7 @@ export default function GameAddForm() {
         }
 
         // ✅ Validation avec Zod
-        const validation = validateSession(data);
+        const validation = validateSession(data, locale);
         if (!validation.ok) {
             // Rappel près du bouton : sur mobile, le champ fautif est souvent hors écran
             setErrorMessage([

@@ -21,7 +21,7 @@ const MESSAGES = {
     },
     fr: {
         home: "Accueil PokerBuddy",
-        tagline: "Vos soirées poker entre amis, en toute simplicité.",
+        tagline: "Tes soirées poker entre amis, en toute simplicité.",
         nav: "Pied de page",
         games: "Mes parties",
         leaderboard: "Classement",

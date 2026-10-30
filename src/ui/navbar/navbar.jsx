@@ -80,7 +80,7 @@ export default function Navbar() {
         window.addEventListener("resize", handleResize);
 
         return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    }, [mobile]); // le seuil change avec la langue (libellés français plus longs)
 
     // Notifications récupérées au montage, au focus, au retour sur l'onglet et toutes les 60 s
     // (onglet visible) : boucle partagée avec les toasts, une seule requête à la fois
