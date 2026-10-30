@@ -107,3 +107,32 @@
         align-items: flex-start;
     }
 }
+
+// Sélecteur de langue (composant partagé src/i18n/language-switcher.jsx)
+.language-switcher {
+    display: inline-flex;
+    gap: 0.25rem;
+
+    &__option {
+        min-width: 44px; // cible tactile
+        min-height: 36px;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--secondary-text);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--secondary-text);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+
+        &.is-active {
+            border-color: currentColor;
+            color: inherit;
+        }
+
+        &:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+    }
+}

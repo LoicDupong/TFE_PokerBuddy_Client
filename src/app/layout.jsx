@@ -28,6 +28,8 @@ import "../components/toast/toast.scss";
 import "../components/toast/toaster.scss";
 import AuthInit from "@/components/auth/auth-init.jsx";
 import PageViewTracker from "@/components/analytics/page-view-tracker.jsx";
+import { I18nProvider } from "@/i18n/i18n-provider.jsx";
+import { getLocale } from "@/i18n/server.js";
 
 // Police servie par Next (plus d'@import Google Fonts bloquant dans le SCSS)
 const roboto = Roboto({
@@ -49,20 +51,24 @@ export const metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Langue lue dans le cookie (ou Accept-Language) : le HTML serveur est déjà dans la bonne langue
+  const locale = await getLocale();
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <meta name="apple-mobile-web-app-title" content="PokerBuddy" />
       </head>
 
       <body className={`${roboto.variable} ${barlowCondensed.variable}`}>
-        <AuthInit />
-        <PageViewTracker />
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <Toaster />
+        <I18nProvider initialLocale={locale}>
+          <AuthInit />
+          <PageViewTracker />
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <Toaster />
+        </I18nProvider>
         <SpeedInsights/>
         <Analytics/>
       </body>

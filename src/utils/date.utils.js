@@ -1,13 +1,14 @@
-export function shortDateTime(date) {
-  return new Date(date).toLocaleString("fr-FR", {
+// intlLocale : fourni par useT() (en-GB / fr-BE) ; format jj/mm/aaaa par défaut
+export function shortDateTime(date, intlLocale = "fr-FR") {
+  return new Date(date).toLocaleString(intlLocale, {
     dateStyle: "short",
     timeStyle: "short",
   });
 }
 
 
-export function shortTime(date) {
-  return new Date(date).toLocaleString("fr-FR", {
+export function shortTime(date, intlLocale = "fr-FR") {
+  return new Date(date).toLocaleString(intlLocale, {
     timeStyle: "short",
   });
 }
@@ -51,15 +52,21 @@ export function isSameLocalDay(a, b = new Date()) {
 
 // Date lisible d'un coup d'oeil : "Tonight 21:30", "Tomorrow 20:00", "Fri 30/10 20:00"
 // (l'année n'apparaît que si ce n'est pas l'année en cours)
-export function relativeDateTime(date) {
+const RELATIVE_WORDS = {
+  en: { tonight: "Tonight", today: "Today", tomorrow: "Tomorrow", intl: "en-GB" },
+  fr: { tonight: "Ce soir", today: "Aujourd'hui", tomorrow: "Demain", intl: "fr-BE" },
+};
+
+export function relativeDateTime(date, locale = "en") {
+  const words = RELATIVE_WORDS[locale] || RELATIVE_WORDS.en;
   const d = new Date(date);
   const now = new Date();
   const time = hhmm(d);
-  if (isSameLocalDay(d, now)) return `${d.getHours() >= 18 ? "Tonight" : "Today"} ${time}`;
+  if (isSameLocalDay(d, now)) return `${d.getHours() >= 18 ? words.tonight : words.today} ${time}`;
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (isSameLocalDay(d, tomorrow)) return `Tomorrow ${time}`;
-  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+  if (isSameLocalDay(d, tomorrow)) return `${words.tomorrow} ${time}`;
+  const weekday = d.toLocaleDateString(words.intl, { weekday: "short" });
   const year = d.getFullYear() !== now.getFullYear() ? `/${d.getFullYear()}` : "";
   return `${weekday} ${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}${year} ${time}`;
 }
