@@ -76,7 +76,8 @@ export default function Navbar() {
 
     if (isMobile === null) return <nav className="nav" />;
 
-    const navLinks = user ? links : baseLinks;
+    // Lien Admin : confort d'affichage seulement, l'API refuse de toute façon un non-admin
+    const navLinks = user ? (user.role === "admin" ? [...links, { href: "/admin", name: "Admin" }] : links) : baseLinks;
 
     // Desktop
     if (!isMobile) {

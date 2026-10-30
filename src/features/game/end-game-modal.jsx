@@ -63,7 +63,7 @@ export default function EndGameModal({
     // Joueurs du classement : ceux qui ont paye (en PKO, du dernier elimine au premier d'abord)
     const rankedPlayers = useMemo(() => {
         if (!tracked) {
-            return players.map((p) => ({ gamePlayerId: p.id, name: p.user ? p.user.username : p.name }));
+            return players.map((p) => ({ gamePlayerId: p.id, name: displayPlayerName(p.user ? p.user.username : p.name) }));
         }
         const byId = new Map(finance.players.map((p) => [p.id, p]));
         const presetOrder = players.map((p) => p.id).filter((id) => byId.has(id));

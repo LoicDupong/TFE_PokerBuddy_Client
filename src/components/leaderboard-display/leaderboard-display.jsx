@@ -4,6 +4,7 @@ import leaderboardService from "@/services/leaderboard.service.js";
 import Link from "next/link.js";
 import { useEffect, useState } from "react";
 import useAuthStore from "@/stores/useAuthStore";
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 export default function LeaderboardDisplay({ compact = false }) {
     const limit = compact ? 3 : 10;
@@ -48,7 +49,7 @@ export default function LeaderboardDisplay({ compact = false }) {
                                 <td>{p.rank}</td>
                                 <td>
                                     <Link href={`/profile/${p.id}`} className={`leaderboard__player-link${p.rank === 1 ? " red" : ""}`}>
-                                        {p.username}
+                                        {displayPlayerName(p.username)}
                                     </Link>
                                     {p.id === currentUser?.id && <span className="leaderboard__you">You</span>}
                                 </td>

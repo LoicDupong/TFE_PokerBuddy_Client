@@ -13,6 +13,7 @@ import gameInviteService from '@/services/gameInvite.service.js';
 import useAuthStore from '@/stores/useAuthStore.js';
 import useToastStore from '@/stores/useToastStore.js';
 import { useParams } from 'next/navigation.js';
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 export default function UpcomingGamesDetails() {
   const { id } = useParams();
@@ -64,7 +65,7 @@ export default function UpcomingGamesDetails() {
         <div className="card__header">
           <h3 className="title title--card">{game.name}</h3>
           <p className="card__when">{relativeDateTime(game.dateStart)}</p>
-          <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + game.host.id}>{game.host.username}</Link></h4>
+          <h4 className="subtitle subtitle--card">Hosted by <Link href={'/profile/' + game.host.id}>{displayPlayerName(game.host.username)}</Link></h4>
         </div>
         <div className="card__body">
           <div className="card__infos">
@@ -102,7 +103,7 @@ export default function UpcomingGamesDetails() {
               <h3>Players list</h3>
               <ul>
                 {game.playerLinks.map((r) => (
-                  <li key={r.id}>• {r.user?.username || r.userName || r.guestName} <span className={`player__status player__status--${r.status}`}>{r.status}</span></li>
+                  <li key={r.id}>• {displayPlayerName(r.user?.username || r.userName || r.guestName)} <span className={`player__status player__status--${r.status}`}>{r.status}</span></li>
                 ))}
               </ul>
             </div>

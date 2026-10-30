@@ -11,6 +11,7 @@ import { currencySymbol, inviteResponseToast } from '@/utils/game.utils.js';
 import { relativeDateTime } from '@/utils/date.utils.js';
 import { useEffect, useState } from 'react';
 import ActiveGameSkeleton from './active-game-skeleton.jsx';
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 export default function ActiveGameDisplay({ onResponded }) {
     const [games, setGames] = useState(null);
@@ -66,7 +67,7 @@ export default function ActiveGameDisplay({ onResponded }) {
                             <div className="card__header">
                                 <h3 className="title title--card">{g.name}</h3>
                                 <p className="card__when">{relativeDateTime(g.dateStart)}</p>
-                                <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
+                                <h4 className="subtitle subtitle--card">Host: {displayPlayerName(g.host.username)}</h4>
                             </div>
                             <div className="card__body">
                                 <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {g.location}</p>

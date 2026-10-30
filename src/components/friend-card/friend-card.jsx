@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faUser } from "@fortawesome/free-solid-svg-icons";
 import { serverUrl } from "@/utils/media.js";
 import "./friend-card.scss";
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 // Pseudos collés (CamelCase, chiffres) : on autorise le retour à la ligne entre les "mots"
 // plutôt qu'au milieu d'un mot ("BluffMaster|Supreme" et non "BluffMasterSu|preme").
@@ -33,8 +34,8 @@ function FriendCardBody({ user, status, selected }) {
             </span>
             <span className="friend-card__text">
                 {/* title : nom complet au survol quand il est tronqué (le texte complet reste lu par les lecteurs d'écran) */}
-                <span className="friend-card__name" title={user.username}>
-                    {breakableName(user.username)}
+                <span className="friend-card__name" title={displayPlayerName(user.username)}>
+                    {breakableName(displayPlayerName(user.username))}
                 </span>
                 {status && <span className="friend-card__status">{status}</span>}
             </span>

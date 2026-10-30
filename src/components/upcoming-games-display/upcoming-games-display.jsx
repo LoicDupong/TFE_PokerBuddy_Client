@@ -12,6 +12,7 @@ import { currencySymbol } from '@/utils/game.utils.js';
 import { relativeDateTime } from '@/utils/date.utils.js';
 import gameInviteService from "@/services/gameInvite.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 function UpcomingCard({ g }) {
   return (
@@ -19,7 +20,7 @@ function UpcomingCard({ g }) {
       <div className="card__header">
         <h3 className="title title--card">{g.name}</h3>
         <p className="card__when">{relativeDateTime(g.dateStart)}</p>
-        <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
+        <h4 className="subtitle subtitle--card">Host: {displayPlayerName(g.host.username)}</h4>
       </div>
       <div className="card__body">
         <p><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {g.location}</p>

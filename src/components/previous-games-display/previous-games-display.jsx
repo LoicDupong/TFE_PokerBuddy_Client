@@ -17,7 +17,7 @@ function PreviousCard({ g }) {
             <div className="card__header">
                 <h3 className="title title--card">{g.name}</h3>
                 <p className="card__when">{relativeDateTime(g.dateEnd || g.dateStart)}</p>
-                <h4 className="subtitle subtitle--card">Host: {g.host.username}</h4>
+                <h4 className="subtitle subtitle--card">Host: {displayPlayerName(g.host.username)}</h4>
             </div>
             <div className="card__body">
                 {g.status === "finished" ? (

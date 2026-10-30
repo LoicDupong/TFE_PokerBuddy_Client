@@ -12,6 +12,7 @@ import { faBell, faCheck, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { displayPlayerName } from "@/utils/game.utils.js";
 
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const isToday = (iso) => startOfDay(new Date(iso)).getTime() === startOfDay(new Date()).getTime();
@@ -101,7 +102,7 @@ export default function NotificationsPage() {
             return (
                 <div className="notification__actions">
                     <Link href={getNotificationLink(n, { senderId: invite.User.id })} className="notification__link">
-                        {invite.User.username}
+                        {displayPlayerName(invite.User.username)}
                     </Link>
                     <button
                         className="btn btn--small btn--primary"
