@@ -21,6 +21,65 @@ import {
     faSave,
     faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import { COMMON } from "@/i18n/common.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: {
+        ...COMMON.en,
+        rebuyInvalid: "Rebuy price must be a positive amount",
+        updateFailed: "Update failed",
+        title: "Title",
+        dateTime: "Date & Time",
+        tableStart: "Table start",
+        location: "Location",
+        money: "Money settings",
+        buyIn: "Buy-in",
+        maxPlayers: "Max players",
+        placesPaid: "Places paid",
+        prizePoolMin: "Prize pool (min)",
+        currency: "Currency",
+        locked: "Once a buy-in, rebuy or knockout is recorded in the Game Manager, the buy-in and PKO settings are locked.",
+        payouts: "Payout distribution (%)",
+        place: (p) => `Place #${p.place}`,
+        total: "Total",
+        mustBe100: "→ must be exactly 100%",
+        blinds: "Blinds",
+        smallBlind: "Small blind",
+        bigBlind: "Big blind",
+        levelDuration: "Level duration (min)",
+        enableTimer: "Enable blind timer during the game",
+        description: "Description",
+        saveChanges: "Save changes",
+    },
+    fr: {
+        ...COMMON.fr,
+        rebuyInvalid: "Le prix du rebuy doit être un montant positif",
+        updateFailed: "La mise à jour a échoué",
+        title: "Titre",
+        dateTime: "Date et heure",
+        tableStart: "Début à table",
+        location: "Lieu",
+        money: "Réglages d'argent",
+        buyIn: "Buy-in",
+        maxPlayers: "Joueurs max",
+        placesPaid: "Places payées",
+        prizePoolMin: "Prize pool (min)",
+        currency: "Devise",
+        locked: "Dès qu'un buy-in, un rebuy ou une élimination est enregistré dans le Game Manager, le buy-in et les réglages PKO sont verrouillés.",
+        payouts: "Répartition des gains (%)",
+        place: (p) => `Place n°${p.place}`,
+        total: "Total",
+        mustBe100: "→ doit faire exactement 100 %",
+        blinds: "Blinds",
+        smallBlind: "Petite blind",
+        bigBlind: "Grosse blind",
+        levelDuration: "Durée d'un niveau (min)",
+        enableTimer: "Activer le minuteur de blinds pendant la partie",
+        description: "Description",
+        saveChanges: "Enregistrer les modifications",
+    },
+};
 
 export default function EditGamePage() {
     const { id } = useParams();
@@ -28,6 +87,7 @@ export default function EditGamePage() {
 
     const [game, setGame] = useState(null);
     const { showToast } = useToastStore();
+    const { t, locale, intlLocale } = useT(MESSAGES);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -112,7 +172,7 @@ export default function EditGamePage() {
         });
     }, [formData.placesPaid]);
 
-    if (!game) return <p>Loading…</p>;
+    if (!game) return <p>{t("loading")}</p>;
 
     // handle inputs
     const handleChange = (e) => {
@@ -133,7 +193,7 @@ export default function EditGamePage() {
         const rebuyText = String(rebuyAmount ?? "").trim();
         const rebuyAmountCents = rebuyText === "" ? null : parseAmountToCents(rebuyText);
         if (rebuyText !== "" && !rebuyAmountCents) {
-            showToast("Rebuy price must be a positive amount");
+            showToast(t("rebuyInvalid"));
             return;
         }
         const res = await gameService.update(game.id, {
@@ -150,7 +210,7 @@ export default function EditGamePage() {
         if (res.success) {
             router.push(`/games/${game.id}`);
         } else {
-            showToast(res.errorMessage?.[0] || "Update failed");
+            showToast(t("updateFailed"));
         }
     };
 
@@ -164,13 +224,13 @@ export default function EditGamePage() {
     return (
         <form onSubmit={handleConfirm} className="form form--session">
             <h2>
-                Edit <span className="red">game</span>
+                {locale === "fr" ? <>Modifier la <span className="red">partie</span></> : <>Edit <span className="red">game</span></>}
             </h2>
 
             {/* Name */}
             <div className="form__row">
                 <label htmlFor="name">
-                    <FontAwesomeIcon icon={faDiamond} /> Title
+                    <FontAwesomeIcon icon={faDiamond} /> {t("title")}
                 </label>
                 <input id="name" name="name" value={formData.name} onChange={handleChange} />
             </div>
@@ -179,7 +239,7 @@ export default function EditGamePage() {
             <div className="form__grid">
                 <div className="form__row">
                     <label htmlFor="dateStart">
-                        <FontAwesomeIcon icon={faCalendar} /> Date & Time
+                        <FontAwesomeIcon icon={faCalendar} /> {t("dateTime")}
                     </label>
                     <input id="dateStart"
                         type="datetime-local"
@@ -190,7 +250,7 @@ export default function EditGamePage() {
                 </div>
                 <div className="form__row">
                     <label htmlFor="realStart">
-                        <FontAwesomeIcon icon={faClock} /> Table start
+                        <FontAwesomeIcon icon={faClock} /> {t("tableStart")}
                     </label>
                     <input id="realStart"
                         type="time"
@@ -204,7 +264,7 @@ export default function EditGamePage() {
             {/* Location */}
             <div className="form__row">
                 <label htmlFor="location">
-                    <FontAwesomeIcon icon={faLocationDot} /> Location
+                    <FontAwesomeIcon icon={faLocationDot} /> {t("location")}
                 </label>
                 <input id="location" name="location" value={formData.location} onChange={handleChange} />
             </div>
@@ -212,13 +272,13 @@ export default function EditGamePage() {
             {/* Money */}
             <fieldset className="form__fieldset">
                 <legend>
-                    <FontAwesomeIcon icon={faGear} /> Money settings
+                    <FontAwesomeIcon icon={faGear} /> {t("money")}
                 </legend>
 
                 <div className="form__grid">
                     <div className="form__row">
                         <label htmlFor="buyIn">
-                            <FontAwesomeIcon icon={faDollarSign} /> Buy-in
+                            <FontAwesomeIcon icon={faDollarSign} /> {t("buyIn")}
                         </label>
                         <input id="buyIn"
                             type="number"
@@ -229,7 +289,7 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="maxPlayers">Max players</label>
+                        <label htmlFor="maxPlayers">{t("maxPlayers")}</label>
                         <input id="maxPlayers"
                             type="number"
                             name="maxPlayers"
@@ -239,7 +299,7 @@ export default function EditGamePage() {
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="placesPaid">Places paid</label>
+                        <label htmlFor="placesPaid">{t("placesPaid")}</label>
                         <input id="placesPaid"
                             type="number"
                             name="placesPaid"
@@ -250,13 +310,13 @@ export default function EditGamePage() {
 
                     <div className="form__row">
                         <label htmlFor="prizePoolMin">
-                            <FontAwesomeIcon icon={faDollarSign} /> Prize pool (min)
+                            <FontAwesomeIcon icon={faDollarSign} /> {t("prizePoolMin")}
                         </label>
                         <input id="prizePoolMin" type="number" value={prizePoolValue} readOnly />
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="currency">Currency</label>
+                        <label htmlFor="currency">{t("currency")}</label>
                         <select id="currency" name="currency" value={formData.currency} onChange={handleChange}>
                             <option value="EUR">EUR</option>
                             <option value="USD">USD</option>
@@ -271,17 +331,17 @@ export default function EditGamePage() {
                     buyIn={formData.buyIn}
                     currency={formData.currency}
                 />
-                <p className="gray">Once a buy-in, rebuy or knockout is recorded in the Game Manager, the buy-in and PKO settings are locked.</p>
+                <p className="gray">{t("locked")}</p>
             </fieldset>
 
             {/* Payouts */}
             <fieldset className="form__fieldset">
-                <legend>Payout distribution (%)</legend>
+                <legend>{t("payouts")}</legend>
 
                 <div className="form__grid">
                     {payouts.map((p, idx) => (
                         <div className="form__row" key={idx}>
-                            <label htmlFor={`payout-${idx}`}>Place #{p.place}</label>
+                            <label htmlFor={`payout-${idx}`}>{t("place", { place: p.place })}</label>
                             <input
                                 id={`payout-${idx}`}
                                 type="number"
@@ -298,24 +358,24 @@ export default function EditGamePage() {
                                 }}
                             />
                             {prizePoolValue > 0 && (
-                                <p className="gray">≈ {(prizePoolValue * p.percent / 100).toFixed(2)} {currencySymbol(formData.currency)}</p>
+                                <p className="gray">≈ {new Intl.NumberFormat(intlLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prizePoolValue * p.percent / 100)} {currencySymbol(formData.currency)}</p>
                             )}
                         </div>
                     ))}
                 </div>
                 <p className={payoutError ? "form__error" : "gray"}>
-                    Total: {totalPercent}% {payoutError && "→ must be exactly 100%"}
+                    {t("total")}: {totalPercent}% {payoutError && t("mustBe100")}
                 </p>
             </fieldset>
 
             {/* Blinds */}
             <fieldset className="form__fieldset">
                 <legend>
-                    <FontAwesomeIcon icon={faCoins} /> Blinds
+                    <FontAwesomeIcon icon={faCoins} /> {t("blinds")}
                 </legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label htmlFor="smallBlind">Small blind</label>
+                        <label htmlFor="smallBlind">{t("smallBlind")}</label>
                         <input id="smallBlind"
                             type="number"
                             name="smallBlind"
@@ -324,7 +384,7 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="bigBlind">Big blind</label>
+                        <label htmlFor="bigBlind">{t("bigBlind")}</label>
                         <input id="bigBlind"
                             type="number"
                             name="bigBlind"
@@ -333,7 +393,7 @@ export default function EditGamePage() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="levelDuration">Level duration (min)</label>
+                        <label htmlFor="levelDuration">{t("levelDuration")}</label>
                         <input id="levelDuration"
                             type="number"
                             name="levelDuration"
@@ -350,14 +410,14 @@ export default function EditGamePage() {
                         checked={formData.enableBlindTimer}
                         onChange={handleChange}
                     />
-                    <span>Enable blind timer during the game</span>
+                    <span>{t("enableTimer")}</span>
                 </label>
             </fieldset>
 
             {/* Description */}
             <div className="form__row">
                 <label htmlFor="description">
-                    <FontAwesomeIcon icon={faPenToSquare} /> Description
+                    <FontAwesomeIcon icon={faPenToSquare} /> {t("description")}
                 </label>
                 <textarea id="description"
                     name="description"
@@ -370,10 +430,10 @@ export default function EditGamePage() {
             {/* Actions */}
             <div className="form__actions">
                 <button type="button" className="btn btn--secondary" onClick={handleCancel}>
-                    <FontAwesomeIcon icon={faXmark} /> Cancel
+                    <FontAwesomeIcon icon={faXmark} /> {t("cancel")}
                 </button>
                 <button type="submit" className="btn btn--primary" disabled={payoutError}>
-                    <FontAwesomeIcon icon={faSave} /> Save changes
+                    <FontAwesomeIcon icon={faSave} /> {t("saveChanges")}
                 </button>
             </div>
         </form>

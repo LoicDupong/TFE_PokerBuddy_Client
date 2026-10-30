@@ -19,11 +19,41 @@ export function getPrizePool(game) {
 const CURRENCY_SYMBOLS = { EUR: "€", USD: "$", GBP: "£" };
 export const currencySymbol = (code) => CURRENCY_SYMBOLS[code] ?? "€";
 
+// Langue pour les helpers appelés hors hook : paramètre explicite (useT), sinon cookie "locale" côté client
+function pickLocale(locale) {
+    if (locale === "fr" || locale === "en") return locale;
+    if (typeof document !== "undefined") {
+        const match = document.cookie.match(/(?:^|; )locale=(en|fr)/);
+        if (match) return match[1];
+    }
+    return "en";
+}
+
+const GAME_TEXT = {
+    en: {
+        accepted: (p) => `✅ Accepted "${p.name}"`,
+        refused: (p) => `Refused "${p.name}"`,
+        pending: "Upcoming",
+        active: "Live",
+        finished: "Finished",
+        deleted: "Deleted player",
+    },
+    fr: {
+        accepted: (p) => `✅ Tu as accepté « ${p.name} »`,
+        refused: (p) => `Tu as refusé « ${p.name} »`,
+        pending: "À venir",
+        active: "En cours",
+        finished: "Terminée",
+        deleted: "Joueur supprimé",
+    },
+};
+
 // Arguments de showToast après une réponse à une invitation de partie : popup de 5 s
-export function inviteResponseToast(action, gameName) {
+export function inviteResponseToast(action, gameName, locale) {
+    const text = GAME_TEXT[pickLocale(locale)];
     return action === "accepted"
-        ? [`✅ Accepted "${gameName}"`, "success", 5000]
-        : [`Refused "${gameName}"`, "info", 5000];
+        ? [text.accepted({ name: gameName }), "success", 5000]
+        : [text.refused({ name: gameName }), "info", 5000];
 }
 
 // Places payées et répartition : pour une partie terminée, ce qui a vraiment été distribué
@@ -47,13 +77,12 @@ export function getPayoutAmount(prizePool, percent) {
 }
 
 // Libellés affichés pour le statut technique d'une partie
-const STATUS_LABELS = { pending: "Upcoming", active: "Live", finished: "Finished" };
-export const gameStatusLabel = (status) => STATUS_LABELS[status] ?? status;
+export const gameStatusLabel = (status, locale) => GAME_TEXT[pickLocale(locale)][status] ?? status;
 
 // Un compte supprimé garde un pseudo technique "deleted_xxxxxxxx" : on ne l'affiche jamais tel quel
-export const DELETED_PLAYER_LABEL = "Deleted player";
-export function displayPlayerName(name) {
-    return /^deleted_[0-9a-f]{8}$/i.test(String(name || "")) ? DELETED_PLAYER_LABEL : name;
+export const DELETED_PLAYER_LABEL = GAME_TEXT.en.deleted;
+export function displayPlayerName(name, locale) {
+    return /^deleted_[0-9a-f]{8}$/i.test(String(name || "")) ? GAME_TEXT[pickLocale(locale)].deleted : name;
 }
 
 // Montant d'un résultat en unités : les centimes font foi quand ils existent

@@ -3,8 +3,12 @@
 import { currencySymbol } from "@/utils/game.utils.js";
 
 /** 1250 → "12,50 €" (toujours 2 décimales, virgule décimale, espace insécable avant le symbole) */
-export function formatCents(cents, currency = "EUR") {
+// Avec `intlLocale` (useT) : format Intl de la langue (en-GB "€12.50", fr-BE "12,50 €") ; sans : format historique
+export function formatCents(cents, currency = "EUR", intlLocale) {
     const value = Math.round(Number(cents) || 0);
+    if (intlLocale) {
+        return new Intl.NumberFormat(intlLocale, { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value / 100);
+    }
     const sign = value < 0 ? "-" : "";
     const abs = Math.abs(value);
     const whole = String(Math.floor(abs / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -13,8 +17,8 @@ export function formatCents(cents, currency = "EUR") {
 }
 
 /** Idem avec un signe explicite pour les nets : "+3,00 €" / "-2,00 €" / "0,00 €" */
-export function formatSignedCents(cents, currency = "EUR") {
-    const text = formatCents(cents, currency);
+export function formatSignedCents(cents, currency = "EUR", intlLocale) {
+    const text = formatCents(cents, currency, intlLocale);
     return Number(cents) > 0 ? `+${text}` : text;
 }
 
