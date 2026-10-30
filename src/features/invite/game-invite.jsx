@@ -5,9 +5,12 @@ import FriendCard from "@/components/friend-card/friend-card.jsx";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { PROFILE_MESSAGES } from "@/app/profile/profile.messages.js";
 
 // invitedIds : amis déjà dans la partie (affichés "Invited", non sélectionnables)
 export default function GameInvite({ invites, setInvites, onClose, onConfirm, invitedIds = [] }) {
+    const { t } = useT(PROFILE_MESSAGES);
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -17,7 +20,7 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
         })();
     }, []);
 
-    if (!user) return <p>Loading...</p>;
+    if (!user) return <p>{t("loading")}</p>;
 
     // ✅ Toggle un ami
     const toggleFriend = (friend) => {
@@ -56,11 +59,11 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
         <div className="modal">
             <div className="modal__overlay" onClick={onClose}></div>
             <div className="modal__content">
-                <button type="button" className="modal__close" onClick={onClose} aria-label="Close">
+                <button type="button" className="modal__close" onClick={onClose} aria-label={t("close")}>
                     <FontAwesomeIcon icon={faXmark} />
                 </button>
 
-                <h2 className="modal__title">Invite Friends</h2>
+                <h2 className="modal__title">{t("invite")}</h2>
 
                 {/* ✅ Emails
                 <div className="form__row">
@@ -75,7 +78,7 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
 
                 {/* ✅ Friends list */}
                 <div className="section section__friends">
-                    <h3 id="game-invite-friends-title">Your friends</h3>
+                    <h3 id="game-invite-friends-title">{t("yourFriends")}</h3>
                     {user.friends?.length > 0 ? (
                         <ul className="friend-grid" aria-labelledby="game-invite-friends-title">
                             {user.friends.map((f) => {
@@ -89,31 +92,31 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
                                             onToggle={toggleFriend}
                                             selected={invites.friends.some((sf) => sf.id === f.id)}
                                             disabled={alreadyInvited}
-                                            status={alreadyInvited ? "Invited" : null}
+                                            status={alreadyInvited ? t("invitedStatus") : null}
                                         />
                                     </li>
                                 );
                             })}
                         </ul>
                     ) : (
-                        <p className="empty-state">No friends yet. Add some from your profile, or invite guests below.</p>
+                        <p className="empty-state">{t("noFriendsInvite")}</p>
                     )}
                 </div>
 
                 {/* ✅ Guests */}
                 <div className="form__row">
-                    <label htmlFor="email">Add Guests</label>
+                    <label htmlFor="guests">{t("addGuests")}</label>
                     <textarea
                         id="guests"
                         defaultValue={invites.guests.join(", ")} // ✅ garder valeur existante
                         onChange={handleGuestChange}
-                        placeholder="Separate names with commas ',' (John, Jane, ...)"
+                        placeholder={t("guestsPh")}
                     />
                 </div>
 
                 {/* ✅ Selected friends */}
                 <div className="section section__selected">
-                    <h3>Selected Friends ({invites.friends.length + invites.guests.length})</h3>
+                    <h3>{t("selected")} ({invites.friends.length + invites.guests.length})</h3>
                     <div className="selected-container">
                         {invites.friends.map((f) => (
                             <div key={f.id} className="selected-friend">
@@ -122,17 +125,17 @@ export default function GameInvite({ invites, setInvites, onClose, onConfirm, in
                         ))}
                         {invites.guests.map((g, index) => (
                             <div key={index} className="selected-friend">
-                                {g} (Guest)
+                                {g} {t("guestTag")}
                             </div>
                         ))}
-                        {invites.friends.length === 0 && invites.guests.length === 0 && <p>No friends or guests selected.</p>}
+                        {invites.friends.length === 0 && invites.guests.length === 0 && <p>{t("noneSelected")}</p>}
                         
                     </div>
                 </div>
 
                 {/* Confirm */}
                 <button className="btn btn--full btn--primary" onClick={onConfirm ?? onClose}>
-                    Confirm
+                    {t("confirm")}
                 </button>
             </div>
         </div>

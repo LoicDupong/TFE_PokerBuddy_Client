@@ -23,11 +23,27 @@ export function canAddToCalendar(info, now = new Date()) {
 }
 
 // Texte de l'événement : uniquement ce que la page d'invitation montre déjà
-export function inviteEventDetails({ host, buyIn, currencyLabel, inviteUrl }) {
+const EVENT_TEXT = {
+    en: {
+        hosted: (host) => `Poker night hosted by ${host}.`,
+        organised: "Poker night organised with PokerBuddy.",
+        buyIn: (buyIn, cur) => `Buy-in: ${buyIn} ${cur}.`,
+        see: (url) => `See the details and answer the invite: ${url}`,
+    },
+    fr: {
+        hosted: (host) => `Soirée poker organisée par ${host}.`,
+        organised: "Soirée poker organisée avec PokerBuddy.",
+        buyIn: (buyIn, cur) => `Buy-in : ${buyIn} ${cur}.`,
+        see: (url) => `Vois les détails et réponds à l'invitation : ${url}`,
+    },
+};
+
+export function inviteEventDetails({ host, buyIn, currencyLabel, inviteUrl }, locale = "en") {
+    const text = EVENT_TEXT[locale] ?? EVENT_TEXT.en;
     return [
-        host ? `Poker night hosted by ${host}.` : "Poker night organised with PokerBuddy.",
-        buyIn !== undefined && buyIn !== null ? `Buy-in: ${buyIn} ${currencyLabel}.` : null,
-        inviteUrl ? `See the details and answer the invite: ${inviteUrl}` : null,
+        host ? text.hosted(host) : text.organised,
+        buyIn !== undefined && buyIn !== null ? text.buyIn(buyIn, currencyLabel) : null,
+        inviteUrl ? text.see(inviteUrl) : null,
     ].filter(Boolean).join("\n");
 }
 
@@ -56,11 +72,11 @@ export function googleCalendarUrl({ title, start, durationMs = GAME_DURATION_MS,
 }
 
 // "Friday 7 November" et "20:00" dans le fuseau des joueurs (et non celui du serveur)
-export function formatInviteDate(date, { timeZone = APP_TIME_ZONE, weekday = "long", month = "long" } = {}) {
+export function formatInviteDate(date, { timeZone = APP_TIME_ZONE, weekday = "long", month = "long", intlLocale = "en-GB" } = {}) {
     const d = new Date(date);
     if (Number.isNaN(d.getTime())) return null;
     return {
-        day: new Intl.DateTimeFormat("en-GB", { timeZone, weekday, day: "numeric", month }).format(d),
-        time: new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d),
+        day: new Intl.DateTimeFormat(intlLocale, { timeZone, weekday, day: "numeric", month }).format(d),
+        time: new Intl.DateTimeFormat(intlLocale, { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d),
     };
 }

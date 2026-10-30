@@ -7,8 +7,15 @@ import userService from "@/services/user.service.js";
 import friendService from "@/services/friend.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import FriendCard from "@/components/friend-card/friend-card.jsx";
+import { useT } from "@/i18n/i18n-provider.jsx";
+import { PROFILE_MESSAGES } from "@/app/profile/profile.messages.js";
+import { useDisplayName } from "@/utils/player-name.utils.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 export default function FriendInvite({ onClose, friends = [] }) {
+    const { t } = useT(PROFILE_MESSAGES);
+    const displayName = useDisplayName();
+    const serverError = useServerError();
     const [username, setUsername] = useState("");
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -36,7 +43,7 @@ export default function FriendInvite({ onClose, friends = [] }) {
         if (res.success) {
             setSentIds(prev => new Set([...prev, friendId]));
         } else {
-            showToast(res.errorMessage?.[0] || "Friend request failed");
+            showToast(serverError(res.errorMessage?.[0]) || t("requestFailed"));
         }
     };
 
@@ -44,35 +51,35 @@ export default function FriendInvite({ onClose, friends = [] }) {
         <div className="modal">
             <div className="modal__overlay" onClick={onClose}></div>
             <div className="modal__content">
-                <button type="button" className="modal__close" onClick={onClose} aria-label="Close">
+                <button type="button" className="modal__close" onClick={onClose} aria-label={t("close")}>
                     <FontAwesomeIcon icon={faXmark} />
                 </button>
 
-                <h2 className="modal__title">Add a Friend</h2>
+                <h2 className="modal__title">{t("addAFriend")}</h2>
 
                 {/* 🔹 Input recherche */}
                 <form className="form__row" role="search" onSubmit={searchUser}>
-                    <label htmlFor="username">Search by username</label>
+                    <label htmlFor="username">{t("search")}</label>
                     <input
                         id="username"
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter username"
+                        placeholder={t("usernamePh")}
                         autoComplete="off"
                         enterKeyHint="search"
                     />
                     <button type="submit" className="btn btn--primary">
-                        Search
+                        {t("searchBtn")}
                     </button>
                 </form>
 
                 {/* 🔹 Résultats */}
                 <div className="section section__results">
-                    {loading && <p>Searching...</p>}
+                    {loading && <p>{t("searching")}</p>}
                     {/* Message affiché seulement après une recherche (et plus à l'ouverture de la modale) */}
                     {!loading && searched && results.length === 0 && (
-                        <p>No users found. Try another username.</p>
+                        <p>{t("noUsers")}</p>
                     )}
                     {results.length > 0 && (
                         <ul className="friend-grid friend-grid--rows">
@@ -84,20 +91,20 @@ export default function FriendInvite({ onClose, friends = [] }) {
                                         actions={
                                             friends.some(f => f.id === u.id) ? (
                                                 <button type="button" className="btn btn--small" disabled>
-                                                    Friend
+                                                    {t("friendBtn")}
                                                 </button>
                                             ) : sentIds.has(u.id) ? (
                                                 <button type="button" className="btn btn--small" disabled>
-                                                    Request Sent
+                                                    {t("sentBtn")}
                                                 </button>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     className="btn btn--small btn--primary"
-                                                    aria-label={`Add ${u.username} as a friend`}
+                                                    aria-label={t("addAs", { name: displayName(u.username) })}
                                                     onClick={() => addFriend(u.id)}
                                                 >
-                                                    <FontAwesomeIcon icon={faUserPlus} /> Add
+                                                    <FontAwesomeIcon icon={faUserPlus} /> {t("add")}
                                                 </button>
                                             )
                                         }

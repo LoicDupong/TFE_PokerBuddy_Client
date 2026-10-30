@@ -1,14 +1,24 @@
 import Link from "next/link.js";
+import { getT } from "@/i18n/server.js";
 
-export const metadata = { title: "Page not found | PokerBuddy" };
+const MESSAGES = {
+    en: { title: "Page not found | PokerBuddy", pageRed: "Page", notFound: "not found", text: "This page doesn't exist.", back: "Back to home" },
+    fr: { title: "Page introuvable | PokerBuddy", pageRed: "Page", notFound: "introuvable", text: "Cette page n'existe pas.", back: "Retour à l'accueil" },
+};
 
-export default function NotFound() {
+export async function generateMetadata() {
+    const { t } = await getT(MESSAGES);
+    return { title: t("title") };
+}
+
+export default async function NotFound() {
+    const { t } = await getT(MESSAGES);
     return (
         <section className="not-found">
             <p className="not-found__code" aria-hidden="true">404</p>
-            <h1><span className="red">Page</span> not found</h1>
-            <p>This page doesn&apos;t exist.</p>
-            <Link href="/" className="btn">Back to home</Link>
+            <h1><span className="red">{t("pageRed")}</span> {t("notFound")}</h1>
+            <p>{t("text")}</p>
+            <Link href="/" className="btn">{t("back")}</Link>
         </section>
     );
 }
