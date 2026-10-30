@@ -1,8 +1,11 @@
 import Link from "next/link.js";
+import { getLocale } from "@/i18n/server.js";
+import StrategyContentFr from "./content-fr.jsx";
 
-export default function LearnStrategyPage() {
+// Version anglaise ici, version française dans content-fr.jsx
+function StrategyContentEn() {
   return (
-    <section className="learn-page">
+    <>
       <h1>Strategy Guide</h1>
       <div className="divider"></div>
 
@@ -185,6 +188,15 @@ export default function LearnStrategyPage() {
         </p>
       </article>
 
+        </>
+  );
+}
+
+export default async function LearnStrategyPage() {
+  const locale = await getLocale();
+  return (
+    <section className="learn-page">
+      {locale === "fr" ? <StrategyContentFr /> : <StrategyContentEn />}
     </section>
   );
 }

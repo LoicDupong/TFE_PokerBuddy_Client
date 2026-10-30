@@ -5,20 +5,36 @@ import Link from "next/link";
 
 import adminSupportService from "@/services/adminSupport.service.js";
 import { Badge, LoadError, Pagination } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatDateTime, ticketTone, useDebounced } from "@/components/admin/admin.utils.js";
+import { ticketTone, useAdminFormat, useAdminText, useDebounced, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const SUPPORT_TEXT = {
-    title: "Support",
-    search: "Search by subject or username",
-    status: "Status",
-    any: "All tickets",
-    loadError: "Could not load the tickets.",
-    empty: "No ticket matches these filters.",
-    pageSize: 20,
+const SUPPORT_MESSAGES = {
+    en: {
+        title: "Support",
+        search: "Search by subject or username",
+        status: "Status",
+        any: "All tickets",
+        loadError: "Could not load the tickets.",
+        empty: "No ticket matches these filters.",
+    },
+    fr: {
+        title: "Support",
+        search: "Rechercher par sujet ou pseudo",
+        status: "Statut",
+        any: "Tous les tickets",
+        loadError: "Impossible de charger les tickets.",
+        empty: "Aucun ticket ne correspond à ces filtres.",
+    },
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminSupportPage() {
+    const SUPPORT_TEXT = useTexts(SUPPORT_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const [q, setQ] = useState("");
     const [status, setStatus] = useState("");
     const [page, setPage] = useState(1);
@@ -32,13 +48,13 @@ export default function AdminSupportPage() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await adminSupportService.listTickets({ q: search, status, page, pageSize: SUPPORT_TEXT.pageSize });
+            const res = await adminSupportService.listTickets({ q: search, status, page, pageSize: PAGE_SIZE });
             if (cancelled) return;
             if (res.success) { setResult(res.data); setError(null); }
             else setError(res.forbidden ? ADMIN_TEXT.forbidden : SUPPORT_TEXT.loadError);
         })();
         return () => { cancelled = true; };
-    }, [search, status, page, attempt]);
+    }, [search, status, page, attempt, ADMIN_TEXT.forbidden, SUPPORT_TEXT.loadError]);
 
     return (
         <section className="admin__section">
@@ -70,7 +86,7 @@ export default function AdminSupportPage() {
                                     <span className="admin__row-main">{t.subject}</span>
                                     <Badge tone={ticketTone[t.status]}>{ADMIN_TEXT.ticketStatuses[t.status]}</Badge>
                                     <span className="admin__row-meta">
-                                        {displayPlayerName(t.user?.username)} · {ADMIN_TEXT.ticketCategories[t.category] ?? t.category} · {formatDateTime(t.lastMessageAt)}
+                                        {displayPlayerName(t.user?.username, locale)} · {ADMIN_TEXT.ticketCategories[t.category] ?? t.category} · {formatDateTime(t.lastMessageAt)}
                                     </span>
                                 </Link>
                             </li>

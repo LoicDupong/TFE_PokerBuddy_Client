@@ -8,56 +8,108 @@ import adminService from "@/services/admin.service.js";
 import useAuthStore from "@/stores/useAuthStore.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { Badge, ConfirmDialog, LoadError } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, accountTone, formatDate, formatDateTime } from "@/components/admin/admin.utils.js";
+import { accountTone, useAdminFormat, useAdminText, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const USER_TEXT = {
-    back: "Users",
-    notFound: "This user does not exist.",
-    loadError: "Could not load this user.",
-    facts: {
-        email: "Email",
-        joined: "Joined",
-        role: "Role",
-        gamesHosted: "Games hosted",
-        gamesPlayed: "Games played",
-        friends: "Friends",
-        disabledAt: "Disabled on",
-        disabledReason: "Reason",
-        deletedAt: "Deleted on",
+const USER_MESSAGES = {
+    en: {
+        back: "Users",
+        notFound: "This user does not exist.",
+        loadError: "Could not load this user.",
+        facts: {
+            email: "Email",
+            joined: "Joined",
+            role: "Role",
+            gamesHosted: "Games hosted",
+            gamesPlayed: "Games played",
+            friends: "Friends",
+            disabledAt: "Disabled on",
+            disabledReason: "Reason",
+            deletedAt: "Deleted on",
+        },
+        actionsTitle: "Actions",
+        self: "This is your own account: you cannot disable or delete it.",
+        deletedNote: "This account has been deleted. No action is available.",
+        makeAdmin: "Make admin",
+        removeAdmin: "Remove admin role",
+        disable: "Disable account",
+        enable: "Re-enable account",
+        revoke: "Revoke sessions",
+        remove: "Delete account",
+        dialogs: {
+            makeAdmin: (name) => `Give ${name} administrator rights? They will be able to manage all accounts and games.`,
+            removeAdmin: (name) => `Remove administrator rights from ${name}? They will be signed out everywhere.`,
+            removeAdminSelf: "You are about to remove your own administrator rights. You will lose access to this section and be signed out.",
+            disable: (name) => `Disable the account of ${name}? They will be signed out everywhere and will not be able to log in until you re-enable it.`,
+            enable: (name) => `Re-enable the account of ${name}? Their previous sessions stay invalid: they will need to log in again.`,
+            revoke: (name) => `Sign ${name} out of every device? They will need to log in again.`,
+            revokeSelf: "Sign yourself out of every other device? This device stays signed in.",
+            remove: (name) => `Permanently delete the account of ${name}? Their unfinished games are cancelled, their friendships and notifications are removed, and finished games keep a "Deleted player" entry. This cannot be undone.`,
+        },
+        confirmLabels: { role: "Change role", disable: "Disable", enable: "Re-enable", revoke: "Revoke sessions", remove: "Delete permanently" },
+        toasts: {
+            role: "Role updated.",
+            disable: "Account disabled.",
+            enable: "Account re-enabled.",
+            revoke: "Sessions revoked.",
+            revokeSelf: "Your other devices were signed out.",
+            remove: (games) => (games > 0 ? `Account deleted. ${games} unfinished game(s) cancelled.` : "Account deleted."),
+            unchanged: "Nothing changed: the account was already in this state.",
+        },
     },
-    actionsTitle: "Actions",
-    self: "This is your own account: you cannot disable or delete it.",
-    deletedNote: "This account has been deleted. No action is available.",
-    makeAdmin: "Make admin",
-    removeAdmin: "Remove admin role",
-    disable: "Disable account",
-    enable: "Re-enable account",
-    revoke: "Revoke sessions",
-    remove: "Delete account",
-    dialogs: {
-        makeAdmin: (name) => `Give ${name} administrator rights? They will be able to manage all accounts and games.`,
-        removeAdmin: (name) => `Remove administrator rights from ${name}? They will be signed out everywhere.`,
-        removeAdminSelf: "You are about to remove your own administrator rights. You will lose access to this section and be signed out.",
-        disable: (name) => `Disable the account of ${name}? They will be signed out everywhere and will not be able to log in until you re-enable it.`,
-        enable: (name) => `Re-enable the account of ${name}? Their previous sessions stay invalid: they will need to log in again.`,
-        revoke: (name) => `Sign ${name} out of every device? They will need to log in again.`,
-        revokeSelf: "Sign yourself out of every other device? This device stays signed in.",
-        remove: (name) => `Permanently delete the account of ${name}? Their unfinished games are cancelled, their friendships and notifications are removed, and finished games keep a "Deleted player" entry. This cannot be undone.`,
-    },
-    confirmLabels: { role: "Change role", disable: "Disable", enable: "Re-enable", revoke: "Revoke sessions", remove: "Delete permanently" },
-    toasts: {
-        role: "Role updated.",
-        disable: "Account disabled.",
-        enable: "Account re-enabled.",
-        revoke: "Sessions revoked.",
-        revokeSelf: "Your other devices were signed out.",
-        remove: (games) => (games > 0 ? `Account deleted. ${games} unfinished game(s) cancelled.` : "Account deleted."),
-        unchanged: "Nothing changed: the account was already in this state.",
+    fr: {
+        back: "Utilisateurs",
+        notFound: "Cet utilisateur n'existe pas.",
+        loadError: "Impossible de charger cet utilisateur.",
+        facts: {
+            email: "Email",
+            joined: "Inscrit le",
+            role: "Rôle",
+            gamesHosted: "Parties organisées",
+            gamesPlayed: "Parties jouées",
+            friends: "Amis",
+            disabledAt: "Désactivé le",
+            disabledReason: "Motif",
+            deletedAt: "Supprimé le",
+        },
+        actionsTitle: "Actions",
+        self: "C'est ton propre compte : tu ne peux ni le désactiver ni le supprimer.",
+        deletedNote: "Ce compte a été supprimé. Aucune action n'est disponible.",
+        makeAdmin: "Passer admin",
+        removeAdmin: "Retirer le rôle admin",
+        disable: "Désactiver le compte",
+        enable: "Réactiver le compte",
+        revoke: "Révoquer les sessions",
+        remove: "Supprimer le compte",
+        dialogs: {
+            makeAdmin: (name) => `Donner les droits d'administrateur à ${name} ? Il pourra gérer tous les comptes et toutes les parties.`,
+            removeAdmin: (name) => `Retirer les droits d'administrateur à ${name} ? Il sera déconnecté partout.`,
+            removeAdminSelf: "Tu vas retirer tes propres droits d'administrateur. Tu perdras l'accès à cette section et tu seras déconnecté.",
+            disable: (name) => `Désactiver le compte de ${name} ? Il sera déconnecté partout et ne pourra plus se connecter tant que tu ne l'auras pas réactivé.`,
+            enable: (name) => `Réactiver le compte de ${name} ? Ses anciennes sessions restent invalides : il devra se reconnecter.`,
+            revoke: (name) => `Déconnecter ${name} de tous ses appareils ? Il devra se reconnecter.`,
+            revokeSelf: "Te déconnecter de tous tes autres appareils ? Cet appareil reste connecté.",
+            remove: (name) => `Supprimer définitivement le compte de ${name} ? Ses parties non terminées sont annulées, ses amitiés et notifications sont supprimées, et les parties terminées gardent une entrée « Joueur supprimé ». Cette action est irréversible.`,
+        },
+        confirmLabels: { role: "Changer le rôle", disable: "Désactiver", enable: "Réactiver", revoke: "Révoquer les sessions", remove: "Supprimer définitivement" },
+        toasts: {
+            role: "Rôle mis à jour.",
+            disable: "Compte désactivé.",
+            enable: "Compte réactivé.",
+            revoke: "Sessions révoquées.",
+            revokeSelf: "Tes autres appareils ont été déconnectés.",
+            remove: (games) => (games > 0 ? `Compte supprimé. ${games} partie(s) non terminée(s) annulée(s).` : "Compte supprimé."),
+            unchanged: "Rien n'a changé : le compte était déjà dans cet état.",
+        },
     },
 };
 
 export default function AdminUserPage() {
+    const USER_TEXT = useTexts(USER_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDate, formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const { id } = useParams();
     const me = useAuthStore((state) => state.user);
     const showToast = useToastStore((state) => state.showToast);
@@ -88,7 +140,7 @@ export default function AdminUserPage() {
     }
     if (state === "error") return <LoadError message={USER_TEXT.loadError} onRetry={() => { setState("loading"); setAttempt((n) => n + 1); }} />;
 
-    const name = displayPlayerName(user.username);
+    const name = displayPlayerName(user.username, locale);
     const isSelf = me?.id === user.id;
     const isDeleted = user.status === "deleted";
     const isAdmin = user.role === "admin";
@@ -107,7 +159,7 @@ export default function AdminUserPage() {
         setDialog(null);
 
         if (!res.success) {
-            showToast(res.forbidden ? ADMIN_TEXT.forbidden : res.error, "error");
+            showToast(res.forbidden ? ADMIN_TEXT.forbidden : res.error || ADMIN_TEXT.genericError, "error");
             return;
         }
         if (res.data.changed === false) showToast(USER_TEXT.toasts.unchanged, "info");

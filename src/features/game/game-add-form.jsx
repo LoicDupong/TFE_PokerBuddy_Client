@@ -25,6 +25,78 @@ import {
 import GameInvite from "../invite/game-invite.jsx";
 import FinanceFields from "./finance-fields.jsx";
 import { centsToInput } from "@/utils/money.utils.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: {
+        copied: (p) => `Settings copied from "${p.name}".`,
+        formInvalid: "Some fields are invalid: check the messages above.",
+        settings: "Game <red>settings</red>",
+        sameAsLast: "Same as last time",
+        sameAsLastHint: "Copies the settings of your last hosted game, not the title or date.",
+        title: "Title",
+        titlePlaceholder: "Friday Night Poker",
+        dateTime: "Date & time",
+        location: "Location",
+        locationPlaceholder: "Brussels, at John's place",
+        buyIn: "Buy-in",
+        currency: "Currency",
+        inviteFriends: "Invite friends",
+        advanced: "Advanced settings",
+        tableStart: "Table start (optional)",
+        maxPlayers: "Max players",
+        placesPaid: "Places paid",
+        prizePoolMin: "Prize pool (minimum)",
+        payouts: "Payout distribution (%)",
+        place: (p) => `Place #${p.place}`,
+        total: "Total",
+        mustBe100: "→ must be exactly 100%",
+        blinds: "Blinds",
+        smallBlind: "Small blind",
+        bigBlind: "Big blind",
+        levelDuration: "Level duration (min)",
+        enableTimer: "Enable blind timer during the game",
+        description: "Description",
+        descriptionPlaceholder: "House rules, snacks, parking, etc.",
+        creating: "Creating...",
+        create: "Create game",
+        payoutError: "Payout distribution must total 100%: open Advanced settings to fix it.",
+    },
+    fr: {
+        copied: (p) => `Réglages copiés depuis « ${p.name} ».`,
+        formInvalid: "Certains champs sont invalides : vérifie les messages ci-dessus.",
+        settings: "Réglages de la <red>partie</red>",
+        sameAsLast: "Comme la dernière fois",
+        sameAsLastHint: "Copie les réglages de ta dernière partie organisée, pas le titre ni la date.",
+        title: "Titre",
+        titlePlaceholder: "Poker du vendredi soir",
+        dateTime: "Date et heure",
+        location: "Lieu",
+        locationPlaceholder: "Bruxelles, chez Jean",
+        buyIn: "Buy-in",
+        currency: "Devise",
+        inviteFriends: "Inviter des amis",
+        advanced: "Réglages avancés",
+        tableStart: "Début à table (facultatif)",
+        maxPlayers: "Joueurs max",
+        placesPaid: "Places payées",
+        prizePoolMin: "Prize pool (minimum)",
+        payouts: "Répartition des gains (%)",
+        place: (p) => `Place n°${p.place}`,
+        total: "Total",
+        mustBe100: "→ doit faire exactement 100 %",
+        blinds: "Blinds",
+        smallBlind: "Petite blind",
+        bigBlind: "Grosse blind",
+        levelDuration: "Durée d'un niveau (min)",
+        enableTimer: "Activer le minuteur de blinds pendant la partie",
+        description: "Description",
+        descriptionPlaceholder: "Règles de la maison, snacks, parking, etc.",
+        creating: "Création...",
+        create: "Créer la partie",
+        payoutError: "La répartition des gains doit totaliser 100 % : ouvre les réglages avancés pour la corriger.",
+    },
+};
 
 // Champs du bloc replié : une erreur ici doit rouvrir le bloc
 const ADVANCED_FIELDS = [
@@ -43,6 +115,7 @@ const ADVANCED_FIELDS = [
 
 export default function GameAddForm() {
     const router = useRouter();
+    const { t, locale, intlLocale } = useT(MESSAGES);
     const user = useAuthStore((state) => state.user);
     const formRef = useRef(null);
     const [errorMessage, setErrorMessage] = useState([]);
@@ -158,7 +231,7 @@ export default function GameAddForm() {
             pkoCashPercent: g.pkoCashPercent ?? 50,
             description: g.description || "",
         });
-        setPrefillNotice(`Settings copied from "${g.name}".`);
+        setPrefillNotice(t("copied", { name: g.name }));
     }
 
     // Une erreur dans le bloc replié : on l'ouvre, puis on met le focus sur le premier champ invalide
@@ -166,10 +239,10 @@ export default function GameAddForm() {
         if (!errorMessage.some((e) => e.field !== "form")) return;
         if (errorMessage.some((e) => ADVANCED_FIELDS.includes(e.field))) setAdvancedOpen(true);
         // Après le rendu : le bloc ouvert rend ses champs focusables
-        const t = setTimeout(() => {
+        const timer = setTimeout(() => {
             formRef.current?.querySelector('[aria-invalid="true"]')?.focus();
         }, 0);
-        return () => clearTimeout(t);
+        return () => clearTimeout(timer);
     }, [errorMessage]);
 
     // Message d'erreur zod sous le champ concerné
@@ -207,7 +280,7 @@ export default function GameAddForm() {
             // Rappel près du bouton : sur mobile, le champ fautif est souvent hors écran
             setErrorMessage([
                 ...validation.errors,
-                { field: "form", message: "Some fields are invalid: check the messages above." },
+                { field: "form", message: t("formInvalid") },
             ]);
             setIsPending(false);
             return;
@@ -229,16 +302,16 @@ export default function GameAddForm() {
         <>
             <form ref={formRef} onSubmit={handleCreateGame} className="form form--session" noValidate>
                 <h2>
-                    Game <span className="red">settings</span>
+                    {locale === "fr" ? <>Réglages de la <span className="red">partie</span></> : <>Game <span className="red">settings</span></>}
                 </h2>
 
                 {lastGame && (
                     <div className="form__row">
                         <button type="button" className="btn btn--secondary" onClick={applyLastGame}>
-                            <FontAwesomeIcon icon={faClockRotateLeft} /> Same as last time
+                            <FontAwesomeIcon icon={faClockRotateLeft} /> {t("sameAsLast")}
                         </button>
                         <p className="gray" role="status">
-                            {prefillNotice || "Copies the settings of your last hosted game, not the title or date."}
+                            {prefillNotice || t("sameAsLastHint")}
                         </p>
                     </div>
                 )}
@@ -246,17 +319,17 @@ export default function GameAddForm() {
                 {/* Name */}
                 <div className="form__row">
                     <label htmlFor="name">
-                        <FontAwesomeIcon icon={faDiamond} /> Title{" "}
+                        <FontAwesomeIcon icon={faDiamond} /> {t("title")}{" "}
                         <span className="red">*</span>
                     </label>
-                    <input id="name" name="name" placeholder="Friday Night Poker" defaultValue="" {...errProps("name")} />
+                    <input id="name" name="name" placeholder={t("titlePlaceholder")} defaultValue="" {...errProps("name")} />
                     {fieldError("name")}
                 </div>
 
                 {/* Dates */}
                 <div className="form__row input--icon left clickable">
                     <label htmlFor="dateStart">
-                        Date & time <span className="red">*</span>
+                        {t("dateTime")} <span className="red">*</span>
                     </label>
                     <div className="input__container">
                         <input id="dateStart" type="datetime-local" name="dateStart" {...errProps("dateStart")} />
@@ -272,12 +345,12 @@ export default function GameAddForm() {
                 {/* Location */}
                 <div className="form__row">
                     <label htmlFor="location">
-                        <FontAwesomeIcon icon={faLocationDot} /> Location{" "}
+                        <FontAwesomeIcon icon={faLocationDot} /> {t("location")}{" "}
                         <span className="red">*</span>
                     </label>
                     <input id="location"
                         name="location"
-                        placeholder="Brussels, at John's place"
+                        placeholder={t("locationPlaceholder")}
                         defaultValue=""
                         {...errProps("location")}
                     />
@@ -288,7 +361,7 @@ export default function GameAddForm() {
                 <div className="form__grid">
                     <div className="form__row">
                         <label htmlFor="buyIn">
-                            <FontAwesomeIcon icon={faDollarSign} /> Buy-in{" "}
+                            <FontAwesomeIcon icon={faDollarSign} /> {t("buyIn")}{" "}
                             <span className="red">*</span>
                         </label>
                         <input id="buyIn"
@@ -304,7 +377,7 @@ export default function GameAddForm() {
                     </div>
 
                     <div className="form__row">
-                        <label htmlFor="currency">Currency</label>
+                        <label htmlFor="currency">{t("currency")}</label>
                         <select id="currency" name="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
                             <option value="EUR">EUR</option>
                             <option value="USD">USD</option>
@@ -321,7 +394,7 @@ export default function GameAddForm() {
                         className="btn btn--secondary"
                         onClick={() => setShowInviteModal(true)}
                     >
-                        <FontAwesomeIcon icon={faUserPlus} /> Invite friends (
+                        <FontAwesomeIcon icon={faUserPlus} /> {t("inviteFriends")} (
                         {invites.friends.length + invites.guests.length})
                     </button>
                 </div>
@@ -333,13 +406,13 @@ export default function GameAddForm() {
                     onToggle={(e) => setAdvancedOpen(e.currentTarget.open)}
                 >
                     <summary>
-                        <FontAwesomeIcon icon={faGear} /> Advanced settings
+                        <FontAwesomeIcon icon={faGear} /> {t("advanced")}
                     </summary>
 
                     <div className="form__advanced-body">
                         <div className="form__grid">
                             <div className="form__row input--icon left clickable">
-                                <label htmlFor="realStart">Table start (optional)</label>
+                                <label htmlFor="realStart">{t("tableStart")}</label>
                                 <div className="input__container">
                                     <input id="realStart"
                                         type="time"
@@ -358,7 +431,7 @@ export default function GameAddForm() {
                             </div>
 
                             <div className="form__row">
-                                <label htmlFor="maxPlayers">Max players</label>
+                                <label htmlFor="maxPlayers">{t("maxPlayers")}</label>
                                 <input id="maxPlayers"
                                     type="number"
                                     min={2}
@@ -373,7 +446,7 @@ export default function GameAddForm() {
 
                             <div className="form__row">
                                 <label htmlFor="placesPaid">
-                                    Places paid <span className="red">*</span>
+                                    {t("placesPaid")} <span className="red">*</span>
                                 </label>
                                 <input id="placesPaid"
                                     type="number"
@@ -389,7 +462,7 @@ export default function GameAddForm() {
 
                             <div className="form__row">
                                 <label htmlFor="prizePool">
-                                    <FontAwesomeIcon icon={faDollarSign} /> Prize pool (minimum)
+                                    <FontAwesomeIcon icon={faDollarSign} /> {t("prizePoolMin")}
                                 </label>
                                 <input id="prizePool"
                                     type="number"
@@ -411,12 +484,12 @@ export default function GameAddForm() {
 
                         {/* Payout distribution editor */}
                         <fieldset className="form__fieldset">
-                            <legend>Payout distribution (%)</legend>
+                            <legend>{t("payouts")}</legend>
 
                             <div className="form__grid">
                                 {payouts.map((p, idx) => (
                                     <div className="form__row" key={idx}>
-                                        <label htmlFor={`payout-${idx}`}>Place #{p.place}</label>
+                                        <label htmlFor={`payout-${idx}`}>{t("place", { place: p.place })}</label>
                                         <div className="input--payout">
                                             <input
                                                 id={`payout-${idx}`}
@@ -438,7 +511,7 @@ export default function GameAddForm() {
                                         </div>
                                         {prizePoolValue > 0 && (
                                             <p className="gray">
-                                                ≈ {((prizePoolValue * p.percent) / 100).toFixed(2)} {currencySymbol(currency)}
+                                                ≈ {new Intl.NumberFormat(intlLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((prizePoolValue * p.percent) / 100)} {currencySymbol(currency)}
                                             </p>
                                         )}
                                     </div>
@@ -446,7 +519,7 @@ export default function GameAddForm() {
                             </div>
                             <div className="divider"></div>
                             <p className={payoutError ? "form__error" : "gray"}>
-                                Total: {totalPercent}% {payoutError && " → must be exactly 100%"}
+                                {t("total")}: {totalPercent}% {payoutError && t("mustBe100")}
                             </p>
                             {fieldError("payoutDistribution")}
 
@@ -461,12 +534,12 @@ export default function GameAddForm() {
                         {/* Blinds & Timer */}
                         <fieldset className="form__fieldset">
                             <legend>
-                                <FontAwesomeIcon icon={faCoins} /> Blinds
+                                <FontAwesomeIcon icon={faCoins} /> {t("blinds")}
                             </legend>
                             <div className="form__grid">
                                 <div className="form__row">
                                     <label htmlFor="smallBlind">
-                                        Small blind <span className="red">*</span>
+                                        {t("smallBlind")} <span className="red">*</span>
                                     </label>
                                     <input id="smallBlind"
                                         type="number"
@@ -481,7 +554,7 @@ export default function GameAddForm() {
                                 </div>
                                 <div className="form__row">
                                     <label htmlFor="bigBlind">
-                                        Big blind <span className="red">*</span>
+                                        {t("bigBlind")} <span className="red">*</span>
                                     </label>
                                     <input id="bigBlind"
                                         type="number"
@@ -496,7 +569,7 @@ export default function GameAddForm() {
                                 </div>
                                 <div className="form__row">
                                     <label htmlFor="levelDuration">
-                                        Level duration (min) <span className="red">*</span>
+                                        {t("levelDuration")} <span className="red">*</span>
                                     </label>
                                     <input id="levelDuration"
                                         type="number"
@@ -519,19 +592,19 @@ export default function GameAddForm() {
                                     checked={adv.enableBlindTimer}
                                     onChange={(e) => setAdvField("enableBlindTimer", e.target.checked)}
                                 />
-                                <span>Enable blind timer during the game</span>
+                                <span>{t("enableTimer")}</span>
                             </label>
                         </fieldset>
 
                         {/* Description */}
                         <div className="form__row">
                             <label htmlFor="description">
-                                <FontAwesomeIcon icon={faPenToSquare} /> Description
+                                <FontAwesomeIcon icon={faPenToSquare} /> {t("description")}
                             </label>
                             <textarea id="description"
                                 name="description"
                                 rows={4}
-                                placeholder="House rules, snacks, parking, etc."
+                                placeholder={t("descriptionPlaceholder")}
                                 value={adv.description}
                                 onChange={(e) => setAdvField("description", e.target.value)}
                                 {...errProps("description")}
@@ -555,11 +628,11 @@ export default function GameAddForm() {
                     disabled={isPending || payoutError}
                 >
                     <FontAwesomeIcon icon={faPlus} />{" "}
-                    {isPending ? "Creating..." : "Create game"}
+                    {isPending ? t("creating") : t("create")}
                 </button>
                 {payoutError && (
                     <p className="form__error">
-                        Payout distribution must total 100%: open Advanced settings to fix it.
+                        {t("payoutError")}
                     </p>
                 )}
 

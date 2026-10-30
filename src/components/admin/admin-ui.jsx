@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ADMIN_TEXT } from "./admin.utils.js";
+import { useAdminText } from "./admin.utils.js";
 
 // Pastille d'état : texte + couleur (jamais la couleur seule). tone : ok | warn | bad | info | muted
 export function Badge({ tone = "muted", children }) {
@@ -9,9 +9,10 @@ export function Badge({ tone = "muted", children }) {
 }
 
 export function Pagination({ page, pageSize, total, onPage }) {
+    const ADMIN_TEXT = useAdminText();
     const pages = Math.max(1, Math.ceil(total / pageSize));
     return (
-        <nav className="admin__pager" aria-label="Pagination">
+        <nav className="admin__pager" aria-label={ADMIN_TEXT.pagination}>
             <button type="button" className="btn btn--small admin__btn" disabled={page <= 1} onClick={() => onPage(page - 1)}>
                 {ADMIN_TEXT.previous}
             </button>
@@ -25,6 +26,7 @@ export function Pagination({ page, pageSize, total, onPage }) {
 
 // Bloc d'erreur de chargement avec bouton de nouvel essai
 export function LoadError({ message, onRetry }) {
+    const ADMIN_TEXT = useAdminText();
     return (
         <div className="admin__notice" role="alert">
             <p>{message}</p>
@@ -34,7 +36,8 @@ export function LoadError({ message, onRetry }) {
 }
 
 // Confirmation explicite d'une action sensible, raison facultative. Échap = annuler.
-export function ConfirmDialog({ title, children, confirmLabel = ADMIN_TEXT.confirm, danger = false, withReason = false, requireText = null, pending = false, onConfirm, onCancel }) {
+export function ConfirmDialog({ title, children, confirmLabel, danger = false, withReason = false, requireText = null, pending = false, onConfirm, onCancel }) {
+    const ADMIN_TEXT = useAdminText();
     const [reason, setReason] = useState("");
     const [typed, setTyped] = useState("");
     const typedId = useId();
@@ -68,7 +71,7 @@ export function ConfirmDialog({ title, children, confirmLabel = ADMIN_TEXT.confi
                 )}
                 <div className="btn__group admin__dialog-actions">
                     <button type="button" className={`btn admin__btn${danger ? " admin__btn--danger" : " admin__btn--primary"}`} disabled={pending || (requireText !== null && typed.trim() !== requireText)} onClick={() => onConfirm(reason.trim())}>
-                        {confirmLabel}
+                        {confirmLabel ?? ADMIN_TEXT.confirm}
                     </button>
                     <button type="button" ref={cancelRef} className="btn admin__btn" disabled={pending} onClick={onCancel}>
                         {ADMIN_TEXT.cancel}

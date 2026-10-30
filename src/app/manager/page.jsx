@@ -20,7 +20,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { NEW_TIMER, formatTime, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
-import { currencySymbol } from "@/utils/game.utils.js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link.js";
@@ -39,6 +38,78 @@ import {
     useMediaQuery,
     useWakeLock,
 } from "@/features/game/manager-effects.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: {
+        home: "PokerBuddy home",
+        soundOn: "Sound on",
+        soundOff: "Sound off",
+        autoOn: "Auto-advance on",
+        autoOff: "Auto-advance off",
+        exitFullscreen: "Exit fullscreen",
+        enterFullscreen: "Enter fullscreen",
+        edit: "Edit",
+        players: "Players",
+        end: "End",
+        leave: "Leave the Game Manager",
+        level: (p) => `Level ${p.level}`,
+        levelProgress: "Level progress",
+        nextLevel: "Next level",
+        gameInfo: "Game information",
+        prizePool: "Prize pool",
+        bountiesInPlay: "Bounties in play",
+        playersLeft: "Players left",
+        playerOut: "Player out",
+        undoPlayer: "Undo: put a player back in",
+        avgStack: "Avg stack",
+        buyIn: "Buy-in",
+        rebuysSuffix: " + rebuys",
+        levelDuration: "Level duration",
+        minutes: (p) => `${p.n} min`,
+        prev: "Prev",
+        pause: "Pause",
+        start: "Start",
+        next: "Next",
+        closePanel: "Close the players panel",
+        loadingFinances: "Loading the game finances…",
+        needGame: "Start the Game Manager from a game to track rebuys and knockouts.",
+    },
+    fr: {
+        home: "Accueil PokerBuddy",
+        soundOn: "Son activé",
+        soundOff: "Son coupé",
+        autoOn: "Niveau auto activé",
+        autoOff: "Niveau auto coupé",
+        exitFullscreen: "Quitter le plein écran",
+        enterFullscreen: "Passer en plein écran",
+        edit: "Modifier",
+        players: "Joueurs",
+        end: "Terminer",
+        leave: "Quitter le Game Manager",
+        level: (p) => `Niveau ${p.level}`,
+        levelProgress: "Progression du niveau",
+        nextLevel: "Niveau suivant",
+        gameInfo: "Informations sur la partie",
+        prizePool: "Prize pool",
+        bountiesInPlay: "Bounties en jeu",
+        playersLeft: "Joueurs restants",
+        playerOut: "Joueur éliminé",
+        undoPlayer: "Annuler : remettre un joueur en jeu",
+        avgStack: "Tapis moyen",
+        buyIn: "Buy-in",
+        rebuysSuffix: " + rebuys",
+        levelDuration: "Durée du niveau",
+        minutes: (p) => `${p.n} min`,
+        prev: "Préc.",
+        pause: "Pause",
+        start: "Démarrer",
+        next: "Suiv.",
+        closePanel: "Fermer le panneau des joueurs",
+        loadingFinances: "Chargement des finances de la partie…",
+        needGame: "Lance le Game Manager depuis une partie pour suivre les rebuys et les éliminations.",
+    },
+};
 
 // Références stables : un nouveau [] à chaque tick du timer réinitialisait le classement de la modale
 const NO_PLAYERS = [];
@@ -54,6 +125,7 @@ export default function GameManager() {
     const hydrated = usePresetHydrated();
     const { preset, setPreset } = usePresetStore();
     const router = useRouter();
+    const { t, intlLocale } = useT(MESSAGES);
 
     const [showEndModal, setShowEndModal] = useState(false);
     const [now, setNow] = useState(() => Date.now());
@@ -169,10 +241,9 @@ export default function GameManager() {
     if (!hydrated || (!preset.title && !showEndModal)) return null;
 
     // calculs utiles
-    const symbol = currencySymbol(preset.currency);
     const buyIn = Number(preset.buyIn) || 0;
     // Prize pool réel (buy-ins + rebuys + add-ons, hors bounties) pour une partie suivie
-    const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency) : `${buyIn * totalPlayers}${symbol}`;
+    const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency, intlLocale) : formatCents(Math.round(buyIn * totalPlayers * 100), preset.currency, intlLocale);
     // Stack moyen : masqué sans jetons de départ (sinon "0" n'aurait aucun sens)
     // Partie suivie : jetons réellement en jeu (rebuys et add-ons inclus) quand le serveur les connaît
     const avgStack =
@@ -199,7 +270,7 @@ export default function GameManager() {
 
             {/* HEADER */}
             <header className="manager__header">
-                <Link href={"/"} className="logo" aria-label="PokerBuddy home">
+                <Link href={"/"} className="logo" aria-label={t("home")}>
                     <Image
                         src="/pokerbuddy_logo_light.png"
                         className="logo logo--header"
@@ -219,7 +290,7 @@ export default function GameManager() {
                         onClick={toggleSound}
                     >
                         <FontAwesomeIcon icon={preset.soundOn ? faVolumeHigh : faVolumeXmark} />{" "}
-                        Sound {preset.soundOn ? "on" : "off"}
+                        {preset.soundOn ? t("soundOn") : t("soundOff")}
                     </button>
                     <button
                         type="button"
@@ -227,23 +298,23 @@ export default function GameManager() {
                         aria-pressed={!!preset.autoAdvance}
                         onClick={() => setPreset({ autoAdvance: !preset.autoAdvance })}
                     >
-                        <FontAwesomeIcon icon={faForward} /> Auto-advance {preset.autoAdvance ? "on" : "off"}
+                        <FontAwesomeIcon icon={faForward} /> {preset.autoAdvance ? t("autoOn") : t("autoOff")}
                     </button>
                     {fullscreenOk && (
                         <button
                             type="button"
                             className="btn btn--control"
-                            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                            aria-label={isFullscreen ? t("exitFullscreen") : t("enterFullscreen")}
                             onClick={toggleFullscreen}
                         >
                             <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} />
                         </button>
                     )}
                     <Link href={"/manager/preset"} className="btn btn--control">
-                        <FontAwesomeIcon icon={faPenToSquare} /> Edit
+                        <FontAwesomeIcon icon={faPenToSquare} /> {t("edit")}
                     </Link>
                     <button type="button" className="btn btn--control" onClick={() => setShowPlayers(true)}>
-                        <FontAwesomeIcon icon={faCoins} /> Players
+                        <FontAwesomeIcon icon={faCoins} /> {t("players")}
                     </button>
                     {/* Bouton END → ouvre la modal */}
                     <button
@@ -251,12 +322,12 @@ export default function GameManager() {
                         className="btn btn--control"
                         onClick={() => setShowEndModal(true)}
                     >
-                        <FontAwesomeIcon icon={faCircleXmark} /> End
+                        <FontAwesomeIcon icon={faCircleXmark} /> {t("end")}
                     </button>
                     <Link
                         href={"/manager/preset"}
                         className="manager__exit"
-                        aria-label="Leave the Game Manager"
+                        aria-label={t("leave")}
                     >
                         <FontAwesomeIcon icon={faRightFromBracket} size="xl" />
                     </Link>
@@ -265,14 +336,14 @@ export default function GameManager() {
 
             {/* TIMER + BLINDS */}
             <main className="manager__main">
-                <p className="manager__level">Level {level}</p>
+                <p className="manager__level">{t("level", { level })}</p>
                 <div className={`manager__timer${warning ? " manager__timer--warning" : ""}`}>
                     {formatTime(timeLeft)}
                 </div>
                 <div
                     className="manager__progress"
                     role="progressbar"
-                    aria-label="Level progress"
+                    aria-label={t("levelProgress")}
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={Math.round(progress * 100)}
@@ -281,27 +352,27 @@ export default function GameManager() {
                 </div>
                 <div className={`manager__blinds manager__blinds--${blindsSize(blinds)}`}>{blinds}</div>
                 <p className="manager__next">
-                    Next level <strong>{nextBlinds}</strong>
+                    {t("nextLevel")} <strong>{nextBlinds}</strong>
                 </p>
             </main>
 
             {/* INFOS */}
-            <section className="manager__stats" aria-label="Game information">
+            <section className="manager__stats" aria-label={t("gameInfo")}>
                 {buyIn > 0 && totalPlayers > 0 && (
                     <div className="manager__stat">
-                        <span>Prize pool</span>
+                        <span>{t("prizePool")}</span>
                         <strong>{prizePoolText}</strong>
                     </div>
                 )}
                 {pko && (
                     <div className="manager__stat">
-                        <span>Bounties in play</span>
-                        <strong>{formatCents(finance.totals.bountiesOnTableCents, preset.currency)}</strong>
+                        <span>{t("bountiesInPlay")}</span>
+                        <strong>{formatCents(finance.totals.bountiesOnTableCents, preset.currency, intlLocale)}</strong>
                     </div>
                 )}
                 {totalPlayers > 0 && (
                     <div className="manager__stat">
-                        <span>Players left</span>
+                        <span>{t("playersLeft")}</span>
                         <strong>{playersLeft} / {totalPlayers}</strong>
                         {!pko && <div className="manager__stat-actions">
                             <button
@@ -310,12 +381,12 @@ export default function GameManager() {
                                 disabled={playersLeft <= 1}
                                 onClick={() => setPlayersLeft(playersLeft - 1)}
                             >
-                                <FontAwesomeIcon icon={faUserMinus} /> Player out
+                                <FontAwesomeIcon icon={faUserMinus} /> {t("playerOut")}
                             </button>
                             <button
                                 type="button"
                                 className="btn btn--small btn--control"
-                                aria-label="Undo: put a player back in"
+                                aria-label={t("undoPlayer")}
                                 disabled={playersLeft >= totalPlayers}
                                 onClick={() => setPlayersLeft(playersLeft + 1)}
                             >
@@ -326,20 +397,20 @@ export default function GameManager() {
                 )}
                 {avgStack > 0 && (
                     <div className="manager__stat">
-                        <span>Avg stack</span>
+                        <span>{t("avgStack")}</span>
                         <strong>{avgStack}</strong>
                     </div>
                 )}
                 {buyIn > 0 && (
                     <div className="manager__stat">
-                        <span>Buy-in</span>
-                        <strong>{buyIn}{symbol}{(finance?.config.allowRebuys ?? preset.allowRebuys) ? " + rebuys" : ""}</strong>
+                        <span>{t("buyIn")}</span>
+                        <strong>{formatCents(Math.round(buyIn * 100), preset.currency, intlLocale)}{(finance?.config.allowRebuys ?? preset.allowRebuys) ? t("rebuysSuffix") : ""}</strong>
                     </div>
                 )}
                 {levelSeconds > 0 && (
                     <div className="manager__stat">
-                        <span>Level duration</span>
-                        <strong>{preset.levelDurationMin} min</strong>
+                        <span>{t("levelDuration")}</span>
+                        <strong>{t("minutes", { n: preset.levelDurationMin })}</strong>
                     </div>
                 )}
             </section>
@@ -351,7 +422,7 @@ export default function GameManager() {
                     className="btn btn--control"
                     onClick={() => changeLevel(Math.max(1, level - 1))}
                 >
-                    <FontAwesomeIcon icon={faBackwardStep} /> Prev
+                    <FontAwesomeIcon icon={faBackwardStep} /> {t("prev")}
                 </button>
                 <button
                     type="button"
@@ -359,14 +430,14 @@ export default function GameManager() {
                     onClick={toggleTimer}
                 >
                     <FontAwesomeIcon icon={isRunning ? faPause : faPlay} />{" "}
-                    {isRunning ? "Pause" : "Start"}
+                    {isRunning ? t("pause") : t("start")}
                 </button>
                 <button
                     type="button"
                     className="btn btn--control"
                     onClick={() => changeLevel(level + 1)}
                 >
-                    <FontAwesomeIcon icon={faForwardStep} /> Next
+                    <FontAwesomeIcon icon={faForwardStep} /> {t("next")}
                 </button>
             </div>
 
@@ -383,19 +454,19 @@ export default function GameManager() {
                         onClose={() => setShowPlayers(false)}
                     />
                 ) : (
-                    <div className="fin-panel" role="dialog" aria-modal="true" aria-label="Players">
+                    <div className="fin-panel" role="dialog" aria-modal="true" aria-label={t("players")}>
                         <div className="fin-panel__overlay" onClick={() => setShowPlayers(false)} />
                         <aside className="fin-panel__sheet">
                             <header className="fin-panel__head">
-                                <h2>Players</h2>
-                                <button type="button" className="fin-panel__close" onClick={() => setShowPlayers(false)} aria-label="Close the players panel">
+                                <h2>{t("players")}</h2>
+                                <button type="button" className="fin-panel__close" onClick={() => setShowPlayers(false)} aria-label={t("closePanel")}>
                                     <FontAwesomeIcon icon={faCircleXmark} />
                                 </button>
                             </header>
                             <p className="fin-note">
                                 {preset.gameId
-                                    ? "Loading the game finances…"
-                                    : "Start the Game Manager from a game to track rebuys and knockouts."}
+                                    ? t("loadingFinances")
+                                    : t("needGame")}
                             </p>
                         </aside>
                     </div>

@@ -14,6 +14,71 @@ import GameInvite from "@/features/invite/game-invite.jsx";
 import gameInviteService from "@/services/gameInvite.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { isSameLocalDay } from "@/utils/date.utils.js";
+import { COMMON } from "@/i18n/common.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+  en: {
+    ...COMMON.en,
+    notFoundTitle: "Game not found",
+    notFoundText: "This game doesn't exist anymore or couldn't be loaded.",
+    backToGames: "Back to my games",
+    inviteFailedMany: (p) => `${p.count} invites failed (${p.first})`,
+    invitesSent: "Invitations sent",
+    shareText: (p) => `Join my poker night "${p.name}" on PokerBuddy: ${p.url}`,
+    joinLink: "Join link",
+    confirmRegenerate: "Regenerate the link? The current link will stop working.",
+    confirmDisable: "Disable the link? Nobody will be able to join with it.",
+    yesRegenerate: "Yes, regenerate",
+    yesDisable: "Yes, disable",
+    share: "Share",
+    copy: "Copy",
+    copied: "Copied!",
+    regenerate: "Regenerate",
+    disable: "Disable",
+    generateLink: "Generate join link",
+    cancelFailed: "Could not cancel the game, please try again.",
+    cancelled: (p) => `Game "${p.name}" cancelled`,
+    startManager: "Start Game Manager",
+    inviteFriends: "Invite friends",
+    confirmCancelGame: "Cancel this game? It will be deleted for all invited players. This cannot be undone.",
+    yesCancelGame: "Yes, cancel game",
+    keepGame: "Keep game",
+    cancelGame: "Cancel game",
+    submitResults: "Submit results",
+    gameDetails: "Game details",
+  },
+  fr: {
+    ...COMMON.fr,
+    notFoundTitle: "Partie introuvable",
+    notFoundText: "Cette partie n'existe plus ou n'a pas pu être chargée.",
+    backToGames: "Retour à mes parties",
+    inviteFailedMany: (p) => `${p.count} invitations ont échoué (${p.first})`,
+    invitesSent: "Invitations envoyées",
+    shareText: (p) => `Rejoins ma soirée poker « ${p.name} » sur PokerBuddy : ${p.url}`,
+    joinLink: "Lien d'invitation",
+    confirmRegenerate: "Régénérer le lien ? L'ancien lien ne fonctionnera plus.",
+    confirmDisable: "Désactiver le lien ? Plus personne ne pourra rejoindre la partie avec.",
+    yesRegenerate: "Oui, régénérer",
+    yesDisable: "Oui, désactiver",
+    share: "Partager",
+    copy: "Copier",
+    copied: "Copié !",
+    regenerate: "Régénérer",
+    disable: "Désactiver",
+    generateLink: "Générer un lien d'invitation",
+    cancelFailed: "Impossible d'annuler la partie, réessaie.",
+    cancelled: (p) => `Partie « ${p.name} » annulée`,
+    startManager: "Lancer le Game Manager",
+    inviteFriends: "Inviter des amis",
+    confirmCancelGame: "Annuler cette partie ? Elle sera supprimée pour tous les joueurs invités. Cette action est irréversible.",
+    yesCancelGame: "Oui, annuler la partie",
+    keepGame: "Garder la partie",
+    cancelGame: "Annuler la partie",
+    submitResults: "Saisir les résultats",
+    gameDetails: "Détails de la partie",
+  },
+};
 
 export default function GameDetailsPage() {
   const { id } = useParams();
@@ -31,6 +96,7 @@ export default function GameDetailsPage() {
   // Incrémenté après des invitations : recharge le détail (liste des joueurs)
   const [refreshKey, setRefreshKey] = useState(0);
   const { showToast } = useToastStore();
+  const { t } = useT(MESSAGES);
   const user = useAuthStore((state) => state.user);
   const isReady = useAuthStore((state) => state.isReady);
   const router = useRouter();
@@ -54,13 +120,13 @@ export default function GameDetailsPage() {
   if (notFound) {
     return (
       <>
-        <h1>Game not found</h1>
-        <p>This game doesn&apos;t exist anymore or couldn&apos;t be loaded.</p>
-        <Link href="/games" className="btn btn--secondary">Back to my games</Link>
+        <h1>{t("notFoundTitle")}</h1>
+        <p>{t("notFoundText")}</p>
+        <Link href="/games" className="btn btn--secondary">{t("backToGames")}</Link>
       </>
     );
   }
-  if (!game || !isReady) return <p>Loading...</p>;
+  if (!game || !isReady) return <p>{t("loading")}</p>;
   if (!user) return null;
 
   const handleInviteConfirm = async () => {
@@ -76,8 +142,8 @@ export default function GameDetailsPage() {
     setShowInviteModal(false);
     setInvites({ friends: [], guests: [] });
 
-    if (failed.length) showToast(failed.length === 1 ? failed[0] : `${failed.length} invites failed (${failed[0]})`);
-    else showToast("Invitations sent", "success");
+    if (failed.length) showToast(failed.length === 1 ? failed[0] : t("inviteFailedMany", { count: failed.length, first: failed[0] }));
+    else showToast(t("invitesSent"), "success");
 
     // Recharge la partie : les nouveaux invités apparaissent dans la liste
     const data = await gameService.getById(id);
@@ -107,7 +173,7 @@ export default function GameDetailsPage() {
     const url = `${window.location.origin}/join/${inviteCode}`;
     if (navigator.share) {
       try {
-        await navigator.share({ text: `Join my poker night "${game.name}" on PokerBuddy: ${url}` });
+        await navigator.share({ text: t("shareText", { name: game.name, url }) });
       } catch { /* partage annulé par l'utilisateur */ }
       return;
     }
@@ -123,7 +189,7 @@ export default function GameDetailsPage() {
 
   const ShareLink = () => (
     <div className="invite-link">
-      <h3><FontAwesomeIcon icon={faLink} className="fa-icon" /> Join link</h3>
+      <h3><FontAwesomeIcon icon={faLink} className="fa-icon" /> {t("joinLink")}</h3>
       {inviteCode ? (
         <>
           <input
@@ -136,36 +202,36 @@ export default function GameDetailsPage() {
             <div className="invite-link__confirm" role="alert">
               <p>
                 {confirming === "regenerate"
-                  ? "Regenerate the link? The current link will stop working."
-                  : "Disable the link? Nobody will be able to join with it."}
+                  ? t("confirmRegenerate")
+                  : t("confirmDisable")}
               </p>
               <div className="invite-link__actions">
                 <button type="button" className="btn btn--small btn--danger" onClick={handleConfirm}>
-                  {confirming === "regenerate" ? "Yes, regenerate" : "Yes, disable"}
+                  {confirming === "regenerate" ? t("yesRegenerate") : t("yesDisable")}
                 </button>
-                <button type="button" className="btn btn--small" onClick={() => setConfirming(null)}>Cancel</button>
+                <button type="button" className="btn btn--small" onClick={() => setConfirming(null)}>{t("cancel")}</button>
               </div>
             </div>
           ) : (
             <div className="invite-link__actions">
               <button type="button" className="btn btn--small" onClick={handleShare}>
-                <FontAwesomeIcon icon={faShareNodes} /> Share
+                <FontAwesomeIcon icon={faShareNodes} /> {t("share")}
               </button>
               <button type="button" className="btn btn--small" onClick={handleCopyLink}>
-                <FontAwesomeIcon icon={faCopy} /> {copied ? "Copied!" : "Copy"}
+                <FontAwesomeIcon icon={faCopy} /> {copied ? t("copied") : t("copy")}
               </button>
               <button type="button" className="btn btn--small" onClick={() => setConfirming("regenerate")}>
-                <FontAwesomeIcon icon={faRotateRight} /> Regenerate
+                <FontAwesomeIcon icon={faRotateRight} /> {t("regenerate")}
               </button>
               <button type="button" className="btn btn--small btn--danger" onClick={() => setConfirming("disable")}>
-                <FontAwesomeIcon icon={faLinkSlash} /> Disable
+                <FontAwesomeIcon icon={faLinkSlash} /> {t("disable")}
               </button>
             </div>
           )}
         </>
       ) : (
         <button type="button" className="btn btn--small" onClick={handleGenerateCode}>
-          <FontAwesomeIcon icon={faLink} /> Generate join link
+          <FontAwesomeIcon icon={faLink} /> {t("generateLink")}
         </button>
       )}
     </div>
@@ -181,10 +247,10 @@ export default function GameDetailsPage() {
     const res = await gameService.delete(id);
     setCancelling(false);
     if (!res.success) {
-      showToast(res.errorMessage?.[0] || "Could not cancel the game, please try again.");
+      showToast(t("cancelFailed"));
       return;
     }
-    showToast(`Game "${game.name}" cancelled`, "success", 5000);
+    showToast(t("cancelled", { name: game.name }), "success", 5000);
     router.push("/games");
   };
 
@@ -193,27 +259,27 @@ export default function GameDetailsPage() {
     <>
       <div className="game-actions">
         {gameDay ? (
-          <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faGears} /> Start Game Manager</Link>
+          <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faGears} /> {t("startManager")}</Link>
         ) : (
-          <button type="button" className="btn" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> Invite friends</button>
+          <button type="button" className="btn" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> {t("inviteFriends")}</button>
         )}
-        <Link href={`/games/${id}/edit`} className="btn btn--secondary"><FontAwesomeIcon icon={faPenToSquare} /> Edit</Link>
+        <Link href={`/games/${id}/edit`} className="btn btn--secondary"><FontAwesomeIcon icon={faPenToSquare} /> {t("edit")}</Link>
         {gameDay && game.status === "pending" && (
-          <button type="button" className="btn btn--secondary" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> Invite friends</button>
+          <button type="button" className="btn btn--secondary" onClick={() => setShowInviteModal(true)}><FontAwesomeIcon icon={faUserPlus} /> {t("inviteFriends")}</button>
         )}
       </div>
       {game.status === "pending" && ShareLink()}
       <div className="game-actions game-actions__danger">
         {confirmCancel ? (
           <div className="game-actions__confirm" role="alert">
-            <p>Cancel this game? It will be deleted for all invited players. This cannot be undone.</p>
+            <p>{t("confirmCancelGame")}</p>
             <div className="game-actions">
-              <button type="button" className="btn btn--danger" disabled={cancelling} onClick={handleCancelGame}>Yes, cancel game</button>
-              <button type="button" className="btn btn--secondary" onClick={() => setConfirmCancel(false)}>Keep game</button>
+              <button type="button" className="btn btn--danger" disabled={cancelling} onClick={handleCancelGame}>{t("yesCancelGame")}</button>
+              <button type="button" className="btn btn--secondary" onClick={() => setConfirmCancel(false)}>{t("keepGame")}</button>
             </div>
           </div>
         ) : (
-          <button type="button" className="btn btn--danger" onClick={() => setConfirmCancel(true)}><FontAwesomeIcon icon={faTrash} /> Cancel game</button>
+          <button type="button" className="btn btn--danger" onClick={() => setConfirmCancel(true)}><FontAwesomeIcon icon={faTrash} /> {t("cancelGame")}</button>
         )}
       </div>
       {showInviteModal && (
@@ -234,11 +300,11 @@ export default function GameDetailsPage() {
     const canSubmitResults = isHost && (game.results?.length ?? 0) === 0;
     return (
       <>
-        <h1>Game details</h1>
+        <h1>{t("gameDetails")}</h1>
         <PreviousGameDetails
           actions={canSubmitResults && (
             <div className="game-actions">
-              <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faDice} /> Submit results</Link>
+              <Link href={`/manager/preset?gameId=${game.id}`} className="btn"><FontAwesomeIcon icon={faDice} /> {t("submitResults")}</Link>
             </div>
           )}
         />
@@ -250,7 +316,7 @@ export default function GameDetailsPage() {
     const Details = game.status === "active" ? ActiveGameDetails : UpcomingGamesDetails;
     return (
       <>
-        <h1>Game details</h1>
+        <h1>{t("gameDetails")}</h1>
         <Details key={refreshKey} />
         {isHost && HostActions()}
       </>

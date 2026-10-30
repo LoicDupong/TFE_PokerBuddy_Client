@@ -7,47 +7,92 @@ import { useParams, useRouter } from "next/navigation";
 import adminService from "@/services/admin.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { Badge, ConfirmDialog, LoadError } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatCents, formatDateTime, gameTone } from "@/components/admin/admin.utils.js";
+import { gameTone, useAdminFormat, useAdminText, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const GAME_TEXT = {
-    back: "Games",
-    notFound: "This game does not exist.",
-    loadError: "Could not load this game.",
-    facts: {
-        host: "Host",
-        start: "Start",
-        end: "End",
-        location: "Location",
-        buyIn: "Buy-in",
-        prizePool: "Prize pool",
-        options: "Options",
+const GAME_MESSAGES = {
+    en: {
+        back: "Games",
+        notFound: "This game does not exist.",
+        loadError: "Could not load this game.",
+        facts: {
+            host: "Host",
+            start: "Start",
+            end: "End",
+            location: "Location",
+            buyIn: "Buy-in",
+            prizePool: "Prize pool",
+            options: "Options",
+        },
+        options: (game) => [game.allowRebuys && "Rebuys", game.pkoEnabled && "PKO bounties"].filter(Boolean).join(", ") || "None",
+        playersTitle: "Players",
+        playerStatuses: { accepted: "accepted", pending: "pending", refused: "refused" },
+        guest: "guest",
+        noPlayers: "No player yet.",
+        resultsTitle: "Results",
+        noResults: "No result recorded.",
+        prize: (amount) => `Prize ${amount}`,
+        bounty: (amount) => `Bounty ${amount}`,
+        financeTitle: "Finances",
+        financeUntracked: "This game has no tracked buy-ins.",
+        financeLocked: "Locked (game finished)",
+        financeIssues: (n) => (n === 0 ? "No inconsistency" : `${n} inconsistency(ies) to check`),
+        invested: "Total invested",
+        prizePoolTotal: "Prize pool",
+        bountyPool: "Bounty pool",
+        cancelTitle: "Cancel this game",
+        cancel: "Cancel game",
+        finishedNote: "A finished game cannot be cancelled.",
+        cancelBody: (name) => `Cancel "${name}"? Every participant, including the host, is notified. This cannot be undone.`,
+        cancelLabel: "Cancel the game",
+        keep: "Keep it",
+        cancelled: (n) => (n === 1 ? "Game cancelled. 1 person notified." : `Game cancelled. ${n} people notified.`),
     },
-    options: (game) => [game.allowRebuys && "Rebuys", game.pkoEnabled && "PKO bounties"].filter(Boolean).join(", ") || "None",
-    playersTitle: "Players",
-    guest: "guest",
-    noPlayers: "No player yet.",
-    resultsTitle: "Results",
-    noResults: "No result recorded.",
-    prize: (amount) => `Prize ${amount}`,
-    bounty: (amount) => `Bounty ${amount}`,
-    financeTitle: "Finances",
-    financeUntracked: "This game has no tracked buy-ins.",
-    financeLocked: "Locked (game finished)",
-    financeIssues: (n) => (n === 0 ? "No inconsistency" : `${n} inconsistency(ies) to check`),
-    invested: "Total invested",
-    prizePoolTotal: "Prize pool",
-    bountyPool: "Bounty pool",
-    cancelTitle: "Cancel this game",
-    cancel: "Cancel game",
-    finishedNote: "A finished game cannot be cancelled.",
-    cancelBody: (name) => `Cancel "${name}"? Every participant, including the host, is notified. This cannot be undone.`,
-    cancelLabel: "Cancel the game",
-    keep: "Keep it",
-    cancelled: (n) => (n === 1 ? "Game cancelled. 1 person notified." : `Game cancelled. ${n} people notified.`),
+    fr: {
+        back: "Parties",
+        notFound: "Cette partie n'existe pas.",
+        loadError: "Impossible de charger cette partie.",
+        facts: {
+            host: "Organisateur",
+            start: "Début",
+            end: "Fin",
+            location: "Lieu",
+            buyIn: "Buy-in",
+            prizePool: "Prize pool",
+            options: "Options",
+        },
+        options: (game) => [game.allowRebuys && "Rebuys", game.pkoEnabled && "Bounties PKO"].filter(Boolean).join(", ") || "Aucune",
+        playersTitle: "Joueurs",
+        playerStatuses: { accepted: "accepté", pending: "en attente", refused: "refusé" },
+        guest: "invité",
+        noPlayers: "Aucun joueur pour l'instant.",
+        resultsTitle: "Résultats",
+        noResults: "Aucun résultat enregistré.",
+        prize: (amount) => `Gain ${amount}`,
+        bounty: (amount) => `Bounty ${amount}`,
+        financeTitle: "Finances",
+        financeUntracked: "Cette partie n'a pas de buy-ins suivis.",
+        financeLocked: "Verrouillées (partie terminée)",
+        financeIssues: (n) => (n === 0 ? "Aucune incohérence" : `${n} incohérence(s) à vérifier`),
+        invested: "Total investi",
+        prizePoolTotal: "Prize pool",
+        bountyPool: "Cagnotte de bounties",
+        cancelTitle: "Annuler cette partie",
+        cancel: "Annuler la partie",
+        finishedNote: "Une partie terminée ne peut pas être annulée.",
+        cancelBody: (name) => `Annuler « ${name} » ? Tous les participants, hôte compris, sont prévenus. Cette action est irréversible.`,
+        cancelLabel: "Annuler la partie",
+        keep: "La garder",
+        cancelled: (n) => (n <= 1 ? `Partie annulée. ${n} personne prévenue.` : `Partie annulée. ${n} personnes prévenues.`),
+    },
 };
 
 export default function AdminGamePage() {
+    const GAME_TEXT = useTexts(GAME_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatCents, formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const { id } = useParams();
     const router = useRouter();
     const showToast = useToastStore((state) => state.showToast);
@@ -71,7 +116,7 @@ export default function AdminGamePage() {
         setPending(false);
         setConfirm(false);
         if (!res.success) {
-            showToast(res.forbidden ? ADMIN_TEXT.forbidden : res.error, "error");
+            showToast(res.forbidden ? ADMIN_TEXT.forbidden : res.error || ADMIN_TEXT.genericError, "error");
             // Partie déjà terminée entre-temps : on rafraîchit la fiche
             if (res.code === "GAME_FINISHED") load();
             return;
@@ -104,7 +149,7 @@ export default function AdminGamePage() {
             <div className="admin__card">
                 <dl className="admin__facts">
                     <dt>{GAME_TEXT.facts.host}</dt>
-                    <dd>{game.host ? <Link href={`/admin/users/${game.host.id}`}>{displayPlayerName(game.host.username)}</Link> : "—"}</dd>
+                    <dd>{game.host ? <Link href={`/admin/users/${game.host.id}`}>{displayPlayerName(game.host.username, locale)}</Link> : "—"}</dd>
                     <dt>{GAME_TEXT.facts.start}</dt><dd>{formatDateTime(game.dateStart)}</dd>
                     {game.dateEnd && <><dt>{GAME_TEXT.facts.end}</dt><dd>{formatDateTime(game.dateEnd)}</dd></>}
                     {game.location && <><dt>{GAME_TEXT.facts.location}</dt><dd>{game.location}</dd></>}
@@ -119,10 +164,10 @@ export default function AdminGamePage() {
                 {game.players.map((p) => (
                     <li key={p.id} className="admin__row">
                         <span className="admin__row-main">
-                            {p.userId ? <Link href={`/admin/users/${p.userId}`}>{displayPlayerName(p.name)}</Link> : displayPlayerName(p.name)}
+                            {p.userId ? <Link href={`/admin/users/${p.userId}`}>{displayPlayerName(p.name, locale)}</Link> : displayPlayerName(p.name, locale)}
                             {p.isGuest ? ` (${GAME_TEXT.guest})` : ""}
                         </span>
-                        <span className="admin__row-meta">{p.status}</span>
+                        <span className="admin__row-meta">{GAME_TEXT.playerStatuses[p.status] ?? p.status}</span>
                     </li>
                 ))}
             </ul>
@@ -134,7 +179,7 @@ export default function AdminGamePage() {
                     <ol className="admin__list">
                         {game.results.map((r) => (
                             <li key={r.gamePlayerId} className="admin__row">
-                                <span className="admin__row-main">{r.rank}. {displayPlayerName(nameOf.get(r.gamePlayerId)?.name ?? "—")}</span>
+                                <span className="admin__row-main">{r.rank}. {displayPlayerName(nameOf.get(r.gamePlayerId)?.name ?? "—", locale)}</span>
                                 <span className="admin__row-meta">
                                     {GAME_TEXT.prize(r.prizeCents != null ? money(r.prizeCents) : r.prize ?? 0)}
                                     {r.bountyCents ? ` · ${GAME_TEXT.bounty(money(r.bountyCents))}` : ""}

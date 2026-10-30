@@ -4,44 +4,78 @@ import { useEffect, useMemo, useState } from "react";
 
 import adminService from "@/services/admin.service.js";
 import { LoadError } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatCents } from "@/components/admin/admin.utils.js";
+import { useAdminFormat, useAdminText, useTexts } from "@/components/admin/admin.utils.js";
 
-const DASH_TEXT = {
-    title: "Dashboard",
-    range: "Period",
-    presets: [{ days: 7, label: "7 days" }, { days: 30, label: "30 days" }, { days: 90, label: "90 days" }],
-    from: "From",
-    to: "To",
-    invalidRange: "Pick a start date that is not after the end date, within one year.",
-    loadError: "Could not load the dashboard.",
-    tiles: {
-        signups: "New members",
-        activeUsers: "Active members",
-        gamesCreated: "Games created",
-        gamesFinished: "Games finished",
-        avgPlayersPerGame: "Players per game",
-        invitationsSent: "Invitations sent",
-        acceptanceRate: "Acceptance rate",
-        financeVolume: "Money tracked",
-        supportOpen: "Open tickets",
-        supportCreated: "Tickets created",
-        pageViews: "Page views",
+const DASH_MESSAGES = {
+    en: {
+        title: "Dashboard",
+        range: "Period",
+        presets: [{ days: 7, label: "7 days" }, { days: 30, label: "30 days" }, { days: 90, label: "90 days" }],
+        from: "From",
+        to: "To",
+        invalidRange: "Pick a start date that is not after the end date, within one year.",
+        loadError: "Could not load the dashboard.",
+        tiles: {
+            signups: "New members",
+            activeUsers: "Active members",
+            gamesCreated: "Games created",
+            gamesFinished: "Games finished",
+            avgPlayersPerGame: "Players per game",
+            invitationsSent: "Invitations sent",
+            acceptanceRate: "Acceptance rate",
+            financeVolume: "Money tracked",
+            supportOpen: "Open tickets",
+            supportCreated: "Tickets created",
+            pageViews: "Page views",
+        },
+        none: "—",
+        chartTitle: "Per day",
+        series: { signups: "Sign-ups", gamesCreated: "Games created", pageViews: "Page views" },
+        chartLabel: (name, total, from, to) => `${name}: ${total} between ${from} and ${to}`,
+        peak: (n) => `Peak: ${n}`,
+        topPages: "Top pages",
+        topReferrers: "Top referrers",
+        noData: "No data for this period.",
+        views: (n) => `${n} views`,
     },
-    none: "—",
-    chartTitle: "Per day",
-    series: { signups: "Sign-ups", gamesCreated: "Games created", pageViews: "Page views" },
-    chartLabel: (name, total, from, to) => `${name}: ${total} between ${from} and ${to}`,
-    peak: (n) => `Peak: ${n}`,
-    topPages: "Top pages",
-    topReferrers: "Top referrers",
-    noData: "No data for this period.",
-    views: (n) => `${n} views`,
+    fr: {
+        title: "Tableau de bord",
+        range: "Période",
+        presets: [{ days: 7, label: "7 jours" }, { days: 30, label: "30 jours" }, { days: 90, label: "90 jours" }],
+        from: "Du",
+        to: "Au",
+        invalidRange: "Choisis une date de début qui n'est pas après la date de fin, sur une année maximum.",
+        loadError: "Impossible de charger le tableau de bord.",
+        tiles: {
+            signups: "Nouveaux membres",
+            activeUsers: "Membres actifs",
+            gamesCreated: "Parties créées",
+            gamesFinished: "Parties terminées",
+            avgPlayersPerGame: "Joueurs par partie",
+            invitationsSent: "Invitations envoyées",
+            acceptanceRate: "Taux d'acceptation",
+            financeVolume: "Argent suivi",
+            supportOpen: "Tickets ouverts",
+            supportCreated: "Tickets créés",
+            pageViews: "Pages vues",
+        },
+        none: "—",
+        chartTitle: "Par jour",
+        series: { signups: "Inscriptions", gamesCreated: "Parties créées", pageViews: "Pages vues" },
+        chartLabel: (name, total, from, to) => `${name} : ${total} entre le ${from} et le ${to}`,
+        peak: (n) => `Pic : ${n}`,
+        topPages: "Pages les plus vues",
+        topReferrers: "Principales sources",
+        noData: "Aucune donnée pour cette période.",
+        views: (n) => `${n} vues`,
+    },
 };
 
 const isoDay = (date) => date.toISOString().slice(0, 10);
 const daysAgo = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() - n); return isoDay(d); };
 
 function BarChart({ data, valueKey, name }) {
+    const DASH_TEXT = useTexts(DASH_MESSAGES);
     const width = 320;
     const height = 110;
     const max = Math.max(1, ...data.map((d) => d[valueKey] || 0));
@@ -73,6 +107,7 @@ function BarChart({ data, valueKey, name }) {
 }
 
 function Bars({ title, rows, labelKey, empty }) {
+    const DASH_TEXT = useTexts(DASH_MESSAGES);
     const max = Math.max(1, ...rows.map((r) => r.views));
     return (
         <div className="admin__section">
@@ -93,6 +128,9 @@ function Bars({ title, rows, labelKey, empty }) {
 }
 
 export default function AdminDashboardPage() {
+    const DASH_TEXT = useTexts(DASH_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatCents } = useAdminFormat();
     const [range, setRange] = useState(() => ({ from: daysAgo(29), to: daysAgo(0) }));
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -114,7 +152,7 @@ export default function AdminDashboardPage() {
             else setError(res.forbidden ? ADMIN_TEXT.forbidden : DASH_TEXT.loadError);
         })();
         return () => { cancelled = true; };
-    }, [range, rangeValid, attempt]);
+    }, [range, rangeValid, attempt, ADMIN_TEXT.forbidden, DASH_TEXT.loadError]);
 
     const t = data?.totals;
     const tiles = t ? [

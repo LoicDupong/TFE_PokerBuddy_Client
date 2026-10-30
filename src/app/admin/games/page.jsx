@@ -5,21 +5,38 @@ import Link from "next/link";
 
 import adminService from "@/services/admin.service.js";
 import { Badge, LoadError, Pagination } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatDateTime, gameTone, useDebounced } from "@/components/admin/admin.utils.js";
+import { gameTone, useAdminFormat, useAdminText, useDebounced, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const GAMES_TEXT = {
-    title: "Games",
-    search: "Search by game name",
-    status: "Status",
-    any: "Any",
-    loadError: "Could not load games.",
-    players: (n) => (n === 1 ? "1 player" : `${n} players`),
-    hostedBy: (name) => `Hosted by ${name}`,
-    pageSize: 20,
+const GAMES_MESSAGES = {
+    en: {
+        title: "Games",
+        search: "Search by game name",
+        status: "Status",
+        any: "Any",
+        loadError: "Could not load games.",
+        players: (n) => (n === 1 ? "1 player" : `${n} players`),
+        hostedBy: (name) => `Hosted by ${name}`,
+    },
+    fr: {
+        title: "Parties",
+        search: "Rechercher par nom de partie",
+        status: "Statut",
+        any: "Tous",
+        loadError: "Impossible de charger les parties.",
+        players: (n) => (n <= 1 ? `${n} joueur` : `${n} joueurs`),
+        hostedBy: (name) => `Organisée par ${name}`,
+    },
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminGamesPage() {
+    const GAMES_TEXT = useTexts(GAMES_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const [q, setQ] = useState("");
     const [status, setStatus] = useState("");
     const [page, setPage] = useState(1);
@@ -33,13 +50,13 @@ export default function AdminGamesPage() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await adminService.listGames({ q: search, status, page, pageSize: GAMES_TEXT.pageSize });
+            const res = await adminService.listGames({ q: search, status, page, pageSize: PAGE_SIZE });
             if (cancelled) return;
             if (res.success) { setResult(res.data); setError(null); }
             else setError(res.forbidden ? ADMIN_TEXT.forbidden : GAMES_TEXT.loadError);
         })();
         return () => { cancelled = true; };
-    }, [search, status, page, attempt]);
+    }, [search, status, page, attempt, ADMIN_TEXT.forbidden, GAMES_TEXT.loadError]);
 
     return (
         <section className="admin__section">
@@ -71,7 +88,7 @@ export default function AdminGamesPage() {
                                     <span className="admin__row-main">{g.name}</span>
                                     <Badge tone={gameTone[g.status]}>{ADMIN_TEXT.gameStatuses[g.status] ?? g.status}</Badge>
                                     <span className="admin__row-meta">
-                                        {formatDateTime(g.dateStart)} · {GAMES_TEXT.hostedBy(displayPlayerName(g.host?.username))} · {GAMES_TEXT.players(g.playersCount ?? 0)}
+                                        {formatDateTime(g.dateStart)} · {GAMES_TEXT.hostedBy(displayPlayerName(g.host?.username, locale))} · {GAMES_TEXT.players(g.playersCount ?? 0)}
                                     </span>
                                 </Link>
                             </li>
