@@ -8,6 +8,7 @@ import "./styles/pages/profile.scss";
 import "./styles/pages/manager.scss";
 import "./styles/pages/invite.scss";
 import "./styles/pages/help.scss";
+import "./styles/pages/admin.scss";
 
 
 import Header from "@/ui/header/header.jsx";

@@ -1,0 +1,317 @@
+// Interface d'administration (mobile d'abord : listes en cartes, aucun tableau qui déborde à 375px)
+.admin {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    min-width: 0;
+
+    h1, h2, h3 { overflow-wrap: anywhere; }
+
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.1rem; }
+
+    &__title { margin-bottom: 0; }
+
+    // Onglets : défilent horizontalement dans leur propre cadre, jamais la page
+    &__tabs {
+        display: flex;
+        gap: 0.25rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid var(--primary-text-trans);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    &__tab {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 0.9rem;
+        border-radius: 8px 8px 0 0;
+        color: var(--secondary-text);
+        white-space: nowrap;
+
+        &:hover { color: var(--primary-text); }
+
+        &--active {
+            color: var(--primary-text);
+            box-shadow: inset 0 -3px 0 var(--secondary-color);
+        }
+    }
+
+    &__back {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--primary-color-light);
+    }
+
+    &__hint { color: var(--secondary-text); line-height: 1.5; }
+
+    &__notice {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+        outline: 1px solid var(--secondary-color-trans);
+    }
+
+    // Boutons : secondaire par défaut, 44px de cible tactile
+    &__btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 0;
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid var(--primary-text);
+        color: var(--primary-text);
+        font: inherit;
+
+        &:hover:not(:disabled) { background: var(--primary-text-trans); }
+        &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        &--primary { background: var(--secondary-color); border-color: var(--secondary-color); }
+        &--danger { background: var(--secondary-color-deep); border-color: var(--secondary-color-text); }
+    }
+
+    // Filtres
+    &__filters {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        input, select {
+            width: 100%;
+            max-width: 100%;
+            min-height: 44px;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+        }
+    }
+
+    &__count { color: var(--secondary-text); font-size: 0.9rem; }
+
+    // Liste en cartes
+    &__list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.25rem 0.75rem;
+        align-items: center;
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+        transition: background-color 0.15s ease;
+
+        &:is(a):hover { background: rgba(247, 248, 255, 0.1); }
+
+        @media (prefers-reduced-motion: reduce) { transition: none; }
+    }
+
+    &__row-main { font-weight: 700; overflow-wrap: anywhere; }
+    &__row-meta { grid-column: 1 / -1; font-size: 0.85rem; color: var(--secondary-text); overflow-wrap: anywhere; }
+
+    // Pastilles
+    &__badge {
+        display: inline-block;
+        padding: 0.1rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid currentColor;
+        font-size: 0.8rem;
+        white-space: nowrap;
+
+        &--ok { color: #8ff1b2; }
+        &--warn { color: #f2c46d; }
+        &--bad { color: var(--secondary-color-text); }
+        &--info { color: var(--primary-color-light); }
+        &--muted { color: var(--secondary-text); }
+    }
+
+    // Pagination
+    &__pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    &__pager-info { color: var(--secondary-text); font-size: 0.9rem; text-align: center; }
+
+    // Fiches : paires libellé / valeur
+    &__card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+    }
+
+    &__facts {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.5rem 1rem;
+        margin: 0;
+
+        dt { color: var(--secondary-text); font-size: 0.85rem; }
+        dd { margin: 0; overflow-wrap: anywhere; }
+    }
+
+    &__actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .admin__btn { width: 100%; }
+    }
+
+    &__section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    // Tableau de bord
+    &__range {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    &__presets { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    &__tiles {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+
+    &__tile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background: var(--primary-text-trans);
+        min-width: 0;
+    }
+
+    &__tile-value { font-family: var(--font-display, inherit); font-size: 1.75rem; line-height: 1.1; overflow-wrap: anywhere; }
+    &__tile-label { font-size: 0.8rem; color: var(--secondary-text); }
+
+    &__chart { width: 100%; height: auto; display: block; }
+    &__chart-title { display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; font-size: 0.9rem; }
+    &__chart-legend { color: var(--secondary-text); font-size: 0.8rem; }
+
+    &__bars {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    &__bar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.15rem 0.5rem;
+        font-size: 0.9rem;
+
+        span:first-child { overflow-wrap: anywhere; }
+    }
+
+    &__bar-track {
+        grid-column: 1 / -1;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--primary-text-trans);
+        overflow: hidden;
+
+        i { display: block; height: 100%; background: var(--primary-color-light); }
+    }
+
+    // Fil du support
+    &__thread { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+
+    &__message {
+        max-width: 92%;
+        padding: 0.75rem 1rem;
+        border-radius: 12px 12px 12px 4px;
+        background: var(--primary-text-trans);
+
+        &--staff {
+            align-self: flex-end;
+            border-radius: 12px 12px 4px 12px;
+            background: rgba(159, 165, 223, 0.12);
+            outline: 1px solid rgba(159, 165, 223, 0.35);
+        }
+    }
+
+    &__message-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.25rem 0.75rem;
+        margin-bottom: 0.35rem;
+        font-size: 0.85rem;
+
+        time { color: var(--secondary-text); }
+    }
+
+    &__message-body { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+
+        textarea { width: 100%; max-width: 100%; resize: vertical; }
+    }
+
+    &__statuses { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    &__details {
+        font-size: 0.85rem;
+        color: var(--secondary-text);
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        font-family: inherit;
+    }
+
+    &__dialog-body { display: flex; flex-direction: column; gap: 0.5rem; line-height: 1.5; overflow-wrap: anywhere; }
+    &__dialog-actions { flex-wrap: wrap; }
+}
+
+@media (min-width: 700px) {
+    .admin {
+        &__filters { flex-direction: row; flex-wrap: wrap; align-items: flex-end; label { flex: 1 1 12rem; } }
+        &__tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        &__facts { grid-template-columns: max-content minmax(0, 1fr); dt { padding-top: 0.15rem; } }
+        &__actions { flex-direction: row; flex-wrap: wrap; .admin__btn { width: auto; } }
+        &__message { max-width: 70%; }
+    }
+}
+
+@media (min-width: 1100px) {
+    .admin__tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
