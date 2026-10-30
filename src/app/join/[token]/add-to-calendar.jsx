@@ -10,7 +10,7 @@ import { googleCalendarUrl, inviteEventDetails } from "@/utils/calendar.utils.js
 import { useT } from "@/i18n/i18n-provider.jsx";
 
 const MESSAGES = {
-    en: { add: "Add to calendar", newTab: " (opens in a new tab)", hint: "{t("hint")}" },
+    en: { add: "Add to calendar", newTab: " (opens in a new tab)", hint: ".ics file, works with most calendar apps" },
     fr: { add: "Ajouter au calendrier", newTab: " (s'ouvre dans un nouvel onglet)", hint: "fichier .ics, compatible avec la plupart des agendas" },
 };
 
