@@ -3,6 +3,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: {
+        termCount: (p) => (p.n === 1 ? "1 term" : `${p.n} terms`),
+        noMatch: (p) => `No term matches “${p.q}”`,
+        matches: (p) => (p.n === 1 ? `1 term matches “${p.q}”` : `${p.n} terms match “${p.q}”`),
+        searchLabel: "Search the glossary",
+        placeholder: "Try “bluff” or “pot odds”",
+        clear: "Clear search",
+        emptyTitle: (p) => `No term matches “${p.q}”.`,
+        emptyHint: "Check the spelling or try a shorter word.",
+    },
+    fr: {
+        termCount: (p) => (p.n <= 1 ? `${p.n} terme` : `${p.n} termes`),
+        noMatch: (p) => `Aucun terme ne correspond à « ${p.q} »`,
+        matches: (p) => (p.n === 1 ? `1 terme correspond à « ${p.q} »` : `${p.n} termes correspondent à « ${p.q} »`),
+        searchLabel: "Rechercher dans le glossaire",
+        placeholder: "Essaie « bluff » ou « cotes du pot »",
+        clear: "Effacer la recherche",
+        emptyTitle: (p) => `Aucun terme ne correspond à « ${p.q} ».`,
+        emptyHint: "Vérifie l'orthographe ou essaie un mot plus court.",
+    },
+};
 
 // Texte normalisé pour la recherche (minuscules, sans accents via NFD, tirets = espaces,
 // espaces regroupés) + correspondance index normalisé → index d'origine, pour surligner
@@ -43,20 +67,21 @@ function Highlight({ text, range }) {
     );
 }
 
-function countLabel(count, query) {
-    if (!query) return count === 1 ? "1 term" : `${count} terms`;
-    if (count === 0) return `No term matches “${query}”`;
-    return count === 1 ? `1 term matches “${query}”` : `${count} terms match “${query}”`;
+function countLabel(t, count, query) {
+    if (!query) return t("termCount", { n: count });
+    if (count === 0) return t("noMatch", { q: query });
+    return t("matches", { n: count, q: query });
 }
 
 export default function GlossarySearch({ terms, intro = null }) {
+    const { t } = useT(MESSAGES);
     const [query, setQuery] = useState("");
     const [announcement, setAnnouncement] = useState("");
     const inputRef = useRef(null);
 
     // Index calculé une seule fois (les termes sont statiques)
     const indexed = useMemo(
-        () => terms.map((t) => ({ ...t, name: normalizeWithMap(t.term), body: normalizeWithMap(t.definition) })),
+        () => terms.map((t) => ({ ...t, name: normalizeWithMap(t.term), body: normalizeWithMap(t.definition), alt: normalizeWithMap(t.altTerm || "") })),
         [terms]
     );
 
@@ -69,15 +94,17 @@ export default function GlossarySearch({ terms, intro = null }) {
         for (const t of indexed) {
             const nameRange = findRange(t.name, q);
             const bodyRange = findRange(t.body, q);
-            if (!nameRange && !bodyRange) continue;
-            // Priorité au nom : début du nom, puis nom, puis définition seule (tri stable = ordre alphabétique conservé)
-            const rank = nameRange ? (nameRange[0] === 0 ? 0 : 1) : 2;
+            // Terme équivalent dans l'autre langue : trouvé sans surlignage (on cherche en FR comme en EN)
+            const altMatch = !nameRange && findRange(t.alt, q);
+            if (!nameRange && !bodyRange && !altMatch) continue;
+            // Priorité au nom : début du nom, puis nom ou équivalent, puis définition seule (tri stable = ordre alphabétique conservé)
+            const rank = nameRange ? (nameRange[0] === 0 ? 0 : 1) : altMatch ? 1 : 2;
             matches.push({ ...t, nameRange, bodyRange, rank });
         }
         return matches.sort((a, b) => a.rank - b.rank);
     }, [indexed, q]);
 
-    const label = countLabel(results.length, q ? displayQuery : "");
+    const label = countLabel(t, results.length, q ? displayQuery : "");
 
     // Annonce aux lecteurs d'écran après une courte pause de frappe (pas une annonce par touche)
     useEffect(() => {
@@ -106,7 +133,7 @@ export default function GlossarySearch({ terms, intro = null }) {
                 }}
             >
                 <label htmlFor="glossary-search" className="glossary__label">
-                    Search the glossary
+                    {t("searchLabel")}
                 </label>
                 <div className="glossary__field">
                     <FontAwesomeIcon icon={faMagnifyingGlass} className="glossary__icon" />
@@ -123,7 +150,7 @@ export default function GlossarySearch({ terms, intro = null }) {
                                 setQuery("");
                             }
                         }}
-                        placeholder="Try “bluff” or “pot odds”"
+                        placeholder={t("placeholder")}
                         autoComplete="off"
                         autoCorrect="off"
                         autoCapitalize="none"
@@ -132,7 +159,7 @@ export default function GlossarySearch({ terms, intro = null }) {
                         aria-describedby="glossary-count"
                     />
                     {query && (
-                        <button type="button" className="glossary__clear" onClick={clear} aria-label="Clear search">
+                        <button type="button" className="glossary__clear" onClick={clear} aria-label={t("clear")}>
                             <FontAwesomeIcon icon={faXmark} />
                         </button>
                     )}
@@ -166,10 +193,10 @@ export default function GlossarySearch({ terms, intro = null }) {
                 </article>
             ) : (
                 <div className="glossary__empty">
-                    <p>No term matches “{displayQuery}”.</p>
-                    <p>Check the spelling or try a shorter word.</p>
+                    <p>{t("emptyTitle", { q: displayQuery })}</p>
+                    <p>{t("emptyHint")}</p>
                     <button type="button" className="btn btn--secondary glossary__reset" onClick={clear}>
-                        Clear search
+                        {t("clear")}
                     </button>
                 </div>
             )}

@@ -1,6 +1,9 @@
-export default function LearnRulesPage() {
-  return (
-    <section className="learn-page">
+import { getLocale } from "@/i18n/server.js";
+
+// Contenu pédagogique : un arbre JSX par langue (liens et gras dans le texte)
+const CONTENT = {
+  en: () => (
+    <>
       <h1>Poker Rules For Beginners</h1>
       <div className="divider"></div>
 
@@ -123,7 +126,142 @@ export default function LearnRulesPage() {
           <strong>Pot-Limit:</strong> The max raise equals the pot size at the time.
         </p>
       </article>
+    </>
+  ),
+  fr: () => (
+    <>
+      <h1>Les règles du poker pour débutants</h1>
+      <div className="divider"></div>
 
+      <article>
+        <p>
+          Tu cherches un résumé rapide de tout ce qu&apos;il faut savoir pour te lancer au poker ?
+        </p>
+        <p>
+          Les règles ci-dessous valent aussi bien pour les cash games que pour les tournois, et pour
+          le Texas Hold&apos;em, l&apos;Omaha ou le Royal Poker. Quelle que soit la variante que tu préfères,
+          tu trouveras ici de bonnes bases.
+        </p>
+        <p>
+          Et quand tu seras prêt à t&apos;y essayer, sans aucun risque et sans dépenser un centime,
+          inscris-toi et rejoins une communauté de joueurs dynamique – il suffit d&apos;une adresse email !
+        </p>
+      </article>
+
+      <article>
+        <h2>Le déroulement d&apos;une main (exemple au Texas Hold&apos;em)</h2>
+
+        <h3>La distribution</h3>
+        <p>
+          Chaque joueur reçoit deux cartes privées. La petite blind et la grosse blind sont postées par les deux
+          joueurs à gauche du bouton du donneur.
+        </p>
+
+        <h3>Premier tour de mise</h3>
+        <p>
+          En partant de la gauche de la grosse blind, chaque joueur doit suivre, relancer ou se coucher.
+          Les blinds comptent comme des mises.
+        </p>
+
+        <h3>Le flop</h3>
+        <p>
+          Trois cartes communes sont posées face visible. Tous les joueurs peuvent les utiliser pour former leur meilleure main.
+        </p>
+
+        <h3>Deuxième tour de mise</h3>
+        <p>
+          Il commence à gauche du bouton. Sans mise obligatoire, les joueurs peuvent checker jusqu&apos;à ce que quelqu&apos;un mise.
+        </p>
+
+        <h3>Le turn</h3>
+        <p>Une quatrième carte commune est posée face visible.</p>
+
+        <h3>Troisième tour de mise</h3>
+        <p>Un nouveau tour de mise a lieu, comme avant.</p>
+
+        <h3>La river</h3>
+        <p>
+          La cinquième et dernière carte commune est posée. Les joueurs disposent maintenant de 7 cartes pour former
+          leur meilleure main de 5 cartes.
+        </p>
+
+        <h3>Quatrième tour de mise</h3>
+        <p>
+          Le dernier tour de mise a lieu. Tous les joueurs restants connaissent leur meilleure main possible.
+        </p>
+
+        <h3>L&apos;abattage</h3>
+        <p>
+          Les joueurs restants dévoilent leurs cartes. La main la plus forte remporte le pot (ou il est partagé en cas
+          d&apos;égalité). Le bouton avance ensuite d&apos;un siège vers la gauche et la main suivante commence.
+        </p>
+      </article>
+
+      <article>
+        <h2>Comment gagner une main, une partie ou un tournoi</h2>
+        <p>
+          Les règles varient d&apos;une variante à l&apos;autre, mais tout le poker se découpe en mains – un tour de jeu
+          qui commence par la distribution et se termine soit quand toutes les cartes sont dévoilées et que le pot
+          revient à la meilleure main, soit quand il ne reste qu&apos;un joueur parce que tous les autres se sont couchés.
+        </p>
+        <p>Il existe deux grandes façons de jouer au poker : le cash game et le tournoi.</p>
+
+        <h3>Gagner en cash game</h3>
+        <p>
+          Un cash game se joue sans fin prévue. Les joueurs peuvent partir quand ils veulent et s&apos;asseoir dès qu&apos;une
+          place se libère. On ne « gagne » pas vraiment un cash game – chacun décide quand s&apos;arrêter.
+        </p>
+
+        <h3>Gagner un tournoi</h3>
+        <p>
+          Dans un tournoi, tous les joueurs paient le même droit d&apos;entrée et démarrent avec le même tapis. Le jeu
+          continue jusqu&apos;à ce qu&apos;il ne reste qu&apos;un joueur. Les blinds augmentent à intervalles réguliers pour
+          forcer l&apos;action. Les gains sont partagés entre les premiers du classement, la plus grosse part allant au vainqueur.
+        </p>
+      </article>
+
+      <article>
+        <h2>Blinds, mises et position</h2>
+
+        <h3>Que sont les blinds au poker ?</h3>
+        <p>
+          La plupart des mains commencent par deux joueurs qui postent les blinds – des mises obligatoires pour créer un
+          pot. La position du donneur est marquée par un bouton qui avance d&apos;un siège vers la gauche à chaque main.
+          La petite blind se trouve juste à gauche du bouton, et la grosse blind à gauche de la petite blind.
+        </p>
+        <p>
+          Chaque joueur doit suivre, relancer ou se coucher face à la grosse blind. Si tout le monde se couche, la grosse
+          blind remporte le pot sans combat. Si des joueurs suivent, la grosse blind peut checker ou relancer.
+        </p>
+
+        <h3>Comment fonctionnent les mises</h3>
+        <ul>
+          <li>Le jeu tourne dans le sens des aiguilles d&apos;une montre, en commençant par le premier joueur à gauche du bouton.</li>
+          <li>Pour rester dans la main, il faut au moins égaler la plus haute mise.</li>
+          <li>S&apos;il n&apos;y a pas de mise en cours, on peut checker.</li>
+          <li>Un joueur à court de jetons peut aller à tapis (all-in).</li>
+          <li>La relance minimum égale la mise précédente ; le maximum dépend du type de jeu.</li>
+        </ul>
+
+        <h3>Connaître les structures de mise</h3>
+        <p>
+          <strong>Limit :</strong> les mises se font en unités fixes (petites et grosses).
+          <br />
+          <strong>No-Limit :</strong> n&apos;importe quel montant, jusqu&apos;à tout son tapis.
+          <br />
+          <strong>Pot-Limit :</strong> la relance maximum égale la taille du pot à ce moment-là.
+        </p>
+      </article>
+    </>
+  ),
+};
+
+export default async function LearnRulesPage() {
+  const locale = await getLocale();
+  const Content = CONTENT[locale];
+  return (
+    <section className="learn-page">
+      <Content />
     </section>
   );
 }
