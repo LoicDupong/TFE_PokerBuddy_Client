@@ -20,7 +20,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import usePresetStore, { usePresetHydrated } from "@/stores/usePresetStore";
 import { NEW_TIMER, formatTime, getTimeLeft, goToLevel, pauseTimer, startTimer } from "@/utils/timer.utils.js";
-import { currencySymbol } from "@/utils/game.utils.js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link.js";
@@ -242,10 +241,9 @@ export default function GameManager() {
     if (!hydrated || (!preset.title && !showEndModal)) return null;
 
     // calculs utiles
-    const symbol = currencySymbol(preset.currency);
     const buyIn = Number(preset.buyIn) || 0;
     // Prize pool réel (buy-ins + rebuys + add-ons, hors bounties) pour une partie suivie
-    const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency, intlLocale) : `${buyIn * totalPlayers}${symbol}`;
+    const prizePoolText = tracked ? formatCents(finance.totals.prizePoolCents, preset.currency, intlLocale) : formatCents(Math.round(buyIn * totalPlayers * 100), preset.currency, intlLocale);
     // Stack moyen : masqué sans jetons de départ (sinon "0" n'aurait aucun sens)
     // Partie suivie : jetons réellement en jeu (rebuys et add-ons inclus) quand le serveur les connaît
     const avgStack =
@@ -406,7 +404,7 @@ export default function GameManager() {
                 {buyIn > 0 && (
                     <div className="manager__stat">
                         <span>{t("buyIn")}</span>
-                        <strong>{buyIn}{symbol}{(finance?.config.allowRebuys ?? preset.allowRebuys) ? t("rebuysSuffix") : ""}</strong>
+                        <strong>{formatCents(Math.round(buyIn * 100), preset.currency, intlLocale)}{(finance?.config.allowRebuys ?? preset.allowRebuys) ? t("rebuysSuffix") : ""}</strong>
                     </div>
                 )}
                 {levelSeconds > 0 && (
