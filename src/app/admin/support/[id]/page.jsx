@@ -9,27 +9,50 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import adminSupportService from "@/services/adminSupport.service.js";
 import useToastStore from "@/stores/useToastStore.js";
 import { Badge, LoadError } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatDateTime, ticketTone } from "@/components/admin/admin.utils.js";
+import { ticketTone, useAdminFormat, useAdminText, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const TICKET_TEXT = {
-    back: "Support",
-    notFound: "This ticket does not exist.",
-    loadError: "Could not load this ticket.",
-    from: (name) => `From ${name}`,
-    staff: "Support",
-    statusTitle: "Status",
-    reply: "Reply",
-    replyHint: "The member is notified of your reply. Do not share anything private here.",
-    send: "Send reply",
-    sending: "Sending…",
-    empty: "Write a reply first.",
-    sent: "Reply sent.",
-    statusChanged: "Status updated.",
-    messageMax: 4000,
+const TICKET_MESSAGES = {
+    en: {
+        back: "Support",
+        notFound: "This ticket does not exist.",
+        loadError: "Could not load this ticket.",
+        from: (name) => `From ${name}`,
+        staff: "Support",
+        statusTitle: "Status",
+        reply: "Reply",
+        replyHint: "The member is notified of your reply. Do not share anything private here.",
+        send: "Send reply",
+        sending: "Sending…",
+        empty: "Write a reply first.",
+        sent: "Reply sent.",
+        statusChanged: "Status updated.",
+    },
+    fr: {
+        back: "Support",
+        notFound: "Ce ticket n'existe pas.",
+        loadError: "Impossible de charger ce ticket.",
+        from: (name) => `De ${name}`,
+        staff: "Support",
+        statusTitle: "Statut",
+        reply: "Réponse",
+        replyHint: "Le membre est prévenu de ta réponse. Ne partage rien de privé ici.",
+        send: "Envoyer la réponse",
+        sending: "Envoi…",
+        empty: "Écris d'abord une réponse.",
+        sent: "Réponse envoyée.",
+        statusChanged: "Statut mis à jour.",
+    },
 };
 
+const MESSAGE_MAX = 4000;
+
 export default function AdminTicketPage() {
+    const TICKET_TEXT = useTexts(TICKET_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const { id } = useParams();
     const replyId = useId();
     const showToast = useToastStore((state) => state.showToast);
@@ -95,7 +118,7 @@ export default function AdminTicketPage() {
             <p className="admin__hint">
                 <Badge tone={ticketTone[ticket.status]}>{ADMIN_TEXT.ticketStatuses[ticket.status]}</Badge>{" "}
                 {ADMIN_TEXT.ticketCategories[ticket.category] ?? ticket.category} ·{" "}
-                {ticket.user ? <Link href={`/admin/users/${ticket.user.id}`}>{TICKET_TEXT.from(displayPlayerName(ticket.user.username))}</Link> : null}
+                {ticket.user ? <Link href={`/admin/users/${ticket.user.id}`}>{TICKET_TEXT.from(displayPlayerName(ticket.user.username, locale))}</Link> : null}
             </p>
 
             <div className="admin__statuses" role="group" aria-label={TICKET_TEXT.statusTitle}>
@@ -117,7 +140,7 @@ export default function AdminTicketPage() {
                 {ticket.messages.map((m) => (
                     <li key={m.id} className={`admin__message${m.isStaff ? " admin__message--staff" : ""}`}>
                         <p className="admin__message-head">
-                            <strong>{m.isStaff ? `${TICKET_TEXT.staff}${m.author ? ` (${displayPlayerName(m.author.username)})` : ""}` : displayPlayerName(m.author?.username ?? ticket.user?.username)}</strong>
+                            <strong>{m.isStaff ? `${TICKET_TEXT.staff}${m.author ? ` (${displayPlayerName(m.author.username, locale)})` : ""}` : displayPlayerName(m.author?.username ?? ticket.user?.username, locale)}</strong>
                             <time dateTime={m.createdAt}>{formatDateTime(m.createdAt)}</time>
                         </p>
                         {/* Texte brut : React échappe le contenu, pre-wrap garde les retours à la ligne */}
@@ -133,7 +156,7 @@ export default function AdminTicketPage() {
                         id={replyId}
                         rows={4}
                         value={reply}
-                        maxLength={TICKET_TEXT.messageMax}
+                        maxLength={MESSAGE_MAX}
                         aria-invalid={Boolean(replyError)}
                         onChange={(e) => setReply(e.target.value)}
                     />

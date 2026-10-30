@@ -5,31 +5,56 @@ import Link from "next/link";
 
 import adminService from "@/services/admin.service.js";
 import { LoadError, Pagination } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, formatDateTime } from "@/components/admin/admin.utils.js";
+import { useAdminFormat, useAdminText, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
+import { useLocale } from "@/i18n/i18n-provider.jsx";
 
-const AUDIT_TEXT = {
-    title: "Audit log",
-    hint: "Every administrative action is recorded here, newest first.",
-    action: "Action",
-    targetType: "Target",
-    any: "Any",
-    loadError: "Could not load the audit log.",
-    empty: "No action recorded for these filters.",
-    by: (name) => `by ${name}`,
-    actions: {
-        "user.role": "Role changed",
-        "user.disable": "Account disabled",
-        "user.enable": "Account re-enabled",
-        "user.revoke_sessions": "Sessions revoked",
-        "user.delete": "Account deleted",
-        "game.cancel": "Game cancelled",
-        "support.reply": "Support reply sent",
-        "support.status": "Ticket status changed",
+const AUDIT_MESSAGES = {
+    en: {
+        title: "Audit log",
+        hint: "Every administrative action is recorded here, newest first.",
+        action: "Action",
+        targetType: "Target",
+        any: "Any",
+        loadError: "Could not load the audit log.",
+        empty: "No action recorded for these filters.",
+        by: (name) => `by ${name}`,
+        actions: {
+            "user.role": "Role changed",
+            "user.disable": "Account disabled",
+            "user.enable": "Account re-enabled",
+            "user.revoke_sessions": "Sessions revoked",
+            "user.delete": "Account deleted",
+            "game.cancel": "Game cancelled",
+            "support.reply": "Support reply sent",
+            "support.status": "Ticket status changed",
+        },
+        targets: { user: "Account", game: "Game", support_ticket: "Support ticket" },
     },
-    targets: { user: "Account", game: "Game", support_ticket: "Support ticket" },
-    pageSize: 25,
+    fr: {
+        title: "Journal d'audit",
+        hint: "Chaque action d'administration est enregistrée ici, la plus récente en premier.",
+        action: "Action",
+        targetType: "Cible",
+        any: "Toutes",
+        loadError: "Impossible de charger le journal d'audit.",
+        empty: "Aucune action enregistrée pour ces filtres.",
+        by: (name) => `par ${name}`,
+        actions: {
+            "user.role": "Rôle modifié",
+            "user.disable": "Compte désactivé",
+            "user.enable": "Compte réactivé",
+            "user.revoke_sessions": "Sessions révoquées",
+            "user.delete": "Compte supprimé",
+            "game.cancel": "Partie annulée",
+            "support.reply": "Réponse au support envoyée",
+            "support.status": "Statut du ticket modifié",
+        },
+        targets: { user: "Compte", game: "Partie", support_ticket: "Ticket de support" },
+    },
 };
+
+const PAGE_SIZE = 25;
 
 // Page admin de la cible, quand elle existe
 const targetHref = (type, id) => {
@@ -50,6 +75,10 @@ const detailsText = (details) => {
 };
 
 export default function AdminAuditPage() {
+    const AUDIT_TEXT = useTexts(AUDIT_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDateTime } = useAdminFormat();
+    const { locale } = useLocale();
     const [action, setAction] = useState("");
     const [targetType, setTargetType] = useState("");
     const [page, setPage] = useState(1);
@@ -62,13 +91,13 @@ export default function AdminAuditPage() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await adminService.listAuditLogs({ action, targetType, page, pageSize: AUDIT_TEXT.pageSize });
+            const res = await adminService.listAuditLogs({ action, targetType, page, pageSize: PAGE_SIZE });
             if (cancelled) return;
             if (res.success) { setResult(res.data); setError(null); }
             else setError(res.forbidden ? ADMIN_TEXT.forbidden : AUDIT_TEXT.loadError);
         })();
         return () => { cancelled = true; };
-    }, [action, targetType, page, attempt]);
+    }, [action, targetType, page, attempt, ADMIN_TEXT.forbidden, AUDIT_TEXT.loadError]);
 
     return (
         <section className="admin__section">
@@ -106,7 +135,7 @@ export default function AdminAuditPage() {
                                 <li key={log.id} className="admin__row">
                                     <span className="admin__row-main">{href ? <Link href={href}>{label}</Link> : label}</span>
                                     <time className="admin__row-meta" dateTime={log.createdAt}>
-                                        {formatDateTime(log.createdAt)} · {AUDIT_TEXT.by(displayPlayerName(log.actor?.username ?? "—"))} · {AUDIT_TEXT.targets[log.targetType] ?? log.targetType}
+                                        {formatDateTime(log.createdAt)} · {AUDIT_TEXT.by(displayPlayerName(log.actor?.username ?? "—", locale))} · {AUDIT_TEXT.targets[log.targetType] ?? log.targetType}
                                     </time>
                                     {details && <span className="admin__row-meta">{details}</span>}
                                 </li>

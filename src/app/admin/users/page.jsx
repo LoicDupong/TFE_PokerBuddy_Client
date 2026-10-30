@@ -5,21 +5,36 @@ import Link from "next/link";
 
 import adminService from "@/services/admin.service.js";
 import { Badge, LoadError, Pagination } from "@/components/admin/admin-ui.jsx";
-import { ADMIN_TEXT, accountTone, formatDate, useDebounced } from "@/components/admin/admin.utils.js";
+import { accountTone, useAdminFormat, useAdminText, useDebounced, useTexts } from "@/components/admin/admin.utils.js";
 import { displayPlayerName } from "@/utils/game.utils.js";
 
-const USERS_TEXT = {
-    title: "Users",
-    search: "Search by username or email",
-    role: "Role",
-    status: "Status",
-    any: "Any",
-    loadError: "Could not load users.",
-    joined: (date) => `Joined ${date}`,
-    pageSize: 20,
+const USERS_MESSAGES = {
+    en: {
+        title: "Users",
+        search: "Search by username or email",
+        role: "Role",
+        status: "Status",
+        any: "Any",
+        loadError: "Could not load users.",
+        joined: (date) => `Joined ${date}`,
+    },
+    fr: {
+        title: "Utilisateurs",
+        search: "Rechercher par pseudo ou email",
+        role: "Rôle",
+        status: "Statut",
+        any: "Tous",
+        loadError: "Impossible de charger les utilisateurs.",
+        joined: (date) => `Inscrit le ${date}`,
+    },
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminUsersPage() {
+    const USERS_TEXT = useTexts(USERS_MESSAGES);
+    const ADMIN_TEXT = useAdminText();
+    const { formatDate } = useAdminFormat();
     const [q, setQ] = useState("");
     const [role, setRole] = useState("");
     const [status, setStatus] = useState("");
@@ -34,13 +49,13 @@ export default function AdminUsersPage() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const res = await adminService.listUsers({ q: search, role, status, page, pageSize: USERS_TEXT.pageSize });
+            const res = await adminService.listUsers({ q: search, role, status, page, pageSize: PAGE_SIZE });
             if (cancelled) return;
             if (res.success) { setResult(res.data); setError(null); }
             else setError(res.forbidden ? ADMIN_TEXT.forbidden : USERS_TEXT.loadError);
         })();
         return () => { cancelled = true; };
-    }, [search, role, status, page, attempt]);
+    }, [search, role, status, page, attempt, ADMIN_TEXT.forbidden, USERS_TEXT.loadError]);
 
     return (
         <section className="admin__section">
