@@ -9,9 +9,78 @@ import gameFinanceService from "@/services/gameFinance.service";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import gameService from "@/services/game.service";
+import { useT } from "@/i18n/i18n-provider.jsx";
+
+const MESSAGES = {
+    en: {
+        loading: "Loading…",
+        linked: (p) => `Linked to the game ${p.title}: results will be saved to it.`,
+        freeSession: "Start a free session instead",
+        title: "Title",
+        titlePlaceholder: "Friday Night Poker",
+        buyIn: "Buy-in",
+        chips: "Chips per player",
+        blinds: "Blinds",
+        smallBlind: "Small blind",
+        bigBlind: "Big blind",
+        levelDuration: "Level duration (min)",
+        enableTimer: "Enable blind timer",
+        players: "Players",
+        playerName: "Player name",
+        remove: (p) => `Remove ${p.name}`,
+        removeFallback: "player",
+        pending: "pending",
+        pendingTitle: "No answer to the invite yet — remove if absent",
+        addPlayer: "Add player",
+        allowRebuys: "Allow rebuys and add-ons",
+        prizeDistribution: "Prize distribution",
+        placesPaid: "Places paid",
+        placeLabel: (p) => `${p.ordinal} place`,
+        total: (p) => `Total: ${p.total}% (must equal 100%)`,
+        prizePool: "Prize pool",
+        duplicateNames: "Two or more players have the same name. Please use unique names.",
+        mustTotal100: (p) => `Prize distribution must total 100% (currently ${p.total}%).`,
+        seating: "Seating players…",
+        start: "Start Game Manager",
+        seatError: "Could not seat the players, please try again.",
+    },
+    fr: {
+        loading: "Chargement…",
+        linked: (p) => `Liée à la partie ${p.title} : les résultats y seront enregistrés.`,
+        freeSession: "Lancer plutôt une session libre",
+        title: "Titre",
+        titlePlaceholder: "Poker du vendredi soir",
+        buyIn: "Buy-in",
+        chips: "Jetons par joueur",
+        blinds: "Blinds",
+        smallBlind: "Petite blind",
+        bigBlind: "Grosse blind",
+        levelDuration: "Durée d'un niveau (min)",
+        enableTimer: "Activer le minuteur de blinds",
+        players: "Joueurs",
+        playerName: "Nom du joueur",
+        remove: (p) => `Retirer ${p.name}`,
+        removeFallback: "joueur",
+        pending: "en attente",
+        pendingTitle: "Pas encore de réponse à l'invitation — retire-le s'il est absent",
+        addPlayer: "Ajouter un joueur",
+        allowRebuys: "Autoriser les rebuys et les add-ons",
+        prizeDistribution: "Répartition des gains",
+        placesPaid: "Places payées",
+        placeLabel: (p) => `${p.ordinal} place`,
+        total: (p) => `Total : ${p.total} % (doit faire 100 %)`,
+        prizePool: "Prize pool",
+        duplicateNames: "Au moins deux joueurs ont le même nom. Utilise des noms uniques.",
+        mustTotal100: (p) => `La répartition des gains doit totaliser 100 % (actuellement ${p.total} %).`,
+        seating: "Installation des joueurs…",
+        start: "Lancer le Game Manager",
+        seatError: "Impossible d'installer les joueurs, réessaie.",
+    },
+};
 
 // 1st, 2nd, 3rd, 4th… (11th, 12th, 13th compris)
-function ordinal(n) {
+function ordinal(n, locale) {
+    if (locale === "fr") return n === 1 ? "1re" : `${n}e`;
     const mod100 = n % 100;
     if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
     return `${n}${{ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th"}`;
@@ -22,6 +91,7 @@ export default function PresetForm() {
     const hydrated = usePresetHydrated();
     const { preset, setPreset, resetPreset } = usePresetStore();
     const router = useRouter();
+    const { t, locale, intlLocale } = useT(MESSAGES);
     const [playerError, setPlayerError] = useState(null);
     const [starting, setStarting] = useState(false);
 
@@ -46,7 +116,7 @@ export default function PresetForm() {
                         .filter((p) => p.status !== "refused")
                         .map((p) => ({
                             id: p.id,
-                            name: displayPlayerName(p.user?.username || p.userName || p.guestName),
+                            name: displayPlayerName(p.user?.username || p.userName || p.guestName, locale),
                             status: p.status,
                             linked: true, // a déjà un GamePlayer côté serveur
                         }));
@@ -79,6 +149,8 @@ export default function PresetForm() {
                 console.error("Error loading game preset:", err);
             }
         })();
+    // La langue ne doit pas relancer le chargement (et réinitialiser le preset)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialGameId, hydrated, setPreset, resetPreset]);
 
     const handleChange = (e) => {
@@ -168,13 +240,13 @@ export default function PresetForm() {
         const names = filteredPlayers.map((p) => normalizeName(p.name));
         const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i);
         if (hasDuplicates) {
-            setPlayerError("Two or more players have the same name. Please use unique names.");
+            setPlayerError(t("duplicateNames"));
             return;
         }
 
         // Ex : 3 places → 33/33/33 = 99 % ; les gains ne correspondraient pas au prize pool
         if ((preset.payoutDistribution || []).length > 0 && totalPercent !== 100) {
-            setPlayerError(`Prize distribution must total 100% (currently ${totalPercent}%).`);
+            setPlayerError(t("mustTotal100", { total: totalPercent }));
             return;
         }
 
@@ -196,7 +268,7 @@ export default function PresetForm() {
             );
             setStarting(false);
             if (!res.success) {
-                setPlayerError(res.error);
+                setPlayerError(t("seatError"));
                 return;
             }
             const idByKey = new Map(res.data.seats.map((seat) => [seat.key, seat.gamePlayerId]));
@@ -206,41 +278,41 @@ export default function PresetForm() {
         router.push("/manager");
     };
 
-    if (!hydrated) return <p>Loading…</p>;
+    if (!hydrated) return <p>{t("loading")}</p>;
 
     return (
         <form className="form form--preset" onSubmit={handleSubmit}>
             <h2>
-                Game <span className="red">setup</span>
+                {locale === "fr" ? <>Préparation de la <span className="red">partie</span></> : <>Game <span className="red">setup</span></>}
             </h2>
 
             {/* Preset encore lié à une partie (ex: retour via "Edit" depuis le manager) */}
             {preset.gameId && !initialGameId && (
                 <div className="form__row">
                     <p className="gray">
-                        Linked to the game <strong>{preset.title}</strong>: results will be saved to it.
+                        {t("linked", { title: preset.title })}
                     </p>
                     <button type="button" className="btn btn--small" onClick={resetPreset}>
-                        Start a free session instead
+                        {t("freeSession")}
                     </button>
                 </div>
             )}
 
             {/* Title */}
             <div className="form__row">
-                <label htmlFor="title">Title</label>
+                <label htmlFor="title">{t("title")}</label>
                 <input id="title"
                     name="title"
                     value={preset.title}
                     onChange={handleChange}
-                    placeholder="Friday Night Poker"
+                    placeholder={t("titlePlaceholder")}
                 />
             </div>
 
             {/* Buy-in & Chips */}
             <div className="form__grid">
                 <div className="form__row">
-                    <label htmlFor="buyIn">Buy-in</label>
+                    <label htmlFor="buyIn">{t("buyIn")}</label>
                     <input id="buyIn"
                         type="number"
                         name="buyIn"
@@ -249,7 +321,7 @@ export default function PresetForm() {
                     />
                 </div>
                 <div className="form__row">
-                    <label htmlFor="chipsPerPlayer">Chips per player</label>
+                    <label htmlFor="chipsPerPlayer">{t("chips")}</label>
                     <input id="chipsPerPlayer"
                         type="number"
                         name="chipsPerPlayer"
@@ -261,10 +333,10 @@ export default function PresetForm() {
 
             {/* Blinds */}
             <fieldset className="form__fieldset">
-                <legend>Blinds</legend>
+                <legend>{t("blinds")}</legend>
                 <div className="form__grid">
                     <div className="form__row">
-                        <label htmlFor="smallBlind">Small blind</label>
+                        <label htmlFor="smallBlind">{t("smallBlind")}</label>
                         <input id="smallBlind"
                             type="number"
                             name="smallBlind"
@@ -273,7 +345,7 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="bigBlind">Big blind</label>
+                        <label htmlFor="bigBlind">{t("bigBlind")}</label>
                         <input id="bigBlind"
                             type="number"
                             name="bigBlind"
@@ -282,7 +354,7 @@ export default function PresetForm() {
                         />
                     </div>
                     <div className="form__row">
-                        <label htmlFor="levelDurationMin">Level duration (min)</label>
+                        <label htmlFor="levelDurationMin">{t("levelDuration")}</label>
                         <input id="levelDurationMin"
                             type="number"
                             name="levelDurationMin"
@@ -299,20 +371,20 @@ export default function PresetForm() {
                         checked={preset.enableBlindTimer}
                         onChange={handleChange}
                     />
-                    <span>Enable blind timer</span>
+                    <span>{t("enableTimer")}</span>
                 </label>
             </fieldset>
 
 
             {/* Players */}
             <fieldset className="form__fieldset">
-                <legend>Players</legend>
+                <legend>{t("players")}</legend>
                 {(preset.players || []).map((player) => (
                     <div key={player.id} className="form__row form__addPlayer">
                         <input
                             type="text"
-                            aria-label="Player name"
-                            placeholder="Player name"
+                            aria-label={t("playerName")}
+                            placeholder={t("playerName")}
                             value={player.name}
                             onChange={(e) =>
                                 handlePlayerChange(player.id, e.target.value)
@@ -321,7 +393,7 @@ export default function PresetForm() {
                         <button
                             type="button"
                             className="btn btn--small btn-add"
-                            aria-label={`Remove ${player.name || "player"}`}
+                            aria-label={t("remove", { name: player.name || t("removeFallback") })}
                             onClick={() => handleRemovePlayer(player.id)}
                         >
                             <FontAwesomeIcon icon={faTrash} />
@@ -329,9 +401,9 @@ export default function PresetForm() {
                         {player.status === "pending" && (
                             <span
                                 className="player__status player__status--pending"
-                                title="No answer to the invite yet — remove if absent"
+                                title={t("pendingTitle")}
                             >
-                                pending
+                                {t("pending")}
                             </span>
                         )}
                     </div>
@@ -341,10 +413,10 @@ export default function PresetForm() {
                     className="btn btn--addPlayer"
                     onClick={handleAddPlayer}
                 >
-                    <FontAwesomeIcon icon={faPlus} /> Add player
+                    <FontAwesomeIcon icon={faPlus} /> {t("addPlayer")}
                 </button>
                 <div className="form__row">
-                    <label htmlFor="playersNumber">Players</label>
+                    <label htmlFor="playersNumber">{t("players")}</label>
                     <input
                         id="playersNumber"
                         type="number"
@@ -360,15 +432,15 @@ export default function PresetForm() {
                         checked={preset.allowRebuys}
                         onChange={handleChange}
                     />
-                    <span>Allow rebuys and add-ons</span>
+                    <span>{t("allowRebuys")}</span>
                 </label>
             </fieldset>
 
             {/* Payout */}
             <fieldset className="form__fieldset">
-                <legend>Prize distribution</legend>
+                <legend>{t("prizeDistribution")}</legend>
                 <div className="form__row" style={{ marginBottom: "2rem" }}>
-                    <label htmlFor="placesPaid">Places paid</label>
+                    <label htmlFor="placesPaid">{t("placesPaid")}</label>
                     <input id="placesPaid"
                         type="number"
                         name="placesPaid"
@@ -381,14 +453,14 @@ export default function PresetForm() {
                     <div key={i} className="form__grid">
                         <div className="form__row">
                             <label htmlFor={`payout-${i}`}>
-                                {ordinal(p.place)} place{" "}
+                                {t("placeLabel", { ordinal: ordinal(p.place, locale) })}{" "}
                                 <small>
                                     {" "}
                                     ({p.percent}% →{" "}
-                                    {(
+                                    {new Intl.NumberFormat(intlLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(
                                         ((preset.prizePool || 0) * p.percent) /
                                         100
-                                    ).toFixed(1)}{" "}
+                                    )}{" "}
                                     {currencySymbol(preset.currency)})
                                 </small>
                             </label>
@@ -411,12 +483,12 @@ export default function PresetForm() {
                         fontWeight: "bold",
                     }}
                 >
-                    Total: {totalPercent}% (must equal 100%)
+                    {t("total", { total: totalPercent })}
                 </p>
 
                 {/* Prize Pool (auto) */}
                 <div className="form__row">
-                    <label htmlFor="prizePool">Prize pool</label>
+                    <label htmlFor="prizePool">{t("prizePool")}</label>
                     <input id="prizePool" type="number" value={preset.prizePool || 0} readOnly />
                 </div>
             </fieldset>
@@ -425,7 +497,7 @@ export default function PresetForm() {
             {playerError && <p className="error">{playerError}</p>}
 
             <button className="btn btn--full" type="submit" disabled={starting}>
-                {starting ? "Seating players…" : "Start Game Manager"}
+                {starting ? t("seating") : t("start")}
             </button>
         </form>
     );

@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation.js";
 import gameResultsService from "@/services/gameResults.service";
 import usePresetStore from "@/stores/usePresetStore";
-import { toDatetimeLocalValue } from "@/utils/date.utils.js";
+import { shortDateTime, toDatetimeLocalValue } from "@/utils/date.utils.js";
+import { useT } from "@/i18n/i18n-provider.jsx";
 import { currencySymbol, displayPlayerName } from "@/utils/game.utils.js";
 import gameFinanceService from "@/services/gameFinance.service";
 import { centsToInput, formatCents, parseAmountToCents, splitByPercents } from "@/utils/money.utils.js";
@@ -17,6 +18,73 @@ import {
     Draggable,
 } from "@hello-pangea/dnd";
 
+const MESSAGES = {
+    en: {
+        checkAmounts: "Check the prize amounts: use numbers such as 12 or 12.50.",
+        leftToDistribute: (p) => `${p.amount} left to distribute`,
+        tooMuch: (p) => `${p.amount} too much distributed`,
+        noGame: "No game linked to this session. Use the 'Use Preset' button from a game page.",
+        duplicates: "Two or more players have the same name. Please fix duplicate names before saving.",
+        invalidEnd: "Please set a valid end time.",
+        close: "Close",
+        titleDone: "Results saved",
+        titleRecap: "Check the results",
+        titleEdit: "End game",
+        winner: "Winner",
+        backHome: "Back to home",
+        finishedAtRecap: (p) => `Finished at ${p.when}`,
+        distributed: (p) => `Distributed ${p.total} of ${p.pool}`,
+        notMatching: " (does not match the prize pool)",
+        stillIn: (p) => `${p.n} players are still in: each keeps their own remaining bounty.`,
+        back: "Back",
+        saving: "Saving...",
+        confirmSave: "Confirm and save",
+        finishedAt: "Finished at:",
+        loadingFinances: "Loading the game finances…",
+        prizePool: "Prize pool",
+        distributedShort: "Distributed",
+        bountiesNote: "Bounties are paid on top by the app: only the prize pool is split here.",
+        stillInEdit: (p) => `${p.n} players are still in. Record the remaining knockouts first, or each keeps their own bounty.`,
+        moveUp: (p) => `Move ${p.name} up`,
+        moveDown: (p) => `Move ${p.name} down`,
+        prize: "Prize",
+        prizeFor: (p) => `Prize for ${p.name}`,
+        review: "Review results",
+    },
+    fr: {
+        checkAmounts: "Vérifie les montants des gains : utilise des nombres comme 12 ou 12,50.",
+        leftToDistribute: (p) => `Il reste ${p.amount} à distribuer`,
+        tooMuch: (p) => `${p.amount} distribués en trop`,
+        noGame: "Aucune partie liée à cette session. Utilise le bouton « Utiliser le preset » depuis la page d'une partie.",
+        duplicates: "Au moins deux joueurs ont le même nom. Corrige les doublons avant d'enregistrer.",
+        invalidEnd: "Indique une heure de fin valide.",
+        close: "Fermer",
+        titleDone: "Résultats enregistrés",
+        titleRecap: "Vérifie les résultats",
+        titleEdit: "Terminer la partie",
+        winner: "Vainqueur",
+        backHome: "Retour à l'accueil",
+        finishedAtRecap: (p) => `Terminée le ${p.when}`,
+        distributed: (p) => `${p.total} distribués sur ${p.pool}`,
+        notMatching: " (ne correspond pas au prize pool)",
+        stillIn: (p) => `${p.n} joueurs sont encore en jeu : chacun garde sa propre bounty restante.`,
+        back: "Retour",
+        saving: "Enregistrement...",
+        confirmSave: "Confirmer et enregistrer",
+        finishedAt: "Terminée le :",
+        loadingFinances: "Chargement des finances de la partie…",
+        prizePool: "Prize pool",
+        distributedShort: "Distribué",
+        bountiesNote: "Les bounties sont versées en plus par l'app : seul le prize pool est réparti ici.",
+        stillInEdit: (p) => `${p.n} joueurs sont encore en jeu. Enregistre d'abord les éliminations restantes, sinon chacun garde sa bounty.`,
+        moveUp: (p) => `Monter ${p.name}`,
+        moveDown: (p) => `Descendre ${p.name}`,
+        prize: "Gain",
+        prizeFor: (p) => `Gain de ${p.name}`,
+        review: "Vérifier les résultats",
+    },
+};
+
 export default function EndGameModal({
     gameId,
     players,
@@ -26,6 +94,7 @@ export default function EndGameModal({
     onClose,
 }) {
     const router = useRouter();
+    const { t, locale, intlLocale } = useT(MESSAGES);
     const resetPreset = usePresetStore((state) => state.resetPreset);
     const setPreset = usePresetStore((state) => state.setPreset);
     const resultsDraft = usePresetStore((state) => state.preset.resultsDraft);
@@ -55,7 +124,7 @@ export default function EndGameModal({
     const finance = financeState.finance;
     const tracked = Boolean(finance?.tracked);
     const poolCents = tracked ? finance.totals.prizePoolCents : 0;
-    const money = (cents) => formatCents(cents, currency);
+    const money = (cents) => formatCents(cents, currency, intlLocale);
 
     // Ancien flux (partie jamais suivie) : unites entieres, comme avant
     const prizePool = tracked ? poolCents / 100 : buyIn * (players?.length || 0);
@@ -63,14 +132,14 @@ export default function EndGameModal({
     // Joueurs du classement : ceux qui ont paye (en PKO, du dernier elimine au premier d'abord)
     const rankedPlayers = useMemo(() => {
         if (!tracked) {
-            return players.map((p) => ({ gamePlayerId: p.id, name: displayPlayerName(p.user ? p.user.username : p.name) }));
+            return players.map((p) => ({ gamePlayerId: p.id, name: displayPlayerName(p.user ? p.user.username : p.name, locale) }));
         }
         const byId = new Map(finance.players.map((p) => [p.id, p]));
         const presetOrder = players.map((p) => p.id).filter((id) => byId.has(id));
         const order = finance.config.pkoEnabled && finance.suggestedOrder?.length ? finance.suggestedOrder : presetOrder;
         const ids = [...order.filter((id) => byId.has(id)), ...finance.players.map((p) => p.id).filter((id) => !order.includes(id))];
         return ids.map((id) => ({ gamePlayerId: id, name: byId.get(id).name }));
-    }, [tracked, finance, players]);
+    }, [tracked, finance, players, locale]);
 
     // Prizes proposes selon la repartition (centimes repartis comme le serveur le fait)
     const withPrizes = (list) => {
@@ -143,10 +212,10 @@ export default function EndGameModal({
     const amount = (value) => (tracked ? money(Math.round(Number(value) * 100)) : `${Number(value) || 0} ${symbol}`);
     const prizeAmount = (r) => (tracked ? money(parseAmountToCents(r.prize === "" ? "0" : r.prize) ?? 0) : amount(r.prize));
     const leftText = hasInvalidPrize
-        ? "Check the prize amounts: use numbers such as 12 or 12,50."
+        ? t("checkAmounts")
         : leftCents > 0
-            ? `${money(leftCents)} left to distribute`
-            : `${money(-leftCents)} too much distributed`;
+            ? t("leftToDistribute", { amount: money(leftCents) })
+            : t("tooMuch", { amount: money(-leftCents) });
     // En PKO, chaque joueur encore en jeu garde sa bounty : l'hote doit le savoir avant d'enregistrer
     const aliveCount = finance?.totals?.aliveCount ?? 0;
     const multipleAlive = tracked && finance.config.pkoEnabled && aliveCount > 1;
@@ -159,7 +228,7 @@ export default function EndGameModal({
         e.preventDefault();
 
         if (!gameId) {
-            setError(["No game linked to this session. Use the 'Use Preset' button from a game page."]);
+            setError([t("noGame")]);
             return;
         }
 
@@ -171,13 +240,13 @@ export default function EndGameModal({
         const names = results.map((r) => normalizeName(r.name));
         const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i);
         if (hasDuplicates) {
-            setError(["Two or more players have the same name. Please fix duplicate names before saving."]);
+            setError([t("duplicates")]);
             return;
         }
 
         const finishedDate = new Date(finishedAt);
         if (!finishedAt || Number.isNaN(finishedDate.getTime())) {
-            setError(["Please set a valid end time."]);
+            setError([t("invalidEnd")]);
             return;
         }
 
@@ -233,18 +302,18 @@ export default function EndGameModal({
         <div className="modal">
             <div className="modal__overlay" onClick={closeModal} />
             <div className="modal__content" role="dialog" aria-modal="true" aria-labelledby="end-game-title">
-                <button type="button" onClick={closeModal} className="modal__close" aria-label="Close">
+                <button type="button" onClick={closeModal} className="modal__close" aria-label={t("close")}>
                     <FontAwesomeIcon icon={faTimes} />
                 </button>
 
                 <h2 className="modal__title" id="end-game-title">
-                    {step === "done" ? "Results saved" : step === "recap" ? "Check the results" : "End Game"}
+                    {step === "done" ? t("titleDone") : step === "recap" ? t("titleRecap") : t("titleEdit")}
                 </h2>
 
                 {step === "done" && saved && (
                     <div className="results-summary">
                         <p className="results-summary__winner">
-                            Winner: <strong>{displayPlayerName(saved.results[0]?.name)}</strong>
+                            {t("winner")}: <strong>{displayPlayerName(saved.results[0]?.name, locale)}</strong>
                         </p>
                         {saved.recap && <FinanceRecap recap={saved.recap} currency={currency} />}
                         {!saved.recap && <ol className="results-recap">
@@ -254,36 +323,36 @@ export default function EndGameModal({
                                 .map((r) => (
                                     <li key={r.gamePlayerId}>
                                         <span className="results-recap__rank">#{r.rank}</span>
-                                        <span className="results-recap__name">{displayPlayerName(r.name)}</span>
+                                        <span className="results-recap__name">{displayPlayerName(r.name, locale)}</span>
                                         <span>{amount(r.prize)}</span>
                                     </li>
                                 ))}
                         </ol>}
                         <button type="button" className="btn btn--primary" onClick={backToHome}>
-                            Back to home
+                            {t("backHome")}
                         </button>
                     </div>
                 )}
 
                 {step === "recap" && (
                     <div className="results-summary">
-                        <p>Finished at {finishedAt.replace("T", " ")}</p>
+                        <p>{t("finishedAtRecap", { when: shortDateTime(new Date(finishedAt), intlLocale) })}</p>
                         <ol className="results-recap">
                             {results.map((r, i) => (
                                 <li key={r.gamePlayerId}>
                                     <span className="results-recap__rank">#{i + 1}</span>
-                                    <span className="results-recap__name">{displayPlayerName(r.name)}</span>
+                                    <span className="results-recap__name">{displayPlayerName(r.name, locale)}</span>
                                     <span>{prizeAmount(r)}</span>
                                 </li>
                             ))}
                         </ol>
                         <p className={`results-total${matches ? "" : " is-warning"}`}>
-                            Distributed {amount(totalPrizes)} of {amount(prizePool)}
-                            {matches ? "" : " (does not match the prize pool)"}
+                            {t("distributed", { total: amount(totalPrizes), pool: amount(prizePool) })}
+                            {matches ? "" : t("notMatching")}
                         </p>
                         {multipleAlive && (
                             <p className="results-total is-warning">
-                                {aliveCount} players are still in: each keeps their own remaining bounty.
+                                {t("stillIn", { n: aliveCount })}
                             </p>
                         )}
                         {error && <p className="error">{error}</p>}
@@ -294,7 +363,7 @@ export default function EndGameModal({
                                 disabled={loading}
                                 onClick={() => setStep("edit")}
                             >
-                                Back
+                                {t("back")}
                             </button>
                             <button
                                 type="button"
@@ -302,7 +371,7 @@ export default function EndGameModal({
                                 disabled={loading}
                                 onClick={handleSave}
                             >
-                                {loading ? "Saving..." : "Confirm and save"}
+                                {loading ? t("saving") : t("confirmSave")}
                             </button>
                         </div>
                     </div>
@@ -311,7 +380,7 @@ export default function EndGameModal({
                 {step === "edit" && (
                     <form onSubmit={handleReview} className="modal__form">
                         <label>
-                            Finished At:
+                            {t("finishedAt")}
                             <input
                                 type="datetime-local"
                                 value={finishedAt}
@@ -319,18 +388,18 @@ export default function EndGameModal({
                             />
                         </label>
 
-                        {financeState.loading && <p className="results-total">Loading the game finances…</p>}
+                        {financeState.loading && <p className="results-total">{t("loadingFinances")}</p>}
                         <p className="results-total">
-                            Prize Pool: {amount(prizePool)} — Distributed:{" "}
+                            {t("prizePool")}: {amount(prizePool)} — {t("distributedShort")}:{" "}
                             <span className={matches ? "" : "is-warning"}>{amount(totalPrizes)}</span>
                         </p>
                         {tracked && !matches && <p className="results-total is-warning" role="status">{leftText}</p>}
                         {tracked && finance.totals.prizePoolCents !== finance.totals.investedCents && (
-                            <p className="gray">Bounties are paid on top by the app: only the prize pool is split here.</p>
+                            <p className="gray">{t("bountiesNote")}</p>
                         )}
                         {multipleAlive && (
                             <p className="results-total is-warning">
-                                {aliveCount} players are still in. Record the remaining knockouts first, or each keeps their own bounty.
+                                {t("stillInEdit", { n: aliveCount })}
                             </p>
                         )}
 
@@ -362,12 +431,12 @@ export default function EndGameModal({
                                                             <FontAwesomeIcon icon={faGripLines} />
                                                         </span>
                                                         <span className="results-rank">#{index + 1}</span>
-                                                        <span className="player-name">{displayPlayerName(player.name)}</span>
+                                                        <span className="player-name">{displayPlayerName(player.name, locale)}</span>
                                                         <span className="results-move">
                                                             <button
                                                                 type="button"
                                                                 data-direction="-1"
-                                                                aria-label={`Move ${player.name} up`}
+                                                                aria-label={t("moveUp", { name: displayPlayerName(player.name, locale) })}
                                                                 disabled={index === 0}
                                                                 onClick={() => handleMove(index, -1)}
                                                             >
@@ -376,7 +445,7 @@ export default function EndGameModal({
                                                             <button
                                                                 type="button"
                                                                 data-direction="1"
-                                                                aria-label={`Move ${player.name} down`}
+                                                                aria-label={t("moveDown", { name: displayPlayerName(player.name, locale) })}
                                                                 disabled={index === results.length - 1}
                                                                 onClick={() => handleMove(index, 1)}
                                                             >
@@ -386,8 +455,8 @@ export default function EndGameModal({
                                                         <span className="results-prize">
                                                             <input
                                                                 {...(tracked ? { type: "text", inputMode: "decimal" } : { type: "number" })}
-                                                                placeholder="Prize"
-                                                                aria-label={`Prize for ${player.name}`}
+                                                                placeholder={t("prize")}
+                                                                aria-label={t("prizeFor", { name: displayPlayerName(player.name, locale) })}
                                                                 value={player.prize}
                                                                 onChange={(e) =>
                                                                     handlePrizeChange(
@@ -410,7 +479,7 @@ export default function EndGameModal({
 
                         {error && <p className="error">{error}</p>}
                         <button type="submit" className="btn btn--primary" disabled={financeState.loading || (tracked && !matches)}>
-                            Review results
+                            {t("review")}
                         </button>
                     </form>
                 )}
