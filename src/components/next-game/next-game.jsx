@@ -8,11 +8,14 @@ import gameService from '@/services/game.service.js';
 import gameInviteService from '@/services/gameInvite.service.js';
 import useAuthStore from '@/stores/useAuthStore.js';
 import useToastStore from '@/stores/useToastStore.js';
-import { getConfirmedCount, inviteResponseToast } from '@/utils/game.utils.js';
+import { getConfirmedCount } from '@/utils/game.utils.js';
+import { useGameT, useInviteResponseToast } from '@/utils/game-labels.utils.js';
 import { isSameLocalDay, relativeDateTime } from '@/utils/date.utils.js';
 
 // Prochaine partie de l'utilisateur : la plus proche parmi aujourd'hui, invitations en attente et à venir
 export default function NextGame({ onLoaded, onResponded }) {
+  const { t, locale } = useGameT();
+  const inviteToast = useInviteResponseToast();
   const [candidates, setCandidates] = useState(null);
   const [acting, setActing] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
@@ -69,14 +72,14 @@ export default function NextGame({ onLoaded, onResponded }) {
     if (candidates) onLoaded?.(next?.gameId ?? null);
   }, [candidates, next?.gameId, onLoaded]);
 
-  if (!candidates) return <div className="next-game"><div className="skeleton" role="status" aria-busy="true" aria-label="Loading your next game"></div></div>;
+  if (!candidates) return <div className="next-game"><div className="skeleton" role="status" aria-busy="true" aria-label={t("loadingNext")}></div></div>;
 
   if (!next) {
     return (
       <section className="next-game next-game--empty" aria-labelledby="next-game-title">
-        <p className="next-game__label" id="next-game-title">Your next game</p>
-        <p>No game planned yet.</p>
-        <Link href="/games/create" className="btn"><FontAwesomeIcon icon={faPlus} /> Create a game</Link>
+        <p className="next-game__label" id="next-game-title">{t("yourNext")}</p>
+        <p>{t("noGame")}</p>
+        <Link href="/games/create" className="btn"><FontAwesomeIcon icon={faPlus} /> {t("createGame")}</Link>
       </section>
     );
   }
@@ -87,10 +90,10 @@ export default function NextGame({ onLoaded, onResponded }) {
     const res = await gameInviteService.respond(next.myInvite.id, action);
     setActing(false);
     if (!res.success) {
-      showToast(res.errorMessage?.[0] || "Something went wrong, please try again.");
+      showToast(t("genericError"));
       return;
     }
-    showToast(...inviteResponseToast(action, next.name));
+    showToast(...inviteToast(action, next.name));
     // Refusée : la partie quitte la liste ; acceptée : on garde la partie et on met à jour ma réponse
     setCandidates((prev) => action === "refused"
       ? prev.filter((c) => c.gameId !== next.gameId)
@@ -108,42 +111,42 @@ export default function NextGame({ onLoaded, onResponded }) {
   let primary;
   if (next.isHost) {
     primary = gameDay
-      ? <Link href={`/manager/preset?gameId=${next.gameId}`} className="btn">Start Game Manager</Link>
-      : <Link href={`/games/${next.gameId}`} className="btn">Invite friends</Link>;
+      ? <Link href={`/manager/preset?gameId=${next.gameId}`} className="btn">{t("startManager")}</Link>
+      : <Link href={`/games/${next.gameId}`} className="btn">{t("inviteFriends")}</Link>;
   } else if (!pending) {
-    primary = <Link href={`/games/${next.gameId}`} className="btn">View game</Link>;
+    primary = <Link href={`/games/${next.gameId}`} className="btn">{t("viewGame")}</Link>;
   }
 
   return (
     <section className="next-game" aria-labelledby="next-game-title">
-      <p className="next-game__label" id="next-game-title">Your next game</p>
+      <p className="next-game__label" id="next-game-title">{t("yourNext")}</p>
       <h2 className="next-game__name">{next.name}</h2>
-      <p className="next-game__when">{relativeDateTime(next.dateStart)}</p>
+      <p className="next-game__when">{relativeDateTime(next.dateStart, locale)}</p>
       <ul className="next-game__facts">
         {next.location && <li><FontAwesomeIcon icon={faLocationDot} className="fa-icon" /> {next.location}</li>}
         {next.confirmed !== null && (
-          <li><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> Players: {next.confirmed} confirmed · {next.invited} invited</li>
+          <li><FontAwesomeIcon icon={faUserGroup} className="fa-icon" /> {t("playersFact", { confirmed: next.confirmed, invited: next.invited })}</li>
         )}
         <li>
-          <span className="gray">{next.isHost ? "You are hosting" : "Your answer:"}</span>{" "}
-          {!next.isHost && <span className={`player__status player__status--${next.myInvite?.status ?? "accepted"}`}>{next.myInvite?.status ?? "accepted"}</span>}
+          <span className="gray">{next.isHost ? t("hosting") : t("yourAnswer")}</span>{" "}
+          {!next.isHost && <span className={`player__status player__status--${next.myInvite?.status ?? "accepted"}`}>{t(`playerStatus.${next.myInvite?.status ?? "accepted"}`)}</span>}
         </li>
       </ul>
       <div className="next-game__actions">
         {pending ? (
           <>
             <button type="button" className="btn" disabled={acting} onClick={() => respond("accepted")}>
-              <FontAwesomeIcon icon={faCheck} /> Accept
+              <FontAwesomeIcon icon={faCheck} /> {t("accept")}
             </button>
             <button type="button" className="btn btn--secondary" disabled={acting} onClick={() => respond("refused")}>
-              <FontAwesomeIcon icon={faXmark} /> Refuse
+              <FontAwesomeIcon icon={faXmark} /> {t("refuse")}
             </button>
-            <Link href={`/games/${next.gameId}`} className="btn btn--link">View game</Link>
+            <Link href={`/games/${next.gameId}`} className="btn btn--link">{t("viewGame")}</Link>
           </>
         ) : (
           <>
             {primary}
-            {next.isHost && <Link href={`/games/${next.gameId}`} className="btn btn--secondary">View game</Link>}
+            {next.isHost && <Link href={`/games/${next.gameId}`} className="btn btn--secondary">{t("viewGame")}</Link>}
           </>
         )}
       </div>

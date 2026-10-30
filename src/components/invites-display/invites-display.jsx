@@ -14,8 +14,10 @@ import Link from 'next/link.js';
 import { useEffect, useState } from 'react';
 import useToastStore from "@/stores/useToastStore.js";
 import InvitesSkeleton from './invites-skeleton.jsx';
+import { useGameT } from '@/utils/game-labels.utils.js';
 
 export default function InvitesDisplay() {
+    const { t, locale } = useGameT();
     const [invites, setInvites] = useState([]);
     const [isExpanded, setIsExpanded] = useState(true);
     const [loadingId, setLoadingId] = useState(null);
@@ -43,7 +45,7 @@ export default function InvitesDisplay() {
         if (result.success) {
             setInvites(prev => prev.filter(invite => invite.inviteId !== inviteId));
         } else {
-            showToast(result.errorMessage?.[0] || "Something went wrong, please try again.");
+            showToast(t("genericError"));
         }
     };
 
@@ -58,8 +60,8 @@ export default function InvitesDisplay() {
             {/* --- INVITES --- */}
             <section className="section section__invites">
                 <h2>
-                    Game <span className="red">Invites</span> ({invites.length})
-                    <button type="button" className="expand" aria-expanded={isExpanded} aria-label="Toggle invitations" onClick={() => setIsExpanded(!isExpanded)}>
+                    {t("gameTitle")} <span className="red">{t("gameTitleRed")}</span> ({invites.length})
+                    <button type="button" className="expand" aria-expanded={isExpanded} aria-label={t("toggleInvites")} onClick={() => setIsExpanded(!isExpanded)}>
                         <FontAwesomeIcon icon={isExpanded ? faCaretUp : faCaretDown} />
                     </button>
                 </h2>
@@ -70,11 +72,11 @@ export default function InvitesDisplay() {
                             <div key={invite.inviteId} className="card card--invite">
                                 <div className="card__header">
                                     <h3 className="title title--card">{invite.gameName}</h3>
-                                    <p className="subtitle subtitle--card">Invited by {invite.host}</p>
+                                    <p className="subtitle subtitle--card">{t("invitedBy", { name: invite.host })}</p>
                                 </div>
                                 <div className="card__body">
-                                    <p className="card__when">{relativeDateTime(invite.dateStart)}</p>
-                                    <p><span className="chip">Upcoming</span></p>
+                                    <p className="card__when">{relativeDateTime(invite.dateStart, locale)}</p>
+                                    <p><span className="chip">{t("status.pending")}</span></p>
                                     {invite.location && <p className="subtitle">@{invite.location}</p>}
 
                                     <div className="card__actions">
@@ -83,24 +85,24 @@ export default function InvitesDisplay() {
                                             className="btn btn--card"
                                             disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "accepted")}>
-                                            <FontAwesomeIcon icon={faCheck} /> Accept
+                                            <FontAwesomeIcon icon={faCheck} /> {t("accept")}
                                         </button>
                                         <button
                                             type="button"
                                             className="btn btn--card btn--secondary"
                                             disabled={loadingId === invite.inviteId}
                                             onClick={() => handleRespond(invite.inviteId, "refused")}>
-                                            <FontAwesomeIcon icon={faXmark} /> Refuse
+                                            <FontAwesomeIcon icon={faXmark} /> {t("refuse")}
                                         </button>
                                         <Link href={`/games/${invite.gameId}`} className="btn btn--card btn--link">
-                                            <FontAwesomeIcon icon={faEye} /> View
+                                            <FontAwesomeIcon icon={faEye} /> {t("view")}
                                         </Link>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p>No game invites at the moment.</p>
+                        <p>{t("noGameInvites")}</p>
                     )}
                 </div>
             </section>

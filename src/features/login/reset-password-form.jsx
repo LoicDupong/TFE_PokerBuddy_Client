@@ -12,6 +12,9 @@ import { getFieldError } from "@/utils/getFieldError.utils.js";
 import userService from "@/services/user.service.js";
 import useAuthStore from "@/stores/useAuthStore";
 import { rememberAuthEmail } from "./auth-handoff.js";
+import { useT, useLocale } from "@/i18n/i18n-provider.jsx";
+import { AUTH_MESSAGES } from "./auth.messages.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 // Lit le jeton dans l'URL puis l'en retire aussitôt : il ne reste ni dans l'historique,
 // ni dans les outils d'analytics, ni dans un éventuel referrer. Gardé en mémoire seulement.
@@ -26,6 +29,9 @@ function readTokenAndCleanUrl() {
 }
 
 export default function ResetPasswordForm() {
+    const { t } = useT(AUTH_MESSAGES);
+    const { locale } = useLocale();
+    const serverError = useServerError();
     const inputId = useId();
     const router = useRouter();
     const titleRef = useRef(null);
@@ -52,7 +58,7 @@ export default function ResetPasswordForm() {
         if (!token || isPending) return;
 
         const data = Object.fromEntries(new FormData(e.target));
-        const validation = validateResetPassword(data);
+        const validation = validateResetPassword(data, locale);
         if (!validation.ok) {
             setErrorMessage(validation.errors);
             return;
@@ -75,7 +81,7 @@ export default function ResetPasswordForm() {
             setToken(null);
             setLinkInvalid(true);
         } else {
-            setErrorMessage([{ field: "form", message: res.error }]);
+            setErrorMessage([{ field: "form", message: serverError(res.error) }]);
         }
     }
 
@@ -91,23 +97,23 @@ export default function ResetPasswordForm() {
         return (
             <section className="auth auth--reset">
                 <h1 className="title title--auth" ref={titleRef} tabIndex={-1}>
-                    This link <span className="red">no longer works</span>
+                    {t("brokenTitle")} <span className="red">{t("brokenRed")}</span>
                 </h1>
 
                 <div className="auth__panel auth__panel--warning" role="alert">
                     <FontAwesomeIcon icon={faLink} className="auth__panel-icon" aria-hidden="true" />
                     <div>
-                        <p>It has expired or has already been used. Reset links work for 30 minutes, and only once.</p>
-                        <p className="auth__hint">Ask for a new one and use the most recent email you receive.</p>
+                        <p>{t("brokenText")}</p>
+                        <p className="auth__hint">{t("brokenHint")}</p>
                     </div>
                 </div>
 
                 <div className="auth__actions">
-                    <Link href="/auth/forgot-password" className="btn btn--full">Send me a new link</Link>
+                    <Link href="/auth/forgot-password" className="btn btn--full">{t("newLink")}</Link>
                 </div>
 
                 <p className="auth__redirect">
-                    Remembered your password? <Link href="/auth/login" className="link">Log in</Link>
+                    {t("rememberedPwd")} <Link href="/auth/login" className="link">{t("logIn")}</Link>
                 </p>
             </section>
         );
@@ -116,27 +122,26 @@ export default function ResetPasswordForm() {
     return (
         <section className="auth auth--reset">
             <h1 className="title title--auth" ref={titleRef} tabIndex={-1}>
-                Choose a <span className="red">new password</span>
+                {t("chooseTitle")} <span className="red">{t("chooseRed")}</span>
             </h1>
             <p className="auth__intro">
-                Once it&apos;s saved, every device logged in to your account is logged out. You&apos;ll log in
-                again with the new one.
+                {t("chooseIntro")}
             </p>
 
             <form onSubmit={handleSubmit} className="form form--auth" id="reset-password-form" noValidate>
                 <div className="form__row">
                     <label htmlFor={inputId + "password"}>
-                        <FontAwesomeIcon icon={faLock} /> New password
+                        <FontAwesomeIcon icon={faLock} /> {t("newPassword")}
                     </label>
                     <p className="auth__hint" id={inputId + "password-rules"}>
-                        At least 6 characters, with an uppercase letter and a number.
+                        {t("rules")}
                     </p>
                     <div className="input__container">
                         <input
                             type={showPassword ? "text" : "password"}
                             id={inputId + "password"}
                             name="password"
-                            placeholder="Enter a new password"
+                            placeholder={t("newPh")}
                             autoComplete="new-password"
                             className="input--with-toggle"
                             aria-invalid={!!getFieldError(errorMessage, "password")}
@@ -146,7 +151,7 @@ export default function ResetPasswordForm() {
                             type="button"
                             className="input__toggle"
                             onClick={() => setShowPassword((v) => !v)}
-                            aria-label={showPassword ? "Hide passwords" : "Show passwords"}
+                            aria-label={showPassword ? t("hidePasswords") : t("showPasswords")}
                             aria-pressed={showPassword}
                         >
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
@@ -157,13 +162,13 @@ export default function ResetPasswordForm() {
 
                 <div className="form__row">
                     <label htmlFor={inputId + "confirmPassword"}>
-                        <FontAwesomeIcon icon={faLock} /> Confirm new password
+                        <FontAwesomeIcon icon={faLock} /> {t("confirmNew")}
                     </label>
                     <input
                         type={showPassword ? "text" : "password"}
                         id={inputId + "confirmPassword"}
                         name="confirmPassword"
-                        placeholder="Type it again"
+                        placeholder={t("againPh")}
                         autoComplete="new-password"
                         aria-invalid={!!getFieldError(errorMessage, "confirmPassword")}
                         aria-describedby={describedBy("confirmPassword")}
@@ -172,7 +177,7 @@ export default function ResetPasswordForm() {
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending || token === undefined}>
-                    <FontAwesomeIcon icon={faFloppyDisk} /> {isPending ? "Saving…" : "Save my new password"}
+                    <FontAwesomeIcon icon={faFloppyDisk} /> {isPending ? t("saving") : t("saveNew")}
                 </button>
 
                 {getFieldError(errorMessage, "form") && (

@@ -9,36 +9,57 @@ import { useEffect, useState } from "react";
 
 import useAuthStore from "@/stores/useAuthStore";
 import useNotificationStore, { useNotificationSync } from "@/stores/useNotificationStore";
+import { useT } from "@/i18n/i18n-provider.jsx";
 
+
+const MESSAGES = {
+    en: {
+        games: "My Games", create: "Create Game", manager: "Game Manager", leaderboard: "Leaderboard",
+        profile: "Profile", admin: "Admin", home: "Home", login: "Login", logout: "Logout", learn: "Learn",
+        rules: "Poker Rules", hands: "Poker Hands", strategy: "Poker Strategy", terms: "Poker Terms",
+        main: "Main", openMenu: "Open menu", closeMenu: "Close menu", logo: "PokerBuddy logo",
+        notifications: "Notifications",
+        notificationsUnread: (p) => `Notifications (${p.count} unread)`,
+    },
+    fr: {
+        games: "Mes parties", create: "Créer une partie", manager: "Game Manager", leaderboard: "Classement",
+        profile: "Profil", admin: "Admin", home: "Accueil", login: "Connexion", logout: "Déconnexion", learn: "Apprendre",
+        rules: "Règles du poker", hands: "Mains de poker", strategy: "Stratégie", terms: "Lexique du poker",
+        main: "Principale", openMenu: "Ouvrir le menu", closeMenu: "Fermer le menu", logo: "Logo PokerBuddy",
+        notifications: "Notifications",
+        notificationsUnread: (p) => `Notifications (${p.count} non lue${p.count > 1 ? "s" : ""})`,
+    },
+};
 
 const learnLinks = [
-    { href: "/learn/rules", name: "Poker Rules" },
-    { href: "/learn/hands", name: "Poker Hands" },
-    { href: "/learn/strategy", name: "Poker Strategy" },
-    { href: "/learn/terms", name: "Poker Terms" },
+    { href: "/learn/rules", key: "rules" },
+    { href: "/learn/hands", key: "hands" },
+    { href: "/learn/strategy", key: "strategy" },
+    { href: "/learn/terms", key: "terms" },
 ];
 
 export default function Navbar() {
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const unreadCount = useNotificationStore((state) => state.unreadCount);
+    const { t } = useT(MESSAGES);
 
     // Logout est rendu à part : toujours en dernier et visuellement secondaire
     const links = [
-        { href: "/games", name: "My Games" },
-        { href: "/games/create", name: "Create Game" },
-        { href: "/manager", name: "Game Manager" },
-        { href: "/leaderboard", name: "Leaderboard" },
-        { href: "/profile", name: "Profile" },
+        { href: "/games", name: t("games") },
+        { href: "/games/create", name: t("create") },
+        { href: "/manager", name: t("manager") },
+        { href: "/leaderboard", name: t("leaderboard") },
+        { href: "/profile", name: t("profile") },
     ];
 
     const baseLinks = [
-        { href: "/", name: "Home" },
-        { href: "/auth/login", name: "Login" },
-        { href: "/manager", name: "Game Manager" },
+        { href: "/", name: t("home") },
+        { href: "/auth/login", name: t("login") },
+        { href: "/manager", name: t("manager") },
     ];
 
-    const bellLabel = unreadCount > 0 ? `Notifications (${unreadCount} unread)` : "Notifications";
+    const bellLabel = unreadCount > 0 ? t("notificationsUnread", { count: unreadCount }) : t("notifications");
     const bellClass = `notification${unreadCount > 0 ? " has-notification" : ""}`;
 
     const pathname = usePathname();
@@ -77,12 +98,12 @@ export default function Navbar() {
     if (isMobile === null) return <nav className="nav" />;
 
     // Lien Admin : confort d'affichage seulement, l'API refuse de toute façon un non-admin
-    const navLinks = user ? (user.role === "admin" ? [...links, { href: "/admin", name: "Admin" }] : links) : baseLinks;
+    const navLinks = user ? (user.role === "admin" ? [...links, { href: "/admin", name: t("admin") }] : links) : baseLinks;
 
     // Desktop
     if (!isMobile) {
         return (
-            <nav className="nav nav--desktop" aria-label="Main">
+            <nav className="nav nav--desktop" aria-label={t("main")}>
                 {navLinks.map(({ href, name }) => (
                     <Link
                         key={href}
@@ -96,19 +117,19 @@ export default function Navbar() {
                 {/* Learn dropdown desktop */}
                 <div className="nav__dropdown">
                     <span className="nav__item nav__item--dropdown">
-                        Learn <FontAwesomeIcon icon={faChevronDown} className="nav__icon" />
+                        {t("learn")} <FontAwesomeIcon icon={faChevronDown} className="nav__icon" />
                     </span>
                     <div className="nav__submenu">
-                        {learnLinks.map(({ href, name }) => (
+                        {learnLinks.map(({ href, key }) => (
                             <Link key={href} href={href} className="nav__subitem">
-                                {name}
+                                {t(key)}
                             </Link>
                         ))}
                     </div>
                 </div>
                 {user && (
                     <Link href="/" onClick={logout} className="nav__item nav__item--logout">
-                        Logout
+                        {t("logout")}
                     </Link>
                 )}
                 {/* Pas de has-notification sur l'icône : le point est déjà sur le lien */}
@@ -121,13 +142,13 @@ export default function Navbar() {
 
     // Mobile
     return (
-        <nav className="nav" aria-label="Main">
+        <nav className="nav" aria-label={t("main")}>
             {user && (
                 <Link href={'/notifications'} aria-label={bellLabel} className={bellClass}>
                     <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" aria-hidden="true" />
                 </Link>
             )}
-            <button type="button" className="nav__toggle" onClick={() => setIsOpen(true)} aria-label="Open menu" aria-expanded={isOpen}>
+            <button type="button" className="nav__toggle" onClick={() => setIsOpen(true)} aria-label={t("openMenu")} aria-expanded={isOpen}>
                 <FontAwesomeIcon icon={faBars} size="xl" aria-hidden="true" />
             </button>
 
@@ -138,7 +159,7 @@ export default function Navbar() {
                         <Image
                             src="/pokerbuddy_logo_light.png"
                             className="logo logo--header"
-                            alt="PokerBuddy logo"
+                            alt={t("logo")}
                             width={145}
                             height={70}
                             priority
@@ -150,7 +171,7 @@ export default function Navbar() {
                                 <FontAwesomeIcon icon={faBell} className="nav__icon--notification" size="xl" aria-hidden="true" />
                             </Link>
                         )}
-                        <button type="button" className="nav__close" onClick={() => setIsOpen(false)} aria-label="Close menu">
+                        <button type="button" className="nav__close" onClick={() => setIsOpen(false)} aria-label={t("closeMenu")}>
                             <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
                         </button>
                     </div>
@@ -176,14 +197,14 @@ export default function Navbar() {
                         onClick={() => setLearnOpen(!learnOpen)}
                         aria-expanded={learnOpen}
                     >
-                        Learn{" "}
+                        {t("learn")}{" "}
                         <FontAwesomeIcon
                             icon={learnOpen ? faChevronUp : faChevronDown}
                             className="nav__icon"
                         />
                     </button>
                     <div className={`nav__submenu ${learnOpen ? "open" : ""}`}>
-                        {learnLinks.map(({ href, name }) => (
+                        {learnLinks.map(({ href, key }) => (
                             <Link
                                 key={href}
                                 href={href}
@@ -191,7 +212,7 @@ export default function Navbar() {
                                 aria-current={pathname === href ? "page" : undefined}
                                 onClick={() => setIsOpen(false)}
                             >
-                                {name}
+                                {t(key)}
                             </Link>
                         ))}
                     </div>
@@ -205,7 +226,7 @@ export default function Navbar() {
                             }}
                             className="nav__item nav__item--logout"
                         >
-                            Logout
+                            {t("logout")}
                         </Link>
                     )}
                 </div>

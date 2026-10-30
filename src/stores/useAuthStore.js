@@ -40,9 +40,9 @@ const useAuthStore = create((set, get) => ({
   },
 
   // 🔹 Register → /auth/register
-  register: async (username, email, password, claim) => {
+  register: async (username, email, password, claim, locale) => {
     try {
-      const res = await api.post("/auth/register", { username, email, password, ...(claim ? { claim } : {}) });
+      const res = await api.post("/auth/register", { username, email, password, ...(claim ? { claim } : {}), ...(locale ? { locale } : {}) });
       const { token, user } = res.data;
 
       // Hydrate store + localStorage

@@ -12,8 +12,14 @@ import { getFieldError } from "@/utils/getFieldError.utils.js";
 import { getSafeRedirect } from "@/utils/redirect.utils.js";
 import useAuthStore from "@/stores/useAuthStore";
 import { rememberAuthEmail, takeAuthEmail } from "./auth-handoff.js";
+import { useT, useLocale } from "@/i18n/i18n-provider.jsx";
+import { AUTH_MESSAGES } from "./auth.messages.js";
+import { useServerError } from "@/utils/server-errors.utils.js";
 
 export default function LoginForm() {
+    const { t } = useT(AUTH_MESSAGES);
+    const { locale } = useLocale();
+    const serverError = useServerError();
     const inputId = useId();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -49,7 +55,7 @@ export default function LoginForm() {
         const data = Object.fromEntries(formData);
 
         // ✅ Validation avec Zod
-        const validation = validateLogin(data);
+        const validation = validateLogin(data, locale);
         if (!validation.ok) {
             setErrorMessage(validation.errors);
             setIsPending(false);
@@ -64,7 +70,7 @@ export default function LoginForm() {
             setAuth(user, token);
             router.push(redirect || "/");
         } else {
-            setErrorMessage([{ field: "form", message: res.error?.error || "Login failed" }]);
+            setErrorMessage([{ field: "form", message: serverError(res.error?.error) || t("loginFailed") }]);
         }
 
         setIsPending(false);
@@ -72,25 +78,25 @@ export default function LoginForm() {
 
     return (
         <section className="auth auth--login">
-            <h1 className="title title--auth">Log in</h1>
+            <h1 className="title title--auth">{t("loginTitle")}</h1>
 
             {passwordWasReset && (
                 <p className="form__alert form__alert--success auth__notice" role="status">
-                    Your password has been changed. Log in with your new one.
+                    {t("resetDone")}
                 </p>
             )}
 
             <form onSubmit={handleLogin} className="form form--auth" id="login-form" noValidate>
                 <div className="form__row">
                     <label htmlFor={inputId + "email"}>
-                        <FontAwesomeIcon icon={faEnvelope} /> Email
+                        <FontAwesomeIcon icon={faEnvelope} /> {t("email")}
                     </label>
                     <input
                         ref={emailRef}
                         type="email"
                         id={inputId + "email"}
                         name="email"
-                        placeholder="Enter your email"
+                        placeholder={t("emailPh")}
                         autoComplete="email"
                         aria-invalid={!!getFieldError(errorMessage, "email")}
                         aria-describedby={getFieldError(errorMessage, "email") ? inputId + "email-error" : undefined}
@@ -102,7 +108,7 @@ export default function LoginForm() {
 
                 <div className="form__row">
                     <label htmlFor={inputId + "password"}>
-                        <FontAwesomeIcon icon={faLock} /> Password
+                        <FontAwesomeIcon icon={faLock} /> {t("password")}
                     </label>
                     <div className="input__container">
                         <input
@@ -110,7 +116,7 @@ export default function LoginForm() {
                             type={showPassword ? "text" : "password"}
                             id={inputId + "password"}
                             name="password"
-                            placeholder="Enter your password"
+                            placeholder={t("passwordPh")}
                             autoComplete="current-password"
                             aria-invalid={!!getFieldError(errorMessage, "password")}
                             aria-describedby={getFieldError(errorMessage, "password") ? inputId + "password-error" : undefined}
@@ -120,7 +126,7 @@ export default function LoginForm() {
                             type="button"
                             className="input__toggle"
                             onClick={() => setShowPassword((v) => !v)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                             aria-pressed={showPassword}
                         >
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
@@ -135,12 +141,12 @@ export default function LoginForm() {
                         className="link auth__forgot"
                         onClick={() => rememberAuthEmail(emailRef.current?.value)}
                     >
-                        Forgot password?
+                        {t("forgotLink")}
                     </Link>
                 </div>
 
                 <button type="submit" className="btn btn--full btn--auth" disabled={isPending}>
-                    <FontAwesomeIcon icon={faSignInAlt} /> {isPending ? "Logging in…" : "Log in"}
+                    <FontAwesomeIcon icon={faSignInAlt} /> {isPending ? t("loginPending") : t("loginTitle")}
                 </button>
 
                 {/* Erreur globale */}
@@ -150,12 +156,12 @@ export default function LoginForm() {
             </form>
 
             <p className="auth__redirect">
-                Don’t have an account?{" "}
+                {t("noAccount")}{" "}
                 <Link
                     href={redirect ? `/auth/register?redirect=${encodeURIComponent(redirect)}` : "/auth/register"}
                     className="link"
                 >
-                    Register
+                    {t("register")}
                 </Link>
             </p>
         </section>
