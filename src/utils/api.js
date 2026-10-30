@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 // Pages réservées aux membres : une session expirée y renvoie vers le login
-const PROTECTED_PATHS = ["/games", "/profile", "/notifications", "/leaderboard"];
+const PROTECTED_PATHS = ["/games", "/profile", "/notifications", "/leaderboard", "/help/tickets", "/admin"];
 
 // Ajout du JWT si dispo
 api.interceptors.request.use((config) => {
