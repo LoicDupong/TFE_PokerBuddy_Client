@@ -58,7 +58,7 @@ export default function PreviousGameDetails({ actions = null }) {
   const cur = currencySymbol(game.currency);
   // Parties avec centimes : montants a 2 decimales ; anciennes parties : affichage inchange
   const hasCents = (game.results || []).some((r) => r.prizeCents != null);
-  const money = (units) => (hasCents ? formatCents(Math.round(units * 100), game.currency) : `${units}${cur}`);
+  const money = (units) => (hasCents ? formatCents(Math.round(units * 100), game.currency, intlLocale) : `${units}${cur}`);
 
   return (
     <>

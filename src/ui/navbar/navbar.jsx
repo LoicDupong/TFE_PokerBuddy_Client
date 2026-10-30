@@ -42,7 +42,7 @@ export default function Navbar() {
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const unreadCount = useNotificationStore((state) => state.unreadCount);
-    const { t } = useT(MESSAGES);
+    const { t, locale } = useT(MESSAGES);
 
     // Logout est rendu à part : toujours en dernier et visuellement secondaire
     const links = [
@@ -64,7 +64,8 @@ export default function Navbar() {
 
     const pathname = usePathname();
     // Sous 1280px les 7 liens ne tiennent pas sur une ligne à côté du logo : menu burger
-    const mobile = 1280;
+    // (le français est plus long : le burger prend le relais un peu plus tôt)
+    const mobile = locale === "fr" ? 1360 : 1280;
 
     // null tant que la largeur n'est pas connue : évite d'afficher la nav mobile un instant sur desktop
     const [isMobile, setIsMobile] = useState(null);
